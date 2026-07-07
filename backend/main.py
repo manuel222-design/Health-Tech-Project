@@ -38,7 +38,7 @@ ALGORITHM   = "HS256"
 TOKEN_TTL   = 8
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
-groq_client = Groq(api_key=os.getenv("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"))
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def create_token(user_id: str, role: str) -> str:
     """Creates a JWT token that expires in 8 hours"""
