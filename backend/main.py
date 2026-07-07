@@ -2,13 +2,14 @@
 from fastapi import FastAPI, Depends, HTTPException # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from sqlalchemy.orm import Session
-from jose import jwt                                    # type: ignore 
+from jose import jwt, JWTError                                 # type: ignore 
 from passlib.context import CryptContext               # type: ignore 
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel                         # type: ignore 
 from database import get_db
-from models import Article, ArticleStatus, User
+from models import Article, ArticleStatus, User, SearchLog, Category
 import os, uuid
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
 
 app = FastAPI(
     title="Healthtech KB & HMIS Chatbot API",
@@ -35,6 +36,7 @@ SECRET_KEY  = os.getenv("JWT_SECRET_KEY", "changethisinproduction")
 ALGORITHM   = "HS256"
 TOKEN_TTL   = 8
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+bearer_scheme = HTTPBearer()
 
 def create_token(user_id: str, role: str) -> str:
     """Creates a JWT token that expires in 8 hours"""
@@ -44,6 +46,45 @@ def create_token(user_id: str, role: str) -> str:
         SECRET_KEY,
         algorithm=ALGORITHM
     )
+
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    db: Session = Depends(get_db)
+):
+    try:
+        payload = jwt.decode(
+            credentials.credentials,
+            SECRET_KEY,
+            algorithms=[ALGORITHM]
+        )
+        user_id = payload.get("sub")
+        role    = payload.get("role")
+
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        return {"user_id": user_id, "role": role}
+
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token invalid or expired")
+
+def require_editor(user: dict = Depends(get_current_user)):
+    if user["role"] not in ["editor", "admin"]:
+        raise HTTPException(
+            status_code=403,
+            detail="You need Editor or Admin role to do this"
+        )
+    return user
+
+def require_admin(user: dict = Depends(get_current_user)):
+    if user["role"] != "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="You need Admin role to do this"
+        )
+    return user
 
 class LoginRequest(BaseModel):
     email: str
@@ -70,6 +111,53 @@ def get_articles(db: Session = Depends(get_db)):
             "created_at":   str(a.created_at),
         }
         for a in articles
+    ]
+
+@app.get("/api/v1/articles/search")
+def search_articles(q: str, db: Session = Depends(get_db)):
+
+    if not q or len(q.strip()) < 2:
+        raise HTTPException(status_code=400, detail="Search query too short")
+
+    results = db.query(Article).filter(
+        Article.status == ArticleStatus.published,
+        Article.title.ilike(f"%{q}%") |
+        Article.body_markdown.ilike(f"%{q}%")
+    ).all()
+
+    log = SearchLog(
+        id=uuid.uuid4(),
+        query=q,
+        results_count=len(results)
+    )
+    db.add(log)
+    db.commit()
+
+    return {
+        "query":        q,
+        "total_results": len(results),
+        "results": [
+            {
+                "id":    str(a.id),
+                "title": a.title,
+                "slug":  a.slug,
+            }
+            for a in results
+        ]
+    }
+
+
+@app.get("/api/v1/categories")
+def get_categories(db: Session = Depends(get_db)):
+    categories = db.query(Category).order_by(Category.sort_order).all()
+    return [
+        {
+            "id":          str(c.id),
+            "name":        c.name,
+            "slug":        c.slug,
+            "description": c.description,
+        }
+        for c in categories
     ]
 
 @app.get("/api/v1/articles/{slug}")
@@ -129,7 +217,7 @@ class ArticleUpdateRequest(BaseModel):
     status:       str = None
 
 @app.post("/api/v1/articles")
-def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db)):
+def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
     existing = db.query(Article).filter(Article.slug == payload.slug).first()
     if existing:
         raise HTTPException(status_code=400, detail="Slug already exists")
@@ -158,7 +246,7 @@ def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db))
     }
 
 @app.put("/api/v1/articles/{slug}")
-def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depends(get_db)):
+def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
     article = db.query(Article).filter(Article.slug == slug).first()
 
     if not article:
@@ -181,7 +269,7 @@ def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depen
     }
 
 @app.delete("/api/v1/articles/{slug}")
-def delete_article(slug: str, db: Session = Depends(get_db)):
+def delete_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
     article = db.query(Article).filter(Article.slug == slug).first()
 
     if not article:
@@ -192,6 +280,8 @@ def delete_article(slug: str, db: Session = Depends(get_db)):
 
     return {"message": f"Article '{slug}' deleted successfully"}
 
+
+    
 @app.post("/api/v1/chat")
 def chat():
     return {"message": "Chat endpoint — Week 3"}
