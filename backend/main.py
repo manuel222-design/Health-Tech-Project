@@ -7,9 +7,10 @@ from passlib.context import CryptContext               # type: ignore
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel                         # type: ignore 
 from database import get_db
-from models import Article, ArticleStatus, User, SearchLog, Category
+from models import Article, ArticleStatus, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole
 import os, uuid
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
+from groq import Groq # type: ignore
 
 app = FastAPI(
     title="Healthtech KB & HMIS Chatbot API",
@@ -37,6 +38,7 @@ ALGORITHM   = "HS256"
 TOKEN_TTL   = 8
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
+groq_client = Groq(api_key=os.getenv("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"))
 
 def create_token(user_id: str, role: str) -> str:
     """Creates a JWT token that expires in 8 hours"""
@@ -282,9 +284,84 @@ def delete_article(slug: str, db: Session = Depends(get_db), user: dict = Depend
 
 
     
+
+
+class ChatRequest(BaseModel):
+    message: str
+    session_token: str = None
+
 @app.post("/api/v1/chat")
-def chat():
-    return {"message": "Chat endpoint — Week 3"}
+def chat(payload: ChatRequest, db: Session = Depends(get_db)):
+    
+    keywords = [word for word in payload.message.split() 
+                if len(word) > 3]
+                
+    relevant_articles = []
+    for keyword in keywords:
+        results = db.query(Article).filter(
+            Article.status == ArticleStatus.published,
+            Article.title.ilike(f"%{keyword}%") |
+            Article.body_markdown.ilike(f"%{keyword}%")
+        ).all()
+        for r in results:
+            if r not in relevant_articles:
+                relevant_articles.append(r)
+                
+    relevant_articles = relevant_articles[:3]
+
+    if relevant_articles:
+        context = "\n\n".join([
+            f"Article: {a.title}\n{a.body_markdown}"
+            for a in relevant_articles
+        ])
+        context_note = f"Use ONLY the following knowledge base articles to answer:\n\n{context}"
+    else:
+        context_note = "No relevant articles found in the knowledge base."
+
+    prompt = f"""You are a helpful assistant for healthcare workers using the Taifa Care HMIS system.
+    Your job is to answer questions based ONLY on the provided knowledge base articles.
+    If the answer is not in the articles, say "I don't have information about that in the knowledge base yet."
+    Keep answers clear, concise and practical for clinical staff.
+    
+    {context_note}
+    
+    User question: {payload.message}"""
+
+    response = groq_client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    session = ChatSession(
+        id=uuid.uuid4(),
+        session_token=str(uuid.uuid4()),
+        source_url="swagger-test"
+    )
+    db.add(session)
+    db.flush()
+
+    user_msg = ChatMessage(
+        id=uuid.uuid4(),
+        session_id=session.id,
+        role=MessageRole.user,
+        content=payload.message
+    )
+    ai_msg = ChatMessage(
+        id=uuid.uuid4(),
+        session_id=session.id,
+        role=MessageRole.assistant,
+        content=response.choices[0].message.content
+    )
+    db.add(user_msg)
+    db.add(ai_msg)
+    db.commit()
+
+    return {
+        "question":        payload.message,
+        "answer": response.choices[0].message.content,
+        "sources_used":    len(relevant_articles),
+        "articles_found":  [a.title for a in relevant_articles],
+    }
 
 @app.get("/api/v1/admin/users")
 def get_users():
