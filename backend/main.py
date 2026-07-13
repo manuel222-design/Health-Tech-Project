@@ -318,14 +318,21 @@ def chat(payload: ChatRequest, db: Session = Depends(get_db)):
     else:
         context_note = "No relevant articles found in the knowledge base."
 
-    prompt = f"""You are a helpful assistant for healthcare workers using the Taifa Care HMIS system.
-    Your job is to answer questions based ONLY on the provided knowledge base articles.
-    If the answer is not in the articles, say "I don't have information about that in the knowledge base yet."
-    Keep answers clear, concise and practical for clinical staff.
+    prompt = f"""You are a concise support assistant for healthcare workers using the Taifa Care HMIS system.
+    
+    STRICT RULES:
+    - Answer in 3 to 5 sentences MAXIMUM
+    - Use ONLY information from the knowledge base articles provided below
+    - If the answer is not in the articles, respond with exactly: "I don't have information about that in the knowledge base yet. Please contact your system administrator."
+    - Never add extra information from your own knowledge
+    - Use simple, clear language suitable for clinical staff
+    - If steps are needed, give maximum 4 bullet points
     
     {context_note}
     
-    User question: {payload.message}"""
+    User question: {payload.message}
+    
+    Respond in 3 to 5 sentences maximum:"""
 
     response = groq_client.chat.completions.create(
         model="llama-3.1-8b-instant",
