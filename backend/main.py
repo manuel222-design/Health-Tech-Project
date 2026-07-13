@@ -11,6 +11,8 @@ from models import Article, ArticleStatus, User, SearchLog, Category, ChatSessio
 import os, uuid
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
 from groq import Groq # type: ignore
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 
 app = FastAPI(
     title="Healthtech KB & HMIS Chatbot API",
@@ -40,6 +42,30 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={
+            "status": "error",
+            "code": 400,
+            "message": "Invalid request data",
+            "details": str(exc)
+        }
+    )
+
+@app.exception_handler(Exception)
+async def general_error_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "status": "error",
+            "code": 500,
+            "message": "Internal server error",
+            "details": str(exc)
+        }
+    )
+    
 def create_token(user_id: str, role: str) -> str:
     """Creates a JWT token that expires in 8 hours"""
     expire = datetime.now(timezone.utc) + timedelta(hours=TOKEN_TTL)
@@ -182,7 +208,7 @@ def get_article_by_slug(slug: str, db: Session = Depends(get_db)):
         "created_at":    str(article.created_at),
     }
 
-@app.post("/api/v1/auth/login")
+@app.post("/api/v1/auth/login", status_code=200)
 def login(payload: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
 
@@ -218,7 +244,7 @@ class ArticleUpdateRequest(BaseModel):
     body_markdown: str = None
     status:       str = None
 
-@app.post("/api/v1/articles")
+@app.post("/api/v1/articles", status_code=201)
 def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
     existing = db.query(Article).filter(Article.slug == payload.slug).first()
     if existing:
@@ -290,7 +316,7 @@ class ChatRequest(BaseModel):
     message: str
     session_token: str = None
 
-@app.post("/api/v1/chat")
+@app.post("/api/v1/chat", status_code=200)
 def chat(payload: ChatRequest, db: Session = Depends(get_db)):
     
     keywords = [word for word in payload.message.split() 
