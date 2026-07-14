@@ -1,0 +1,121 @@
+{
+  "info": {
+    "name": "Healthtech KB & HMIS Chatbot API",
+    "description": "Complete API collection for the Healthtech Knowledge Base and HMIS Chatbot System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:8000/api/v1/auth/login",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@healthtech.co.ke\",\n  \"password\": \"Admin@1234\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Articles",
+      "item": [
+        {
+          "name": "Get All Articles",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8000/api/v1/articles"
+          }
+        },
+        {
+          "name": "Get Article by Slug",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8000/api/v1/articles/how-to-register-a-patient"
+          }
+        },
+        {
+          "name": "Search Articles",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8000/api/v1/articles/search?q=vitals"
+          }
+        },
+        {
+          "name": "Create Article",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:8000/api/v1/articles",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer YOUR_TOKEN_HERE"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"New Article Title\",\n  \"slug\": \"new-article-slug\",\n  \"body_markdown\": \"## Overview\\nArticle content here.\",\n  \"status\": \"draft\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Article",
+          "request": {
+            "method": "PUT",
+            "url": "http://127.0.0.1:8000/api/v1/articles/new-article-slug",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer YOUR_TOKEN_HERE"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"published\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Article",
+          "request": {
+            "method": "DELETE",
+            "url": "http://127.0.0.1:8000/api/v1/articles/new-article-slug",
+            "header": [
+              {"key": "Authorization", "value": "Bearer YOUR_TOKEN_HERE"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:8000/api/v1/categories"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Chat",
+      "item": [
+        {
+          "name": "Send Chat Message",
+          "request": {
+            "method": "POST",
+            "url": "http://127.0.0.1:8000/api/v1/chat",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"How do I register a new patient?\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
