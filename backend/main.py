@@ -11,8 +11,8 @@ from models import Article, ArticleStatus, User, SearchLog, Category, ChatSessio
 import os, uuid
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
 from groq import Groq # type: ignore
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse # type: ignore
+from fastapi.exceptions import RequestValidationError # type: ignore
 
 app = FastAPI(
     title="Healthtech KB & HMIS Chatbot API",
@@ -318,6 +318,22 @@ class ChatRequest(BaseModel):
 
 @app.post("/api/v1/chat", status_code=200)
 def chat(payload: ChatRequest, db: Session = Depends(get_db)):
+
+    generic_phrases = ["help", "what can you do", "what can you help",
+                        "hi", "hello", "hey", "who are you"]
+    if payload.message.strip().lower() in generic_phrases or \
+       any(p in payload.message.lower() for p in ["what can you help", "what can you do"]):
+        return {
+            "question": payload.message,
+            "answer": (
+                "I can help you with Taifa Care HMIS workflows including: "
+                "patient registration, booking appointments, capturing patient vitals, "
+                "conducting consultations, and TB screening. "
+                "Ask me something specific like 'How do I register a patient?'"
+            ),
+            "sources_used": 0,
+            "articles_found": []
+        }
     
     keywords = [word for word in payload.message.split() 
                 if len(word) > 3]

@@ -1,0 +1,11 @@
+# Use this workspace to collaborate
+workspace:
+  id: 07a942d5-b543-43c7-81ca-c1726e3d23f2
+
+localResources:
+  collections:
+    - ../postman_collection.json
+
+cloudResources:
+  collections:
+    ../postman/collections/Healthtech KB & HMIS Chatbot API: c3ab4143-0838-4431-808c-4f5d6f5c164f

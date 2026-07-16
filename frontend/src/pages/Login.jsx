@@ -8,8 +8,11 @@ export default function Login({ onLogin }) {
   const [error, setError]       = useState("")
   const [loading, setLoading]   = useState(false)
 
-  async function handleSubmit(e) {
-    e.preventDefault()
+  async function handleSubmit() {
+    if (!email || !password) {
+      setError("Please enter both email and password")
+      return
+    }
     setLoading(true)
     setError("")
 
@@ -30,7 +33,6 @@ export default function Login({ onLogin }) {
     <div className="min-h-screen bg-linear-to-br from-teal-600 to-blue-800 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
 
-        {/* Logo and title */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white text-2xl font-bold">HC</span>
@@ -43,14 +45,12 @@ export default function Login({ onLogin }) {
           </p>
         </div>
 
-        {/* Error message */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
             {error}
           </div>
         )}
 
-        {/* Login form */}
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -87,7 +87,6 @@ export default function Login({ onLogin }) {
           </button>
         </div>
 
-        {/* Footer */}
         <p className="text-center text-xs text-gray-400 mt-6">
           Taifa Care HMIS Knowledge Base & Chatbot System
         </p>

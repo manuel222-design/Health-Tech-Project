@@ -1,0 +1,12 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/v1/chat
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "message": "How do I register a new patient?"
+    }
+order: 1000

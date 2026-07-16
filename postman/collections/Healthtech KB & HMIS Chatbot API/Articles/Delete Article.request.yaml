@@ -1,0 +1,6 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/v1/articles/new-article-slug
+method: DELETE
+headers:
+  Authorization: Bearer YOUR_TOKEN_HERE
+order: 6000
