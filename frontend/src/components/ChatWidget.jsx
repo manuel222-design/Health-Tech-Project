@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from "react"
 import { sendMessage } from "../services/api"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 export default function ChatWidget() {
   const [open, setOpen]       = useState(false)
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Hi! 👋 I'm your HMIS assistant. Ask me anything about using Taifa Care HMIS."
+      content: "Hi, I'm your HMIS assistant. Ask me anything about using Taifa Care HMIS."
     }
   ])
   const [input, setInput]     = useState("")
@@ -45,7 +47,7 @@ export default function ChatWidget() {
   return (
     <>
       {open && (
-        <div className="fixed bottom-24 right-6 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden z-50" style={{height: "420px"}}>
+        <div className="fixed bottom-24 right-6 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden z-50" style={{height: "480px"}}>
 
           <div className="bg-teal-600 text-white px-4 py-3 flex justify-between items-center">
             <div>
@@ -63,20 +65,31 @@ export default function ChatWidget() {
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.map((msg, i) => (
               <div
-                key={i}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              key={i}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
-                <div
-                  className={`max-w-xs px-3 py-2 rounded-xl text-sm leading-relaxed ${
-                    msg.role === "user"
-                      ? "bg-teal-600 text-white rounded-br-none"
-                      : "bg-gray-100 text-gray-800 rounded-bl-none"
-                  }`}
-                >
-                  {msg.content}
+              <div
+              className={`max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed ${
+                msg.role === "user"
+                ? "bg-teal-600 text-white rounded-br-none"
+                : "bg-gray-100 text-gray-800 rounded-bl-none overflow-x-auto"
+              }`}
+              >
+                {msg.role === "user" ? (
+                  msg.content
+                ) : (
+                <div className="prose prose-sm prose-teal max-w-none
+                         prose-p:my-1 prose-ul:my-1 prose-li:my-0
+                         prose-table:text-xs prose-th:px-2 prose-th:py-1
+                         prose-td:px-2 prose-td:py-1">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {msg.content}
+                  </ReactMarkdown>
                 </div>
+               )} 
               </div>
-            ))}
+              </div>
+       ))}
 
             {loading && (
               <div className="flex justify-start">
