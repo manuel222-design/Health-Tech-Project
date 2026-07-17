@@ -141,6 +141,38 @@ def get_articles(db: Session = Depends(get_db)):
         for a in articles
     ]
 
+@app.get("/api/v1/articles/admin/all")
+def get_all_articles_admin(db: Session = Depends(get_db), user: dict = Depends(require_editor)):
+    articles = db.query(Article).order_by(Article.created_at.desc()).all()
+    return [
+        {
+            "id":           str(a.id),
+            "title":        a.title,
+            "slug":         a.slug,
+            "status":       a.status.value,
+            "category_id":  str(a.category_id) if a.category_id else None,
+            "view_count":   a.view_count,
+            "created_at":   str(a.created_at),
+        }
+        for a in articles
+    ]
+
+@app.get("/api/v1/articles/admin/{slug}")
+def get_article_admin(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
+    article = db.query(Article).filter(Article.slug == slug).first()
+
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    return {
+        "id":            str(article.id),
+        "title":         article.title,
+        "slug":          article.slug,
+        "body_markdown": article.body_markdown,
+        "status":        article.status.value,
+        "created_at":    str(article.created_at),
+    }
+
 @app.get("/api/v1/articles/search")
 def search_articles(q: str, db: Session = Depends(get_db)):
 
