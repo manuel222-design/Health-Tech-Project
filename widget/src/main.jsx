@@ -1,10 +1,9 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import { createRoot } from "react-dom/client"
+import Widget from "./Widget.jsx"
+import "./index.css"
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+const container = document.createElement("div")
+container.id = "healthtech-widget-root"
+document.body.appendChild(container)
+
+createRoot(container).render(<Widget />)
