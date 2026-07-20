@@ -1,4 +1,6 @@
 
+from sqlalchemy import text
+
 from fastapi import FastAPI, Depends, HTTPException # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from sqlalchemy.orm import Session
@@ -183,34 +185,46 @@ def get_article_admin(slug: str, db: Session = Depends(get_db), user: dict = Dep
 
 @app.get("/api/v1/articles/search")
 def search_articles(q: str, db: Session = Depends(get_db)):
-
     if not q or len(q.strip()) < 2:
         raise HTTPException(status_code=400, detail="Search query too short")
 
-    results = db.query(Article).filter(
-        Article.status == ArticleStatus.published,
-        Article.title.ilike(f"%{q}%") |
-        Article.body_markdown.ilike(f"%{q}%")
-    ).all()
+    search_query = text("""
+        SELECT id, title, slug, status,
+               ts_rank(
+                   setweight(to_tsvector('english', title), 'A') ||
+                   setweight(to_tsvector('english', body_markdown), 'B'),
+                   plainto_tsquery('english', :q)
+               ) AS rank
+        FROM articles
+        WHERE status = 'published'
+          AND (
+                setweight(to_tsvector('english', title), 'A') ||
+                setweight(to_tsvector('english', body_markdown), 'B')
+              ) @@ plainto_tsquery('english', :q)
+        ORDER BY rank DESC
+        LIMIT 20
+    """)
+
+    rows = db.execute(search_query, {"q": q}).fetchall()
 
     log = SearchLog(
         id=uuid.uuid4(),
         query=q,
-        results_count=len(results)
+        results_count=len(rows)
     )
     db.add(log)
     db.commit()
 
     return {
         "query":        q,
-        "total_results": len(results),
+        "total_results": len(rows),
         "results": [
             {
-                "id":    str(a.id),
-                "title": a.title,
-                "slug":  a.slug,
+                "id":    str(row.id),
+                "title": row.title,
+                "slug":  row.slug,
             }
-            for a in results
+            for row in rows
         ]
     }
 
