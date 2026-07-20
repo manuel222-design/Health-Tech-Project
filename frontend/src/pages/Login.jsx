@@ -30,7 +30,7 @@ export default function Login({ onLogin, onShowRegister }) {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-teal-600 to-blue-800 flex items-center justify-center p-4">
+    <main className="min-h-screen bg-linear-to-br from-teal-600 to-blue-800 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
 
         <div className="text-center mb-8">
@@ -89,15 +89,15 @@ export default function Login({ onLogin, onShowRegister }) {
 
         <button
           onClick={onShowRegister}
-          className="w-full text-teal-600 hover:text-teal-700 text-sm font-medium py-2 mt-2"
+          className="w-full text-teal-700 hover:text-teal-800 text-sm font-medium py-2 mt-2"
         >
           Don't have an account? Create one
         </button>
 
-        <p className="text-center text-xs text-gray-400 mt-4">
+        <p className="text-center text-xs text-gray-500 mt-4">
           Taifa Care HMIS Knowledge Base & Chatbot System
         </p>
       </div>
-    </div>
+    </main>
   )
 }

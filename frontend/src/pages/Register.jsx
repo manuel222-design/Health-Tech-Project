@@ -34,7 +34,7 @@ export default function Register({ onRegister, onBackToLogin }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-600 to-blue-800 flex items-center justify-center p-4">
+    <main className="min-h-screen bg-gradient-to-br from-teal-600 to-blue-800 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
 
         <div className="text-center mb-8">
@@ -107,12 +107,12 @@ export default function Register({ onRegister, onBackToLogin }) {
 
           <button
             onClick={onBackToLogin}
-            className="w-full text-teal-600 hover:text-teal-700 text-sm font-medium py-2"
+            className="w-full text-teal-700 hover:text-teal-800 text-sm font-medium py-2"
           >
             Already have an account? Sign in
           </button>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
