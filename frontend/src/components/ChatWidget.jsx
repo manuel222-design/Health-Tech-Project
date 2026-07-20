@@ -32,7 +32,8 @@ export default function ChatWidget() {
       const res = await sendMessage(userMessage)
       setMessages(prev => [...prev, {
         role: "assistant",
-        content: res.data.answer
+        content: res.data.answer,
+        sources: res.data.articles_found || []
       }])
     } catch (err) {
       setMessages(prev => [...prev, {
@@ -69,25 +70,47 @@ export default function ChatWidget() {
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
               <div
-              className={`max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed ${
-                msg.role === "user"
-                ? "bg-teal-600 text-white rounded-br-none"
-                : "bg-gray-100 text-gray-800 rounded-bl-none overflow-x-auto"
-              }`}
-              >
-                {msg.role === "user" ? (
-                  msg.content
-                ) : (
-                <div className="prose prose-sm prose-teal max-w-none
-                         prose-p:my-1 prose-ul:my-1 prose-li:my-0
-                         prose-table:text-xs prose-th:px-2 prose-th:py-1
-                         prose-td:px-2 prose-td:py-1">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {msg.content}
-                  </ReactMarkdown>
+                  className={`max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed ${
+                    msg.role === "user"
+                      ? "bg-teal-600 text-white rounded-br-none"
+                      : "bg-gray-100 text-gray-800 rounded-bl-none overflow-x-auto"
+                  }`}
+                >
+                  {msg.role === "user" ? (
+                    msg.content
+                  ) : (
+                    <>
+                      <div className="prose prose-sm prose-teal max-w-none
+                                       prose-p:my-1 prose-ul:my-1 prose-li:my-0
+                                       prose-table:text-xs prose-th:px-2 prose-th:py-1
+                                       prose-td:px-2 prose-td:py-1">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
+
+                      {msg.sources && msg.sources.length > 0 && (
+                        <div className="mt-2 pt-2 border-t border-gray-200 flex flex-wrap gap-1.5">
+                          {msg.sources.map((src, idx) => (
+                            <a
+                              key={idx}
+                              href={`#article-${src.slug}`}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                if (window.openHealthtechArticle) {
+                                  window.openHealthtechArticle(src.slug)
+                                }
+                              }}
+                              className="text-xs bg-white text-teal-700 border border-teal-200 rounded-full px-2 py-0.5 hover:bg-teal-50 transition"
+                            >
+                              📄 {src.title}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
-               )} 
-              </div>
               </div>
        ))}
 

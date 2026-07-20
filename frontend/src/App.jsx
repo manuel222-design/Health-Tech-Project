@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
 import Articles from "./pages/Articles"
@@ -38,6 +38,11 @@ export default function App() {
     setSelectedSlug(slug)
     setCurrentPage("article")
   }
+
+  useEffect(() => {
+    window.openHealthtechArticle = handleSelectArticle
+    return () => { delete window.openHealthtechArticle }
+  }, [])
 
   function handleEditArticle(slug) {
     setEditSlug(slug)

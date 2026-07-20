@@ -514,7 +514,9 @@ def chat(payload: ChatRequest, db: Session = Depends(get_db)):
         "question":        payload.message,
         "answer": response.choices[0].message.content,
         "sources_used":    len(relevant_articles),
-        "articles_found":  [a.title for a in relevant_articles],
+        "articles_found":  [
+            {"title": a.title, "slug": a.slug} for a in relevant_articles
+        ],
     }
 
 @app.get("/api/v1/admin/users")
