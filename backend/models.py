@@ -14,6 +14,7 @@ class UserRole(str, enum.Enum):
 
 class ArticleStatus(str, enum.Enum):
     draft     = "draft"
+    pending_review   = "pending_review"
     published = "published"
     archived  = "archived"
 

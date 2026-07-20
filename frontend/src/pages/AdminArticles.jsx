@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
-import { getAllArticlesAdmin, deleteArticle } from "../services/api"
+import { getAllArticlesAdmin, deleteArticle, approveArticle } from "../services/api"
 
 export default function AdminArticles({ onEdit, onCreate }) {
   const [articles, setArticles] = useState([])
   const [loading, setLoading]   = useState(true)
   const [deleting, setDeleting] = useState(null)
+  const [approving, setApproving] = useState(null)
 
   function loadArticles() {
     setLoading(true)
@@ -25,6 +26,20 @@ export default function AdminArticles({ onEdit, onCreate }) {
       alert("Failed to delete article. You may not have permission.")
     } finally {
       setDeleting(null)
+    }
+  }
+
+  async function handleApprove(slug) {
+    setApproving(slug)
+    try {
+      await approveArticle(slug)
+      setArticles(prev => prev.map(a =>
+        a.slug === slug ? { ...a, status: "published" } : a
+      ))
+    } catch (err) {
+      alert("Failed to approve article. Admin access required.")
+    } finally {
+      setApproving(null)
     }
   }
 
@@ -62,6 +77,8 @@ export default function AdminArticles({ onEdit, onCreate }) {
                 <span className={`text-xs rounded-full px-2 py-0.5 border ${
                   article.status === "published"
                     ? "bg-teal-50 text-teal-700 border-teal-200"
+                    : article.status === "pending_review"
+                    ? "bg-blue-50 text-blue-700 border-blue-200"
                     : "bg-amber-50 text-amber-700 border-amber-200"
                 }`}>
                   {article.status}
@@ -70,6 +87,15 @@ export default function AdminArticles({ onEdit, onCreate }) {
             </div>
 
             <div className="flex gap-2 shrink-0">
+              {article.status !== "published" && (
+                <button
+                  onClick={() => handleApprove(article.slug)}
+                  disabled={approving === article.slug}
+                  className="text-sm text-teal-600 hover:text-teal-700 font-medium px-3 py-1.5 border border-teal-200 rounded-lg hover:bg-teal-50 transition disabled:opacity-50"
+                >
+                  {approving === article.slug ? "Approving..." : "Approve"}
+                </button>
+              )}
               <button
                 onClick={() => onEdit(article.slug)}
                 className="text-sm text-teal-600 hover:text-teal-700 font-medium px-3 py-1.5 border border-teal-200 rounded-lg hover:bg-teal-50 transition"

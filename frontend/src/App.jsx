@@ -1,5 +1,6 @@
 import { useState } from "react"
 import Login from "./pages/Login"
+import Register from "./pages/Register"
 import Articles from "./pages/Articles"
 import ArticleView from "./pages/ArticleView"
 import AdminArticles from "./pages/AdminArticles"
@@ -13,6 +14,7 @@ export default function App() {
     const role     = localStorage.getItem("role")
     return token ? { token, username, role } : null
   })
+  const [showRegister, setShowRegister] = useState(false)
   const [currentPage, setCurrentPage]   = useState("articles")
   const [selectedSlug, setSelectedSlug] = useState(null)
   const [editSlug, setEditSlug]         = useState(null)
@@ -51,7 +53,12 @@ export default function App() {
     setCurrentPage("admin")
   }
 
-  if (!user) return <Login onLogin={handleLogin} />
+  if (!user) {
+    if (showRegister) {
+      return <Register onRegister={handleLogin} onBackToLogin={() => setShowRegister(false)} />
+    }
+    return <Login onLogin={handleLogin} onShowRegister={() => setShowRegister(true)} />
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

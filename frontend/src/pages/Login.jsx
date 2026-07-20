@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { login } from "../services/api"
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, onShowRegister }) {
   const [email, setEmail]       = useState("")
   const [password, setPassword] = useState("")
   const [error, setError]       = useState("")
@@ -87,7 +87,14 @@ export default function Login({ onLogin }) {
           </button>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
+        <button
+          onClick={onShowRegister}
+          className="w-full text-teal-600 hover:text-teal-700 text-sm font-medium py-2 mt-2"
+        >
+          Don't have an account? Create one
+        </button>
+
+        <p className="text-center text-xs text-gray-400 mt-4">
           Taifa Care HMIS Knowledge Base & Chatbot System
         </p>
       </div>

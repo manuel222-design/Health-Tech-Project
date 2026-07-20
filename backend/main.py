@@ -7,7 +7,7 @@ from passlib.context import CryptContext               # type: ignore
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel                         # type: ignore 
 from database import get_db
-from models import Article, ArticleStatus, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole
+from models import Article, ArticleStatus, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole, UserRole
 import os, uuid
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
 from groq import Groq # type: ignore
@@ -119,6 +119,12 @@ def require_admin(user: dict = Depends(get_current_user)):
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+class RegisterRequest(BaseModel):
+    username: str
+    email: str
+    password: str
+    role: str = "viewer"
 
 @app.get("/")
 def root():
@@ -265,6 +271,36 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         "username":     user.username,
     }
 
+@app.post("/api/v1/auth/register", status_code=201)
+def register(payload: RegisterRequest, db: Session = Depends(get_db)):
+    existing = db.query(User).filter(User.email == payload.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    allowed_roles = ["viewer", "editor"]
+    role = payload.role if payload.role in allowed_roles else "viewer"
+
+    new_user = User(
+        id=uuid.uuid4(),
+        username=payload.username,
+        email=payload.email,
+        password_hash=pwd_context.hash(payload.password),
+        role=UserRole(role),
+        is_active=True
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    token = create_token(str(new_user.id), new_user.role.value)
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "expires_in": TOKEN_TTL * 3600,
+        "role": new_user.role.value,
+        "username": new_user.username,
+    }
 
 class ArticleCreateRequest(BaseModel):
     title:       str
@@ -285,6 +321,10 @@ def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db),
         raise HTTPException(status_code=400, detail="Slug already exists")
 
     admin = db.query(User).filter(User.email == "admin@healthtech.co.ke").first()
+    requested_status = payload.status or "draft"
+
+    if user["role"] == "editor" and requested_status == "published":
+        requested_status = "pending_review"
     
     article = Article(
         id=uuid.uuid4(),
@@ -292,7 +332,7 @@ def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db),
         slug=payload.slug,
         body_markdown=payload.body_markdown,
         body_html="",
-        status=ArticleStatus.draft,
+        status=ArticleStatus(requested_status),
         author_id=admin.id,
         view_count=0
     )
@@ -319,8 +359,10 @@ def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depen
     if payload.body_markdown:
         article.body_markdown = payload.body_markdown
     if payload.status:
-        article.status = ArticleStatus(payload.status)
-
+        if user["role"] == "editor" and payload.status == "published":
+            article.status = ArticleStatus.pending_review
+        else:
+            article.status = ArticleStatus(payload.status)
     db.commit()
     db.refresh(article)
 
@@ -329,6 +371,21 @@ def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depen
         "slug":    article.slug,
         "status":  article.status.value,
     }
+
+@app.post("/api/v1/articles/{slug}/approve")
+def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    article = db.query(Article).filter(Article.slug == slug).first()
+
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    if article.status != ArticleStatus.pending_review:
+        raise HTTPException(status_code=400, detail="Article is not pending review")
+
+    article.status = ArticleStatus.published
+    db.commit()
+
+    return {"message": f"Article '{slug}' approved and published"}
 
 @app.delete("/api/v1/articles/{slug}")
 def delete_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
