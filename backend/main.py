@@ -1,7 +1,7 @@
 
 from sqlalchemy import text
 
-from fastapi import FastAPI, Depends, HTTPException # type: ignore
+from fastapi import FastAPI, Depends, HTTPException, Request # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError                                 # type: ignore 
@@ -15,12 +15,19 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ig
 from groq import Groq # type: ignore
 from fastapi.responses import JSONResponse # type: ignore
 from fastapi.exceptions import RequestValidationError # type: ignore
+from slowapi import Limiter, _rate_limit_exceeded_handler # type: ignore
+from slowapi.util import get_remote_address # type: ignore
+from slowapi.errors import RateLimitExceeded # type: ignore
 
 app = FastAPI(
     title="Healthtech KB & HMIS Chatbot API",
     description="Knowledge base and chatbot system for healthcare workers",
     version="1.0.0"
 )
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 ALLOWED_ORIGINS = [
@@ -263,7 +270,8 @@ def get_article_by_slug(slug: str, db: Session = Depends(get_db)):
     }
 
 @app.post("/api/v1/auth/login", status_code=200)
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/10minutes")
+def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
 
     if not user:
