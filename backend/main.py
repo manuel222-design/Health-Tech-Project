@@ -1,6 +1,6 @@
 
 from sqlalchemy import text
-
+from typing import Optional
 from fastapi import FastAPI, Depends, HTTPException, Request # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from sqlalchemy.orm import Session
@@ -181,12 +181,18 @@ def get_article_admin(slug: str, db: Session = Depends(get_db), user: dict = Dep
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
 
+    from models import ArticleTag
+    tag_links = db.query(ArticleTag).filter(ArticleTag.article_id == article.id).all()
+    tag_ids = [str(link.tag_id) for link in tag_links]
+
     return {
         "id":            str(article.id),
         "title":         article.title,
         "slug":          article.slug,
         "body_markdown": article.body_markdown,
         "status":        article.status.value,
+        "category_id":   str(article.category_id) if article.category_id else None,
+        "tag_ids":       tag_ids,
         "created_at":    str(article.created_at),
     }
 
@@ -247,6 +253,20 @@ def get_categories(db: Session = Depends(get_db)):
             "description": c.description,
         }
         for c in categories
+    ]
+
+@app.get("/api/v1/tags")
+def get_tags(db: Session = Depends(get_db)):
+    from models import Tag
+    tags = db.query(Tag).order_by(Tag.name).all()
+    return [
+        {
+            "id":        str(t.id),
+            "name":      t.name,
+            "slug":      t.slug,
+            "color_hex": t.color_hex,
+        }
+        for t in tags
     ]
 
 @app.get("/api/v1/articles/{slug}")
@@ -325,16 +345,18 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     }
 
 class ArticleCreateRequest(BaseModel):
-    title:       str
-    slug:        str
+    title:         str
+    slug:          str
     body_markdown: str
-    category_id: str = None
-    status:      str = "draft"
-
+    category_id:   Optional[str] = None
+    tag_ids:       list[str] = []
+    status:        str = "draft"
 class ArticleUpdateRequest(BaseModel):
-    title:        str = None
-    body_markdown: str = None
-    status:       str = None
+    title:         Optional[str] = None
+    body_markdown: Optional[str] = None
+    category_id:   Optional[str] = None
+    tag_ids:       Optional[list[str]] = None
+    status:        Optional[str] = None
 
 @app.post("/api/v1/articles", status_code=201)
 def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
@@ -355,10 +377,17 @@ def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db),
         body_markdown=payload.body_markdown,
         body_html="",
         status=ArticleStatus(requested_status),
+        category_id=payload.category_id if payload.category_id else None,
         author_id=admin.id,
         view_count=0
     )
     db.add(article)
+    db.flush()
+
+    from models import ArticleTag
+    for tag_id in payload.tag_ids:
+        db.add(ArticleTag(article_id=article.id, tag_id=tag_id))
+
     db.commit()
     db.refresh(article)
 
@@ -381,10 +410,21 @@ def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depen
     if payload.body_markdown:
         article.body_markdown = payload.body_markdown
     if payload.status:
+        # Editors cannot publish directly — force to pending_review instead
         if user["role"] == "editor" and payload.status == "published":
             article.status = ArticleStatus.pending_review
         else:
             article.status = ArticleStatus(payload.status)
+
+    if payload.category_id is not None:
+        article.category_id = payload.category_id if payload.category_id else None
+
+    if payload.tag_ids is not None:
+        from models import ArticleTag
+        db.query(ArticleTag).filter(ArticleTag.article_id == article.id).delete()
+        for tag_id in payload.tag_ids:
+            db.add(ArticleTag(article_id=article.id, tag_id=tag_id))
+
     db.commit()
     db.refresh(article)
 

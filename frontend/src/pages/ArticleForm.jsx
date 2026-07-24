@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { getArticleAdmin, createArticle, updateArticle } from "../services/api"
+import { getArticleAdmin, createArticle, updateArticle, getCategories, getTags } from "../services/api"
 
 export default function ArticleForm({ slug, onDone, onCancel }) {
   const isEditing = Boolean(slug)
@@ -8,9 +8,18 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
   const [articleSlug, setArticleSlug] = useState("")
   const [body, setBody]       = useState("")
   const [status, setStatus]   = useState("draft")
+  const [categoryId, setCategoryId] = useState("")
+  const [tagIds, setTagIds]         = useState([])
+  const [categories, setCategories] = useState([])
+  const [allTags, setAllTags]       = useState([])
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState("")
+
+  useEffect(() => {
+    getCategories().then(res => setCategories(res.data))
+    getTags().then(res => setAllTags(res.data))
+  }, [])
 
   useEffect(() => {
     if (!isEditing) return
@@ -20,6 +29,8 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
         setArticleSlug(res.data.slug)
         setBody(res.data.body_markdown)
         setStatus(res.data.status)
+        setCategoryId(res.data.category_id || "")
+        setTagIds(res.data.tag_ids || [])
       })
       .finally(() => setLoading(false))
   }, [slug])
@@ -37,6 +48,12 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
     if (!isEditing) setArticleSlug(generateSlug(value))
   }
 
+  function toggleTag(tagId) {
+    setTagIds(prev =>
+      prev.includes(tagId) ? prev.filter(id => id !== tagId) : [...prev, tagId]
+    )
+  }
+  
   async function handleSave() {
     if (!title.trim() || !articleSlug.trim() || !body.trim()) {
       setError("Title, slug, and content are all required")
@@ -46,13 +63,15 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
     setError("")
     try {
       if (isEditing) {
-        await updateArticle(slug, { title, body_markdown: body, status })
+        await updateArticle(slug, { title, body_markdown: body, status, category_id: categoryId || null, tag_ids: tagIds })
       } else {
         await createArticle({
           title,
           slug: articleSlug,
           body_markdown: body,
-          status
+          status,
+          category_id: categoryId || null,
+          tag_ids: tagIds
         })
       }
       onDone()
@@ -132,6 +151,40 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
               placeholder=" Overview&#10;Write your article content here using Markdown..."
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <select
+              value={categoryId}
+              onChange={e => setCategoryId(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            >
+              <option value="">No category</option>
+              {categories.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+            <div className="flex flex-wrap gap-2">
+              {allTags.map(tag => (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => toggleTag(tag.id)}
+                  className={`text-xs rounded-full px-3 py-1.5 border transition ${
+                    tagIds.includes(tag.id)
+                      ? "bg-teal-600 text-white border-teal-600"
+                      : "bg-white text-gray-600 border-gray-300 hover:border-teal-400"
+                  }`}
+                >
+                  {tag.name}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>

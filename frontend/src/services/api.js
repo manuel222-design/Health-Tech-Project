@@ -25,6 +25,7 @@ export const getArticle    = (slug) => api.get(`/articles/${slug}`)
 export const searchArticles = (q)   => api.get(`/articles/search?q=${q}`)
 
 export const getCategories = () => api.get('/categories')
+export const getTags = () => api.get('/tags')
 
 export const sendMessage = (message) =>
   api.post('/chat', { message })
