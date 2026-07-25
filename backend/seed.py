@@ -1,8 +1,11 @@
 
+from multiprocessing import get_context
+
 from database import SessionLocal
 from models import User, UserRole, Category, Article, ArticleStatus, Tag, ArticleTag
 import uuid
-import hashlib
+from passlib.context import CryptContext
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def seed():
     db = SessionLocal()
@@ -16,7 +19,7 @@ def seed():
                 id=uuid.uuid4(),
                 username="Dr. Emmanuel Admin",
                 email="admin@healthtech.co.ke",
-                password_hash=hashlib.sha256("Admin@1234".encode()).hexdigest(),
+                password_hash=pwd_context.hash("Admin@1234"),
                 role=UserRole.admin,
                 is_active=True
             )
