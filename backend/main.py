@@ -1,4 +1,4 @@
-
+import logging
 from sqlalchemy import text
 from typing import Optional
 from fastapi import FastAPI, Depends, HTTPException, Request # type: ignore
@@ -52,6 +52,7 @@ TOKEN_TTL   = 8
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+logger = logging.getLogger("healthtech")
 
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request, exc):
@@ -67,13 +68,14 @@ async def validation_error_handler(request, exc):
 
 @app.exception_handler(Exception)
 async def general_error_handler(request, exc):
+    logger.error(f"Unhandled exception on {request.url.path}: {exc}", exc_info=True)
+
     return JSONResponse(
         status_code=500,
         content={
             "status": "error",
             "code": 500,
-            "message": "Internal server error",
-            "details": str(exc)
+            "message": "An unexpected error occurred. Please try again or contact support.",
         }
     )
     

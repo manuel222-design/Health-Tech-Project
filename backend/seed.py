@@ -4,7 +4,7 @@ from multiprocessing import get_context
 from database import SessionLocal
 from models import User, UserRole, Category, Article, ArticleStatus, Tag, ArticleTag
 import uuid
-from passlib.context import CryptContext
+from passlib.context import CryptContext # type: ignore
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def seed():
