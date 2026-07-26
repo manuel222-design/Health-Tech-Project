@@ -64,7 +64,7 @@ export default function AdminArticles({ onEdit, onCreate }) {
         </button>
       </div>
 
-      <div className="grid gap-3">
+      <div className="grid gap-3 pb-20">
         {articles.map(article => (
           <div
             key={article.id}

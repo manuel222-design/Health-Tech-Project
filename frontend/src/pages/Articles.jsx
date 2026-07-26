@@ -52,7 +52,7 @@ export default function Articles({ onSelectArticle }) {
         {searching ? "Searching..." : `${articles.length} article${articles.length !== 1 ? "s" : ""} found`}
       </p>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 pb-20">
         {articles.map(article => (
           <div
             key={article.id}

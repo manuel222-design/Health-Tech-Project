@@ -67,46 +67,46 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-teal-600 text-white px-6 py-4 flex justify-between items-center shadow">
-        <div className="flex items-center gap-6">
+      <nav className="bg-teal-600 text-white shadow">
+        <div className="px-4 py-3 flex flex-wrap md:flex-nowrap justify-between items-center gap-3">
           <div
             className="flex items-center gap-3 cursor-pointer"
             onClick={() => goTo("articles")}
           >
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shrink-0">
               <span className="text-teal-600 text-sm font-bold">HC</span>
             </div>
-            <span className="font-semibold text-lg">Healthtech KB</span>
+            <span className="font-semibold text-base sm:text-lg whitespace-nowrap">Healthtech KB</span>
           </div>
 
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="hidden sm:inline text-sm text-teal-100 truncate max-w-[140px]">
+              {user.username} · {user.role}
+            </span>
             <button
-              onClick={() => goTo("articles")}
-              className={`hover:text-teal-100 ${currentPage === "articles" || currentPage === "article" ? "font-semibold" : "text-teal-100"}`}
+              onClick={handleLogout}
+              className="text-sm bg-teal-700 hover:bg-teal-800 px-3 py-1.5 rounded-lg transition whitespace-nowrap"
             >
-              Knowledge Base
+              Sign out
             </button>
-            {canManage && (
-              <button
-                onClick={() => goTo("admin")}
-                className={`hover:text-teal-100 ${currentPage === "admin" || currentPage === "form" ? "font-semibold" : "text-teal-100"}`}
-              >
-                Manage Articles
-              </button>
-            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-teal-100">
-            {user.username} · {user.role}
-          </span>
+        <div className="px-4 pb-3 flex items-center gap-4 text-sm overflow-x-auto">
           <button
-            onClick={handleLogout}
-            className="text-sm bg-teal-700 hover:bg-teal-800 px-3 py-1.5 rounded-lg transition"
+            onClick={() => goTo("articles")}
+            className={`whitespace-nowrap hover:text-teal-100 ${currentPage === "articles" || currentPage === "article" ? "font-semibold" : "text-teal-100"}`}
           >
-            Sign out
+            Knowledge Base
           </button>
+          {canManage && (
+            <button
+              onClick={() => goTo("admin")}
+              className={`whitespace-nowrap hover:text-teal-100 ${currentPage === "admin" || currentPage === "form" ? "font-semibold" : "text-teal-100"}`}
+            >
+              Manage Articles
+            </button>
+          )}
         </div>
       </nav>
 
