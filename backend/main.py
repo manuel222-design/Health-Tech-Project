@@ -280,6 +280,9 @@ def get_article_by_slug(slug: str, db: Session = Depends(get_db)):
 
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
+    
+    article.view_count += 1
+    db.commit()
 
     return {
         "id":            str(article.id),
