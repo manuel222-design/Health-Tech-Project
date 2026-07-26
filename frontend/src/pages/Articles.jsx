@@ -1,21 +1,26 @@
 import { useState, useEffect } from "react"
-import { getArticles, searchArticles } from "../services/api"
+import { getArticles, searchArticles, getCategories, getTags } from "../services/api"
 
 export default function Articles({ onSelectArticle }) {
   const [articles, setArticles]   = useState([])
   const [loading, setLoading]     = useState(true)
   const [search, setSearch]       = useState("")
   const [searching, setSearching] = useState(false)
+  const [categories, setCategories] = useState([])
+  const [categoryFilter, setCategoryFilter] = useState("")
+  const [typeFilter, setTypeFilter] = useState("")
+  const [allTags, setAllTags] = useState([])
+  const [tagFilter, setTagFilter] = useState("")
 
   useEffect(() => {
     getArticles()
       .then(res => setArticles(res.data))
       .finally(() => setLoading(false))
+    getCategories().then(res => setCategories(res.data))
+    getTags().then(res => setAllTags(res.data))
   }, [])
 
-  async function handleSearch(e) {
-    const q = e.target.value
-    setSearch(q)
+  async function runSearch(q, catFilter, typeF, tagF) {
     if (q.length < 2) {
       const res = await getArticles()
       setArticles(res.data)
@@ -23,11 +28,39 @@ export default function Articles({ onSelectArticle }) {
     }
     setSearching(true)
     try {
-      const res = await searchArticles(q)
+      const filters = {}
+      if (catFilter) filters.category_id = catFilter
+      if (typeF) filters.content_type = typeF
+      if (tagF) filters.tag_id = tagF
+      const res = await searchArticles(q, filters)
       setArticles(res.data.results)
     } finally {
       setSearching(false)
     }
+  }
+
+  function handleSearch(e) {
+    const q = e.target.value
+    setSearch(q)
+    runSearch(q, categoryFilter, typeFilter, tagFilter)
+  }
+
+  function handleCategoryFilterChange(e) {
+    const val = e.target.value
+    setCategoryFilter(val)
+    runSearch(search, val, typeFilter, tagFilter)
+  }
+
+  function handleTypeFilterChange(e) {
+    const val = e.target.value
+    setTypeFilter(val)
+    runSearch(search, categoryFilter, val, tagFilter)
+  }
+
+  function handleTagFilterChange(e) {
+    const val = e.target.value
+    setTagFilter(val)
+    runSearch(search, categoryFilter, typeFilter, val)
   }
 
   if (loading) return (
@@ -38,7 +71,7 @@ export default function Articles({ onSelectArticle }) {
 
   return (
     <div>
-      <div className="mb-6">
+      <div className="mb-3">
         <input
           type="text"
           value={search}
@@ -46,6 +79,44 @@ export default function Articles({ onSelectArticle }) {
           placeholder="Search articles... e.g. vitals, registration, TB"
           className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
         />
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-6">
+        <select
+          value={categoryFilter}
+          onChange={handleCategoryFilterChange}
+          className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+        >
+          <option value="">All categories</option>
+          {categories.map(c => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+
+        <select
+          value={typeFilter}
+          onChange={handleTypeFilterChange}
+          className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+        >
+          <option value="">All content types</option>
+          <option value="how_to">How-To Guide</option>
+          <option value="sop">SOP</option>
+          <option value="faq">FAQ</option>
+          <option value="feature_reference">Feature Reference</option>
+          <option value="troubleshooting">Troubleshooting</option>
+          <option value="release_notes">Release Notes</option>
+        </select>
+
+        <select
+          value={tagFilter}
+          onChange={handleTagFilterChange}
+          className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+        >
+          <option value="">All tags</option>
+          {allTags.map(t => (
+            <option key={t.id} value={t.id}>{t.name}</option>
+          ))}
+        </select>
       </div>
 
       <p className="text-sm text-gray-500 mb-4">

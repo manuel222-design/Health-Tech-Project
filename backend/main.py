@@ -202,28 +202,77 @@ def get_article_admin(slug: str, db: Session = Depends(get_db), user: dict = Dep
     }
 
 @app.get("/api/v1/articles/search")
-def search_articles(q: str, db: Session = Depends(get_db)):
+def search_articles(
+    q: str,
+    category_id: str = None,
+    content_type: str = None,
+    tag_id: str = None,
+    db: Session = Depends(get_db)
+):
     if not q or len(q.strip()) < 2:
         raise HTTPException(status_code=400, detail="Search query too short")
 
-    search_query = text("""
-        SELECT id, title, slug, status,
+    filters = ["status = 'published'"]
+    params = {"q": q}
+
+    if category_id:
+        filters.append("category_id = :category_id")
+        params["category_id"] = category_id
+
+    if content_type:
+        filters.append("content_type = :content_type")
+        params["content_type"] = content_type
+
+    tag_join = ""
+    if tag_id:
+        tag_join = "JOIN article_tags at ON at.article_id = articles.id AND at.tag_id = :tag_id"
+        params["tag_id"] = tag_id
+
+    filter_clause = " AND ".join(filters)
+
+    search_query = text(f"""
+        SELECT DISTINCT articles.id, articles.title, articles.slug, articles.status,
+               articles.category_id, articles.content_type,
                ts_rank(
-                   setweight(to_tsvector('english', title), 'A') ||
-                   setweight(to_tsvector('english', body_markdown), 'B'),
+                   setweight(to_tsvector('english', articles.title), 'A') ||
+                   setweight(to_tsvector('english', articles.body_markdown), 'B'),
                    plainto_tsquery('english', :q)
                ) AS rank
         FROM articles
-        WHERE status = 'published'
+        {tag_join}
+        WHERE {filter_clause}
           AND (
-                setweight(to_tsvector('english', title), 'A') ||
-                setweight(to_tsvector('english', body_markdown), 'B')
+                setweight(to_tsvector('english', articles.title), 'A') ||
+                setweight(to_tsvector('english', articles.body_markdown), 'B')
               ) @@ plainto_tsquery('english', :q)
         ORDER BY rank DESC
         LIMIT 20
     """)
 
-    rows = db.execute(search_query, {"q": q}).fetchall()
+    rows = db.execute(search_query, params).fetchall()
+
+    log = SearchLog(
+        id=uuid.uuid4(),
+        query=q,
+        results_count=len(rows)
+    )
+    db.add(log)
+    db.commit()
+
+    return {
+        "query":        q,
+        "total_results": len(rows),
+        "results": [
+            {
+                "id":           str(row.id),
+                "title":        row.title,
+                "slug":         row.slug,
+                "category_id":  str(row.category_id) if row.category_id else None,
+                "content_type": row.content_type,
+            }
+            for row in rows
+        ]
+    }
 
     log = SearchLog(
         id=uuid.uuid4(),

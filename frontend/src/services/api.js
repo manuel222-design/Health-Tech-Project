@@ -22,7 +22,10 @@ export const getArticles   = ()     => api.get('/articles')
 export const getAllArticlesAdmin = () => api.get('/articles/admin/all')
 export const getArticleAdmin = (slug) => api.get(`/articles/admin/${slug}`)
 export const getArticle    = (slug) => api.get(`/articles/${slug}`)
-export const searchArticles = (q)   => api.get(`/articles/search?q=${q}`)
+export const searchArticles = (q, filters = {}) => {
+  const params = new URLSearchParams({ q, ...filters })
+  return api.get(`/articles/search?${params.toString()}`)
+}
 
 export const getCategories = () => api.get('/categories')
 export const getTags = () => api.get('/tags')

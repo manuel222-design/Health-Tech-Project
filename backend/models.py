@@ -18,6 +18,14 @@ class ArticleStatus(str, enum.Enum):
     published = "published"
     archived  = "archived"
 
+class ContentType(str, enum.Enum):
+    how_to             = "how_to"
+    sop                = "sop"
+    faq                = "faq"
+    feature_reference  = "feature_reference"
+    troubleshooting    = "troubleshooting"
+    release_notes      = "release_notes"
+
 class MessageRole(str, enum.Enum):
     user      = "user"
     assistant = "assistant"
@@ -60,6 +68,7 @@ class Article(Base):
     body_markdown = Column(Text, nullable=False)
     body_html     = Column(Text)
     status        = Column(Enum(ArticleStatus), default=ArticleStatus.draft)
+    content_type  = Column(Enum(ContentType), default=ContentType.how_to)
     category_id   = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True)
     author_id     = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     view_count    = Column(Integer, default=0)
