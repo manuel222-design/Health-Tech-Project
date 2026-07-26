@@ -137,6 +137,9 @@ class RegisterRequest(BaseModel):
     password: str
     role: str = "viewer"
 
+class TagCreateRequest(BaseModel):
+    name: str
+
 @app.get("/")
 def root():
     return {"message": "Healthtech KB API is running"}
@@ -270,6 +273,42 @@ def get_tags(db: Session = Depends(get_db)):
         }
         for t in tags
     ]
+
+@app.post("/api/v1/tags", status_code=201)
+def create_tag(payload: TagCreateRequest, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
+    from models import Tag
+
+    name = payload.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Tag name cannot be empty")
+
+    slug = name.lower().replace(" ", "-")
+
+    existing = db.query(Tag).filter(Tag.slug == slug).first()
+    if existing:
+        return {
+            "id":        str(existing.id),
+            "name":      existing.name,
+            "slug":      existing.slug,
+            "color_hex": existing.color_hex,
+        }
+
+    tag = Tag(
+        id=uuid.uuid4(),
+        name=name,
+        slug=slug,
+        color_hex="#6B7280"
+    )
+    db.add(tag)
+    db.commit()
+    db.refresh(tag)
+
+    return {
+        "id":        str(tag.id),
+        "name":      tag.name,
+        "slug":      tag.slug,
+        "color_hex": tag.color_hex,
+    }
 
 @app.get("/api/v1/articles/{slug}")
 def get_article_by_slug(slug: str, db: Session = Depends(get_db)):

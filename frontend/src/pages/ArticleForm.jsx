@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { getArticleAdmin, createArticle, updateArticle, getCategories, getTags } from "../services/api"
+import { getArticleAdmin, createArticle, updateArticle, getCategories, getTags, createTag } from "../services/api"
 
 export default function ArticleForm({ slug, onDone, onCancel }) {
   const isEditing = Boolean(slug)
@@ -12,6 +12,8 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
   const [tagIds, setTagIds]         = useState([])
   const [categories, setCategories] = useState([])
   const [allTags, setAllTags]       = useState([])
+  const [newTagInput, setNewTagInput] = useState("")
+  const [creatingTag, setCreatingTag] = useState(false)
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState("")
@@ -54,6 +56,22 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
     )
   }
   
+  async function handleCreateTag() {
+    const name = newTagInput.trim()
+    if (!name) return
+    setCreatingTag(true)
+    try {
+      const res = await createTag(name)
+      setAllTags(prev => prev.find(t => t.id === res.data.id) ? prev : [...prev, res.data])
+      setTagIds(prev => prev.includes(res.data.id) ? prev : [...prev, res.data.id])
+      setNewTagInput("")
+    } catch (err) {
+      alert("Failed to create tag")
+    } finally {
+      setCreatingTag(false)
+    }
+  }
+
   async function handleSave() {
     if (!title.trim() || !articleSlug.trim() || !body.trim()) {
       setError("Title, slug, and content are all required")
@@ -169,7 +187,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mb-2">
               {allTags.map(tag => (
                 <button
                   key={tag.id}
@@ -184,6 +202,24 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
                   {tag.name}
                 </button>
               ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newTagInput}
+                onChange={e => setNewTagInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && (e.preventDefault(), handleCreateTag())}
+                placeholder="Create a new tag..."
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+              <button
+                type="button"
+                onClick={handleCreateTag}
+                disabled={creatingTag || !newTagInput.trim()}
+                className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+              >
+                {creatingTag ? "Adding..." : "+ Add Tag"}
+              </button>
             </div>
           </div>
 
