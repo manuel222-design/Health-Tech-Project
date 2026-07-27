@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react"
-import { sendMessage } from "../services/api"
+import { sendMessage, submitChatFeedback } from "../services/api"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
@@ -19,6 +19,16 @@ export default function ChatWidget() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
+  async function handleFeedback(index, messageId, helpful) {
+    setMessages(prev => prev.map((m, i) =>
+      i === index ? { ...m, feedbackGiven: helpful } : m
+    ))
+    try {
+      await submitChatFeedback(messageId, helpful)
+    } catch (err) {
+    }
+  }
+
   async function handleSend() {
     if (!input.trim() || loading) return
 
@@ -33,7 +43,9 @@ export default function ChatWidget() {
       setMessages(prev => [...prev, {
         role: "assistant",
         content: res.data.answer,
-        sources: res.data.articles_found || []
+        sources: res.data.articles_found || [],
+        messageId: res.data.message_id,
+        feedbackGiven: null
       }])
     } catch (err) {
       setMessages(prev => [...prev, {
@@ -94,7 +106,7 @@ export default function ChatWidget() {
                           {msg.sources.map((src, idx) => (
                             <a
                               key={idx}
-                              href={`#article-${src.slug}`}
+                              href="#"
                               onClick={(e) => {
                                 e.preventDefault()
                                 if (window.openHealthtechArticle) {
@@ -106,6 +118,24 @@ export default function ChatWidget() {
                               📄 {src.title}
                             </a>
                           ))}
+                        </div>
+                      )}
+
+                      {msg.messageId && (
+                        <div className="mt-2 pt-2 border-t border-gray-200 flex items-center gap-2">
+                          <span className="text-xs text-gray-400">Helpful?</span>
+                          <button
+                            onClick={() => handleFeedback(i, msg.messageId, true)}
+                            className={`text-sm transition ${msg.feedbackGiven === true ? "opacity-100" : "opacity-40 hover:opacity-70"}`}
+                          >
+                            👍
+                          </button>
+                          <button
+                            onClick={() => handleFeedback(i, msg.messageId, false)}
+                            className={`text-sm transition ${msg.feedbackGiven === false ? "opacity-100" : "opacity-40 hover:opacity-70"}`}
+                          >
+                            👎
+                          </button>
                         </div>
                       )}
                     </>

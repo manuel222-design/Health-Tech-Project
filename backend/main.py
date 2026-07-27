@@ -140,6 +140,10 @@ class RegisterRequest(BaseModel):
 class TagCreateRequest(BaseModel):
     name: str
 
+class FeedbackRequest(BaseModel):
+    rating: int
+    comment: Optional[str] = None
+
 @app.get("/")
 def root():
     return {"message": "Healthtech KB API is running"}
@@ -357,6 +361,49 @@ def create_tag(payload: TagCreateRequest, db: Session = Depends(get_db), user: d
         "name":      tag.name,
         "slug":      tag.slug,
         "color_hex": tag.color_hex,
+    }
+
+@app.post("/api/v1/articles/{slug}/feedback", status_code=201)
+def submit_feedback(slug: str, payload: FeedbackRequest, db: Session = Depends(get_db)):
+    from models import ArticleFeedback
+
+    if payload.rating < 1 or payload.rating > 5:
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+
+    article = db.query(Article).filter(Article.slug == slug).first()
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    feedback = ArticleFeedback(
+        id=uuid.uuid4(),
+        article_id=article.id,
+        rating=payload.rating,
+        comment=payload.comment
+    )
+    db.add(feedback)
+    db.commit()
+
+    return {"message": "Feedback submitted successfully"}
+
+@app.get("/api/v1/articles/{slug}/feedback/summary")
+def get_feedback_summary(slug: str, db: Session = Depends(get_db)):
+    from models import ArticleFeedback
+    from sqlalchemy import func
+
+    article = db.query(Article).filter(Article.slug == slug).first()
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    result = db.query(
+        func.avg(ArticleFeedback.rating),
+        func.count(ArticleFeedback.id)
+    ).filter(ArticleFeedback.article_id == article.id).first()
+
+    avg_rating, count = result
+
+    return {
+        "average_rating": round(float(avg_rating), 1) if avg_rating else None,
+        "total_ratings": count
     }
 
 @app.get("/api/v1/articles/{slug}")
@@ -650,8 +697,10 @@ def chat(payload: ChatRequest, db: Session = Depends(get_db)):
     db.add(user_msg)
     db.add(ai_msg)
     db.commit()
+    db.refresh(ai_msg)
 
     return {
+        "message_id":      str(ai_msg.id),
         "question":        payload.message,
         "answer": response.choices[0].message.content,
         "sources_used":    len(relevant_articles),
@@ -659,6 +708,23 @@ def chat(payload: ChatRequest, db: Session = Depends(get_db)):
             {"title": a.title, "slug": a.slug} for a in relevant_articles
         ],
     }
+
+class ChatFeedbackRequest(BaseModel):
+    helpful: bool
+
+@app.post("/api/v1/chat/{message_id}/feedback")
+def submit_chat_feedback(message_id: str, payload: ChatFeedbackRequest, db: Session = Depends(get_db)):
+    from models import ChatMessage
+    import json
+
+    message = db.query(ChatMessage).filter(ChatMessage.id == message_id).first()
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+
+    message.metadata = {"helpful": payload.helpful}
+    db.commit()
+
+    return {"message": "Feedback recorded"}
 
 @app.get("/api/v1/admin/users")
 def get_users():

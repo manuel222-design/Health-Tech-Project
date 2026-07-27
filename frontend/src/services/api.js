@@ -38,3 +38,10 @@ export const createArticle = (data) => api.post('/articles', data)
 export const updateArticle = (slug, data) => api.put(`/articles/${slug}`, data)
 export const deleteArticle = (slug) => api.delete(`/articles/${slug}`)
 export default api
+
+export const submitFeedback = (slug, rating, comment) =>
+  api.post(`/articles/${slug}/feedback`, { rating, comment })
+export const getFeedbackSummary = (slug) => api.get(`/articles/${slug}/feedback/summary`)
+
+export const submitChatFeedback = (messageId, helpful) =>
+  api.post(`/chat/${messageId}/feedback`, { helpful })
