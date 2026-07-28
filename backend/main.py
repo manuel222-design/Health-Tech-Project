@@ -611,7 +611,7 @@ def delete_article(
 
 class ChatRequest(BaseModel):
     message: str
-    session_token: str = None
+    session_token: Optional[str] = None
 
 @app.post("/api/v1/chat", status_code=200)
 def chat(payload: ChatRequest, db: Session = Depends(get_db)):
@@ -636,6 +636,18 @@ def chat(payload: ChatRequest, db: Session = Depends(get_db)):
                 if len(word) > 3]
                 
     relevant_articles = []
+    prior_messages = []
+    if payload.session_token:
+        existing_session = db.query(ChatSession).filter(
+            ChatSession.session_token == payload.session_token
+        ).first()
+        if existing_session:
+            prior_msgs = db.query(ChatMessage).filter(
+                ChatMessage.session_id == existing_session.id
+            ).order_by(ChatMessage.created_at).limit(10).all()
+            prior_messages = [
+                {"role": m.role.value, "content": m.content} for m in prior_msgs
+            ]
     for keyword in keywords:
         results = db.query(Article).filter(
             Article.status == ArticleStatus.published,
@@ -673,18 +685,28 @@ def chat(payload: ChatRequest, db: Session = Depends(get_db)):
     
     Respond in 3 to 5 sentences maximum:"""
 
+    conversation_messages = prior_messages + [{"role": "user", "content": prompt}]
+
     response = groq_client.chat.completions.create(
         model="llama-3.1-8b-instant",
-        messages=[{"role": "user", "content": prompt}]
+        messages=conversation_messages
     )
 
-    session = ChatSession(
-        id=uuid.uuid4(),
-        session_token=str(uuid.uuid4()),
-        source_url="swagger-test"
-    )
-    db.add(session)
-    db.flush()
+    session = None
+    if payload.session_token:
+        session = db.query(ChatSession).filter(
+            ChatSession.session_token == payload.session_token,
+            ChatSession.is_active == True
+        ).first()
+
+    if not session:
+        session = ChatSession(
+            id=uuid.uuid4(),
+            session_token=str(uuid.uuid4()),
+            source_url="widget"
+        )
+        db.add(session)
+        db.flush()
 
     user_msg = ChatMessage(
         id=uuid.uuid4(),
@@ -704,11 +726,12 @@ def chat(payload: ChatRequest, db: Session = Depends(get_db)):
     db.refresh(ai_msg)
 
     return {
-        "message_id":      str(ai_msg.id),
-        "question":        payload.message,
-        "answer": response.choices[0].message.content,
-        "sources_used":    len(relevant_articles),
-        "articles_found":  [
+        "message_id":     str(ai_msg.id),
+        "session_token":  session.session_token,
+        "question":       payload.message,
+        "answer":         response.choices[0].message.content,
+        "sources_used":   len(relevant_articles),
+        "articles_found": [
             {"title": a.title, "slug": a.slug} for a in relevant_articles
         ],
     }

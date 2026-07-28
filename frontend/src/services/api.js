@@ -31,8 +31,8 @@ export const getCategories = () => api.get('/categories')
 export const getTags = () => api.get('/tags')
 export const createTag = (name) => api.post('/tags', { name })
 
-export const sendMessage = (message) =>
-  api.post('/chat', { message })
+export const sendMessage = (message, sessionToken) =>
+  api.post('/chat', { message, session_token: sessionToken })
 
 export const createArticle = (data) => api.post('/articles', data)
 export const updateArticle = (slug, data) => api.put(`/articles/${slug}`, data)

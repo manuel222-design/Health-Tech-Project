@@ -13,6 +13,7 @@ export default function ChatWidget() {
   ])
   const [input, setInput]     = useState("")
   const [loading, setLoading] = useState(false)
+  const [sessionToken, setSessionToken] = useState(null)
   const bottomRef             = useRef(null)
 
   useEffect(() => {
@@ -39,7 +40,8 @@ export default function ChatWidget() {
     setLoading(true)
 
     try {
-      const res = await sendMessage(userMessage)
+      const res = await sendMessage(userMessage, sessionToken)
+      setSessionToken(res.data.session_token)
       setMessages(prev => [...prev, {
         role: "assistant",
         content: res.data.answer,
