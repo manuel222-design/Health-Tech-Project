@@ -590,16 +590,20 @@ def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depen
     return {"message": f"Article '{slug}' approved and published"}
 
 @app.delete("/api/v1/articles/{slug}")
-def delete_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+def delete_article(
+    slug: str,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
     article = db.query(Article).filter(Article.slug == slug).first()
 
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
 
-    db.delete(article)
+    article.status = ArticleStatus.archived
     db.commit()
 
-    return {"message": f"Article '{slug}' deleted successfully"}
+    return {"message": f"Article '{slug}' archived successfully"}
 
 
     

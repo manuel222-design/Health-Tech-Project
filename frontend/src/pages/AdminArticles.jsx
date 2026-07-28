@@ -17,13 +17,13 @@ export default function AdminArticles({ onEdit, onCreate }) {
   useEffect(() => { loadArticles() }, [])
 
   async function handleDelete(slug, title) {
-    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return
+    if (!window.confirm(`Archive "${title}"? It will be hidden from the public knowledge base but can be restored later.`)) return
     setDeleting(slug)
     try {
       await deleteArticle(slug)
-      setArticles(prev => prev.filter(a => a.slug !== slug))
+      setArticles(prev => prev.map(a => a.slug === slug ? { ...a, status: "archived" } : a))
     } catch (err) {
-      alert("Failed to delete article. You may not have permission.")
+      alert("Failed to archive article. You may not have permission.")
     } finally {
       setDeleting(null)
     }
@@ -79,6 +79,8 @@ export default function AdminArticles({ onEdit, onCreate }) {
                     ? "bg-teal-50 text-teal-700 border-teal-200"
                     : article.status === "pending_review"
                     ? "bg-blue-50 text-blue-700 border-blue-200"
+                    : article.status === "archived"
+                    ? "bg-gray-100 text-gray-600 border-gray-300"
                     : "bg-amber-50 text-amber-700 border-amber-200"
                 }`}>
                   {article.status}
@@ -102,13 +104,15 @@ export default function AdminArticles({ onEdit, onCreate }) {
               >
                 Edit
               </button>
-              <button
-                onClick={() => handleDelete(article.slug, article.title)}
-                disabled={deleting === article.slug}
-                className="text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1.5 border border-red-200 rounded-lg hover:bg-red-50 transition disabled:opacity-50"
-              >
-                {deleting === article.slug ? "Deleting..." : "Delete"}
-              </button>
+              {article.status !== "archived" && (
+                <button
+                  onClick={() => handleDelete(article.slug, article.title)}
+                  disabled={deleting === article.slug}
+                  className="text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1.5 border border-red-200 rounded-lg hover:bg-red-50 transition disabled:opacity-50"
+                >
+                  {deleting === article.slug ? "Archiving..." : "Archive"}
+                </button>
+              )}
             </div>
           </div>
         ))}
