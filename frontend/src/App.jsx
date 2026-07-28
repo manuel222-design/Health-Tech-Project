@@ -4,6 +4,8 @@ import Register from "./pages/Register"
 import Articles from "./pages/Articles"
 import ArticleView from "./pages/ArticleView"
 import AdminArticles from "./pages/AdminArticles"
+import AdminUsers from "./pages/AdminUsers"
+import AdminAnalytics from "./pages/AdminAnalytics"
 import ArticleForm from "./pages/ArticleForm"
 import ChatWidget from "./components/ChatWidget"
 
@@ -20,6 +22,8 @@ export default function App() {
   const [editSlug, setEditSlug]         = useState(null)
 
   const canManage = user?.role === "editor" || user?.role === "admin"
+
+  const isAdmin = user?.role === "admin"
 
   function handleLogin(userData) { setUser(userData) }
 
@@ -107,6 +111,22 @@ export default function App() {
               Manage Articles
             </button>
           )}
+          {isAdmin && (
+              <button
+                onClick={() => goTo("users")}
+                className={`whitespace-nowrap hover:text-teal-100 ${currentPage === "users" ? "font-semibold" : "text-teal-100"}`}
+              >
+                Manage Users
+              </button>
+          )}
+          {isAdmin && (
+              <button
+                onClick={() => goTo("analytics")}
+                className={`whitespace-nowrap hover:text-teal-100 ${currentPage === "analytics" ? "font-semibold" : "text-teal-100"}`}
+              >
+                Analytics
+              </button>
+          )}
         </div>
       </nav>
 
@@ -133,6 +153,12 @@ export default function App() {
             onDone={handleFormDone}
             onCancel={() => goTo("admin")}
           />
+        )}
+        {currentPage === "users" && isAdmin && (
+          <AdminUsers />
+        )}
+        {currentPage === "analytics" && isAdmin && (
+          <AdminAnalytics />
         )}
       </main>
 

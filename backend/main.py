@@ -727,5 +727,107 @@ def submit_chat_feedback(message_id: str, payload: ChatFeedbackRequest, db: Sess
     return {"message": "Feedback recorded"}
 
 @app.get("/api/v1/admin/users")
-def get_users():
-    return {"message": "Admin endpoint — coming next"}
+def list_users(db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    users = db.query(User).order_by(User.created_at.desc()).all()
+    return [
+        {
+            "id":         str(u.id),
+            "username":   u.username,
+            "email":      u.email,
+            "role":       u.role.value,
+            "is_active":  u.is_active,
+            "created_at": str(u.created_at),
+        }
+        for u in users
+    ]
+
+class UpdateRoleRequest(BaseModel):
+    role: str
+
+@app.put("/api/v1/admin/users/{user_id}/role")
+def update_user_role(user_id: str, payload: UpdateRoleRequest, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if payload.role not in ["viewer", "editor", "admin"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+
+    target.role = UserRole(payload.role)
+    db.commit()
+
+    return {"message": f"Role updated to {payload.role}"}
+
+@app.put("/api/v1/admin/users/{user_id}/toggle-active")
+def toggle_user_active(user_id: str, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if str(target.id) == user["user_id"]:
+        raise HTTPException(status_code=400, detail="Cannot deactivate your own account")
+
+    target.is_active = not target.is_active
+    db.commit()
+
+    return {"message": "Active" if target.is_active else "Deactivated", "is_active": target.is_active}
+
+@app.get("/api/v1/admin/analytics")
+def get_analytics(db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    from sqlalchemy import func, desc
+    from models import ArticleFeedback
+
+    top_viewed = db.query(Article.title, Article.slug, Article.view_count) \
+        .filter(Article.status == ArticleStatus.published) \
+        .order_by(desc(Article.view_count)) \
+        .limit(5).all()
+
+    low_rated = db.query(
+            Article.title, Article.slug,
+            func.avg(ArticleFeedback.rating).label("avg_rating"),
+            func.count(ArticleFeedback.id).label("rating_count")
+        ) \
+        .join(ArticleFeedback, ArticleFeedback.article_id == Article.id) \
+        .group_by(Article.id) \
+        .having(func.avg(ArticleFeedback.rating) <= 3) \
+        .order_by("avg_rating") \
+        .limit(5).all()
+
+    top_searches = db.query(
+            SearchLog.query,
+            func.count(SearchLog.id).label("count")
+        ) \
+        .group_by(SearchLog.query) \
+        .order_by(desc("count")) \
+        .limit(10).all()
+
+    zero_results = db.query(SearchLog.query, func.count(SearchLog.id).label("count")) \
+        .filter(SearchLog.results_count == 0) \
+        .group_by(SearchLog.query) \
+        .order_by(desc("count")) \
+        .limit(10).all()
+
+    total_articles = db.query(Article).filter(Article.status == ArticleStatus.published).count()
+    total_users = db.query(User).count()
+    total_searches = db.query(SearchLog).count()
+
+    return {
+        "totals": {
+            "published_articles": total_articles,
+            "users": total_users,
+            "searches": total_searches,
+        },
+        "top_viewed": [
+            {"title": t, "slug": s, "views": v} for t, s, v in top_viewed
+        ],
+        "low_rated": [
+            {"title": t, "slug": s, "avg_rating": round(float(r), 1), "rating_count": c}
+            for t, s, r, c in low_rated
+        ],
+        "top_searches": [
+            {"query": q, "count": c} for q, c in top_searches
+        ],
+        "zero_result_searches": [
+            {"query": q, "count": c} for q, c in zero_results
+        ],
+    }

@@ -45,3 +45,9 @@ export const getFeedbackSummary = (slug) => api.get(`/articles/${slug}/feedback/
 
 export const submitChatFeedback = (messageId, helpful) =>
   api.post(`/chat/${messageId}/feedback`, { helpful })
+
+export const listUsers = () => api.get('/admin/users')
+export const updateUserRole = (userId, role) => api.put(`/admin/users/${userId}/role`, { role })
+export const toggleUserActive = (userId) => api.put(`/admin/users/${userId}/toggle-active`)
+
+export const getAnalytics = () => api.get('/admin/analytics')
