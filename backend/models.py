@@ -53,6 +53,7 @@ class Category(Base):
     name        = Column(String(120), nullable=False, unique=True)
     slug        = Column(String(120), nullable=False, unique=True)
     description = Column(Text)
+    icon        = Column(String(50), nullable=True)
     parent_id   = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True)
     sort_order  = Column(Integer, default=0)
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
