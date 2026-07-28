@@ -429,6 +429,57 @@ def get_article_by_slug(slug: str, db: Session = Depends(get_db)):
         "created_at":    str(article.created_at),
     }
 
+@app.get("/api/v1/articles/{slug}/pdf")
+def export_article_pdf(slug: str, db: Session = Depends(get_db)):
+    import markdown as md_lib # type: ignore
+    from xhtml2pdf import pisa # type: ignore
+    from fastapi.responses import Response # type: ignore
+    import io
+
+    article = db.query(Article).filter(
+        Article.slug == slug,
+        Article.status == ArticleStatus.published
+    ).first()
+
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    body_html = md_lib.markdown(article.body_markdown, extensions=["tables", "fenced_code"])
+
+    html_content = f"""
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6; }}
+            h1 {{ color: #0f766e; border-bottom: 2px solid #0f766e; padding-bottom: 8px; }}
+            h2 {{ color: #0f766e; margin-top: 20px; }}
+            .meta {{ color: #64748b; font-size: 10px; margin-bottom: 16px; }}
+            table {{ border-collapse: collapse; width: 100%; margin: 12px 0; }}
+            th, td {{ border: 1px solid #cbd5e1; padding: 6px; text-align: left; font-size: 11px; }}
+            th {{ background-color: #f0fdfa; }}
+            code {{ background-color: #f1f5f9; padding: 2px 4px; }}
+            .footer {{ margin-top: 30px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 9px; color: #94a3b8; }}
+        </style>
+    </head>
+    <body>
+        <h1>{article.title}</h1>
+        <div class="meta">Last updated: {article.created_at.strftime('%d %B %Y')} - Taifa Care HMIS Knowledge Base</div>
+        {body_html}
+        <div class="footer">Generated from Healthtech Knowledge Base</div>
+    </body>
+    </html>
+    """
+
+    pdf_buffer = io.BytesIO()
+    pisa.CreatePDF(html_content, dest=pdf_buffer)
+    pdf_bytes = pdf_buffer.getvalue()
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{article.slug}.pdf"'}
+    )
+
 @app.post("/api/v1/auth/login", status_code=200)
 @limiter.limit("5/10minutes")
 def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)):
@@ -550,7 +601,6 @@ def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depen
     if payload.body_markdown:
         article.body_markdown = payload.body_markdown
     if payload.status:
-        # Editors cannot publish directly — force to pending_review instead
         if user["role"] == "editor" and payload.status == "published":
             article.status = ArticleStatus.pending_review
         else:

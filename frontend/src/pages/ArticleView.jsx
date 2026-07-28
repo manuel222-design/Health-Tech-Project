@@ -52,20 +52,27 @@ export default function ArticleView({ slug, onBack }) {
       </button>
 
       <div className="bg-white rounded-xl border border-gray-200 p-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          {article.title}
-        </h1>
+        <div className="flex items-start justify-between gap-4 mb-2">
+          <h1 className="text-2xl font-bold text-gray-800">
+            {article.title}
+          </h1>
+          <a
+            href={`http://127.0.0.1:8000/api/v1/articles/${slug}/pdf`}
+            download
+            className="shrink-0 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition whitespace-nowrap"
+          >
+            📄 Download PDF
+          </a>
+        </div>
         <p className="text-xs text-gray-400 mb-6">
           Last updated: {new Date(article.created_at).toLocaleDateString()}
         </p>
         <hr className="mb-6" />
 
-        {/* Render markdown content */}
         <div className="prose prose-teal max-w-none">
           <ReactMarkdown>{article.body_markdown}</ReactMarkdown>
         </div>
 
-        {/* Feedback section */}
         <div className="mt-8 pt-6 border-t border-gray-200">
           {summary && summary.total_ratings > 0 && (
             <p className="text-sm text-gray-500 mb-4">
