@@ -8,6 +8,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
   const [articleSlug, setArticleSlug] = useState("")
   const [body, setBody]       = useState("")
   const [status, setStatus]   = useState("draft")
+  const [contentType, setContentType] = useState("how_to")
   const [categoryId, setCategoryId] = useState("")
   const [newCategoryInput, setNewCategoryInput] = useState("")
   const [creatingCategory, setCreatingCategory] = useState(false)
@@ -35,6 +36,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
         setStatus(res.data.status)
         setCategoryId(res.data.category_id || "")
         setTagIds(res.data.tag_ids || [])
+        setContentType(res.data.content_type || "how_to")
       })
       .finally(() => setLoading(false))
   }, [slug])
@@ -99,7 +101,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
     setError("")
     try {
       if (isEditing) {
-        await updateArticle(slug, { title, body_markdown: body, status, category_id: categoryId || null, tag_ids: tagIds })
+        await updateArticle(slug, { title, body_markdown: body, status, category_id: categoryId || null, tag_ids: tagIds, content_type: contentType })
       } else {
         await createArticle({
           title,
@@ -107,7 +109,8 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
           body_markdown: body,
           status,
           category_id: categoryId || null,
-          tag_ids: tagIds
+          tag_ids: tagIds,
+          content_type: contentType
         })
       }
       onDone()
@@ -257,6 +260,22 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
                 {creatingTag ? "Adding..." : "+ Add Tag"}
               </button>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Content Type</label>
+            <select
+              value={contentType}
+              onChange={e => setContentType(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            >
+              <option value="how_to">How-To Guide</option>
+              <option value="sop">SOP</option>
+              <option value="faq">FAQ</option>
+              <option value="feature_reference">Feature Reference</option>
+              <option value="troubleshooting">Troubleshooting</option>
+              <option value="release_notes">Release Notes</option>
+            </select>
           </div>
 
           <div>

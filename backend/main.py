@@ -9,7 +9,7 @@ from passlib.context import CryptContext               # type: ignore
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel                         # type: ignore 
 from database import get_db
-from models import Article, ArticleStatus, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole, UserRole
+from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole, UserRole
 import os, uuid
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
 from groq import Groq # type: ignore
@@ -352,7 +352,7 @@ def create_category(payload: CategoryCreateRequest, db: Session = Depends(get_db
         "slug":        category.slug,
         "description": category.description,
     }
-    
+
 @app.get("/api/v1/tags")
 def get_tags(db: Session = Depends(get_db)):
     from models import Tag
@@ -465,7 +465,9 @@ def get_article_by_slug(slug: str, db: Session = Depends(get_db)):
         "slug":          article.slug,
         "body_markdown": article.body_markdown,
         "status":        article.status.value,
-        "view_count":    article.view_count,
+        "category_id":   str(article.category_id) if article.category_id else None,
+        "content_type":  article.content_type.value if article.content_type else "how_to",
+        "tag_ids":       tag_ids, # type: ignore
         "created_at":    str(article.created_at),
     }
 
@@ -582,12 +584,14 @@ class ArticleCreateRequest(BaseModel):
     category_id:   Optional[str] = None
     tag_ids:       list[str] = []
     status:        str = "draft"
+    content_type:  str = "how_to"
 class ArticleUpdateRequest(BaseModel):
     title:         Optional[str] = None
     body_markdown: Optional[str] = None
     category_id:   Optional[str] = None
     tag_ids:       Optional[list[str]] = None
     status:        Optional[str] = None
+    content_type:  Optional[str] = None
 
 @app.post("/api/v1/articles", status_code=201)
 def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
@@ -609,6 +613,7 @@ def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db),
         body_html="",
         status=ArticleStatus(requested_status),
         category_id=payload.category_id if payload.category_id else None,
+        content_type=ContentType(payload.content_type),
         author_id=admin.id,
         view_count=0
     )
@@ -648,6 +653,9 @@ def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depen
 
     if payload.category_id is not None:
         article.category_id = payload.category_id if payload.category_id else None
+
+    if payload.content_type is not None:
+        article.content_type = ContentType(payload.content_type)
 
     if payload.tag_ids is not None:
         from models import ArticleTag
