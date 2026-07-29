@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Taifa Care HMIS — Mock Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, "Segoe UI", Arial, sans-serif; background: #f1f5f9; color: #1e293b; }
+
+    .layout { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 220px; background: #0f172a; color: #e2e8f0; flex-shrink: 0; padding: 20px 0; }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 24px; border-bottom: 1px solid #1e293b; margin-bottom: 16px; }
+    .sidebar-logo .badge { width: 34px; height: 34px; background: #0d9488; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+    .sidebar-logo span { font-weight: 600; font-size: 15px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 14px; color: #94a3b8; cursor: pointer; }
+    .nav-item.active { background: #1e293b; color: #fff; border-left: 3px solid #0d9488; }
+    .nav-item:hover { background: #1e293b; color: #fff; }
+
+    /* Main */
+    .main { flex: 1; min-width: 0; }
+    .topbar { background: #fff; padding: 14px 28px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
+    .topbar-title { font-size: 18px; font-weight: 600; }
+    .topbar-sub { font-size: 12px; color: #94a3b8; }
+    .topbar-user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #475569; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #0d9488; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+
+    .content { padding: 28px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 18px; }
+    .stat-card .label { font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+    .stat-card .value { font-size: 26px; font-weight: 700; color: #0f172a; }
+    .stat-card .delta { font-size: 11px; color: #059669; margin-top: 4px; }
+
+    .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+    .panel-header { padding: 14px 18px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+    .panel-header h3 { font-size: 14px; font-weight: 600; }
+    .panel-header .action { font-size: 12px; color: #0d9488; cursor: pointer; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 10px 18px; background: #f8fafc; color: #64748b; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; }
+    td { padding: 12px 18px; border-top: 1px solid #f1f5f9; color: #334155; }
+    tr:hover td { background: #f8fafc; }
+
+    .status-pill { font-size: 11px; padding: 3px 9px; border-radius: 999px; font-weight: 500; }
+    .status-waiting { background: #fef3c7; color: #92400e; }
+    .status-progress { background: #dbeafe; color: #1e40af; }
+    .status-done { background: #d1fae5; color: #065f46; }
+
+    .cr-number { font-family: monospace; color: #64748b; }
+
+    .banner { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; font-size: 12.5px; padding: 10px 16px; border-radius: 8px; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="badge">TC</div>
+        <span>Taifa Care HMIS</span>
+      </div>
+      <div class="nav-item active">📊 Dashboard</div>
+      <div class="nav-item">🧑‍⚕️ Patients</div>
+      <div class="nav-item">📅 Appointments</div>
+      <div class="nav-item">🩺 Consultation</div>
+      <div class="nav-item">🧪 Laboratory</div>
+      <div class="nav-item">💊 Pharmacy</div>
+      <div class="nav-item">💳 Billing</div>
+      <div class="nav-item">⚙️ Administration</div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <div class="topbar-title">General Outpatient — Kiambu District Hospital</div>
+          <div class="topbar-sub">Shift: Day &middot; Wednesday, 29 July 2026</div>
+        </div>
+        <div class="topbar-user">
+          <span>Amina Yusuf &middot; Ward Nurse</span>
+          <div class="avatar">AY</div>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <div class="banner">
+          🧩 This is a <strong>simulated external HMIS interface</strong> — completely separate from the Healthtech KB codebase. It only loads the chatbot via a single <code>&lt;script&gt;</code> tag at the bottom of this page, exactly as a real hospital IT team would embed it.
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="label">Patients Today</div>
+            <div class="value">47</div>
+            <div class="delta">+12% vs yesterday</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Waiting in Queue</div>
+            <div class="value">9</div>
+            <div class="delta">Avg wait 14 min</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Consultations Done</div>
+            <div class="value">31</div>
+            <div class="delta">65% of today's load</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">TB Screenings</div>
+            <div class="value">47</div>
+            <div class="delta">100% coverage today</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Today's Patient Queue</h3>
+            <span class="action">View all →</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>CR Number</th>
+                <th>Patient</th>
+                <th>Service Unit</th>
+                <th>Status</th>
+                <th>Vitals</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="cr-number">CR-20260729-014</td>
+                <td>Wanjiru Kamau</td>
+                <td>General OPD</td>
+                <td><span class="status-pill status-waiting">Waiting</span></td>
+                <td>Not captured</td>
+              </tr>
+              <tr>
+                <td class="cr-number">CR-20260729-013</td>
+                <td>Otieno Ochieng</td>
+                <td>MCH</td>
+                <td><span class="status-pill status-progress">In Consultation</span></td>
+                <td>36.8°C · 118/76</td>
+              </tr>
+              <tr>
+                <td class="cr-number">CR-20260729-012</td>
+                <td>Fatuma Ali</td>
+                <td>TB Clinic</td>
+                <td><span class="status-pill status-done">Completed</span></td>
+                <td>37.1°C · 122/80</td>
+              </tr>
+              <tr>
+                <td class="cr-number">CR-20260729-011</td>
+                <td>Njoroge Mwangi</td>
+                <td>General OPD</td>
+                <td><span class="status-pill status-waiting">Waiting</span></td>
+                <td>Not captured</td>
+              </tr>
+              <tr>
+                <td class="cr-number">CR-20260729-010</td>
+                <td>Achieng Odhiambo</td>
+                <td>Paediatrics</td>
+                <td><span class="status-pill status-progress">In Triage</span></td>
+                <td>36.5°C · 108/70</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- WIDGET EMBED — the entire integration is these two lines -->
+  <!-- ============================================================ -->
+  <link rel="stylesheet" href="./dist/widget.css">
+  <script src="./dist/widget.iife.js" charset="utf-8"></script>
+
+</body>
+</html>
