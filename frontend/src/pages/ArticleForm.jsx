@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { getArticleAdmin, createArticle, updateArticle, getCategories, getTags, createTag } from "../services/api"
+import { getArticleAdmin, createArticle, updateArticle, getCategories, getTags, createTag, createCategory } from "../services/api"
 
 export default function ArticleForm({ slug, onDone, onCancel }) {
   const isEditing = Boolean(slug)
@@ -9,6 +9,8 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
   const [body, setBody]       = useState("")
   const [status, setStatus]   = useState("draft")
   const [categoryId, setCategoryId] = useState("")
+  const [newCategoryInput, setNewCategoryInput] = useState("")
+  const [creatingCategory, setCreatingCategory] = useState(false)
   const [tagIds, setTagIds]         = useState([])
   const [categories, setCategories] = useState([])
   const [allTags, setAllTags]       = useState([])
@@ -69,6 +71,22 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
       alert("Failed to create tag")
     } finally {
       setCreatingTag(false)
+    }
+  }
+
+  async function handleCreateCategory() {
+    const name = newCategoryInput.trim()
+    if (!name) return
+    setCreatingCategory(true)
+    try {
+      const res = await createCategory(name)
+      setCategories(prev => prev.find(c => c.id === res.data.id) ? prev : [...prev, res.data])
+      setCategoryId(res.data.id)
+      setNewCategoryInput("")
+    } catch (err) {
+      alert("Failed to create category")
+    } finally {
+      setCreatingCategory(false)
     }
   }
 
@@ -176,13 +194,31 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
             <select
               value={categoryId}
               onChange={e => setCategoryId(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
               <option value="">No category</option>
               {categories.map(c => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newCategoryInput}
+                onChange={e => setNewCategoryInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && (e.preventDefault(), handleCreateCategory())}
+                placeholder="Create a new category..."
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+              <button
+                type="button"
+                onClick={handleCreateCategory}
+                disabled={creatingCategory || !newCategoryInput.trim()}
+                className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+              >
+                {creatingCategory ? "Adding..." : "+ Add Category"}
+              </button>
+            </div>
           </div>
 
           <div>

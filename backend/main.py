@@ -314,6 +314,45 @@ def get_categories(db: Session = Depends(get_db)):
         for c in categories
     ]
 
+class CategoryCreateRequest(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+@app.post("/api/v1/categories", status_code=201)
+def create_category(payload: CategoryCreateRequest, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
+    name = payload.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Category name cannot be empty")
+
+    slug = name.lower().replace(" ", "-")
+
+    existing = db.query(Category).filter(Category.slug == slug).first()
+    if existing:
+        return {
+            "id":          str(existing.id),
+            "name":        existing.name,
+            "slug":        existing.slug,
+            "description": existing.description,
+        }
+
+    category = Category(
+        id=uuid.uuid4(),
+        name=name,
+        slug=slug,
+        description=payload.description,
+        sort_order=0
+    )
+    db.add(category)
+    db.commit()
+    db.refresh(category)
+
+    return {
+        "id":          str(category.id),
+        "name":        category.name,
+        "slug":        category.slug,
+        "description": category.description,
+    }
+    
 @app.get("/api/v1/tags")
 def get_tags(db: Session = Depends(get_db)):
     from models import Tag

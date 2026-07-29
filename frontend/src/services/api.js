@@ -30,6 +30,8 @@ export const searchArticles = (q, filters = {}) => {
 }
 
 export const getCategories = () => api.get('/categories')
+export const createCategory = (name, description) =>
+  api.post('/categories', { name, description })
 export const getTags = () => api.get('/tags')
 export const createTag = (name) => api.post('/tags', { name })
 
