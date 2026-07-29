@@ -459,6 +459,10 @@ def get_article_by_slug(slug: str, db: Session = Depends(get_db)):
     article.view_count += 1
     db.commit()
 
+    from models import ArticleTag
+    tag_links = db.query(ArticleTag).filter(ArticleTag.article_id == article.id).all()
+    tag_ids = [str(link.tag_id) for link in tag_links]
+
     return {
         "id":            str(article.id),
         "title":         article.title,
@@ -467,7 +471,8 @@ def get_article_by_slug(slug: str, db: Session = Depends(get_db)):
         "status":        article.status.value,
         "category_id":   str(article.category_id) if article.category_id else None,
         "content_type":  article.content_type.value if article.content_type else "how_to",
-        "tag_ids":       tag_ids, # type: ignore
+        "tag_ids":       tag_ids,
+        "view_count":    article.view_count,
         "created_at":    str(article.created_at),
     }
 
