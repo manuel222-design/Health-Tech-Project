@@ -13,3 +13,6 @@ dist/
 *.docx
 *.pdf
 *.pptx
+
+/light house*.png
+/mock hmis*.png
