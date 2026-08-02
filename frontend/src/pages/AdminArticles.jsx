@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react"
-import { getAllArticlesAdmin, deleteArticle, approveArticle } from "../services/api"
+import { getAllArticlesAdmin, deleteArticle, approveArticle, rejectArticle } from "../services/api"
 
 export default function AdminArticles({ onEdit, onCreate }) {
   const [articles, setArticles] = useState([])
   const [loading, setLoading]   = useState(true)
   const [deleting, setDeleting] = useState(null)
   const [approving, setApproving] = useState(null)
+  const [rejecting, setRejecting] = useState(null)
+  const [showPendingOnly, setShowPendingOnly] = useState(false)
 
   function loadArticles() {
     setLoading(true)
@@ -43,6 +45,21 @@ export default function AdminArticles({ onEdit, onCreate }) {
     }
   }
 
+  async function handleReject(slug) {
+    const reason = window.prompt("Reason for rejecting this article (optional):")
+    setRejecting(slug)
+    try {
+      await rejectArticle(slug, reason || "")
+      setArticles(prev => prev.map(a =>
+        a.slug === slug ? { ...a, status: "draft" } : a
+      ))
+    } catch (err) {
+      alert("Failed to reject article.")
+    } finally {
+      setRejecting(null)
+    }
+  }
+
   if (loading) return (
     <div className="flex items-center justify-center py-20">
       <div className="text-gray-400">Loading articles...</div>
@@ -51,7 +68,7 @@ export default function AdminArticles({ onEdit, onCreate }) {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Manage Articles</h2>
           <p className="text-gray-500 text-sm">Create, edit, and delete knowledge base articles</p>
@@ -64,8 +81,23 @@ export default function AdminArticles({ onEdit, onCreate }) {
         </button>
       </div>
 
+      <div className="mb-6">
+        <button
+          onClick={() => setShowPendingOnly(!showPendingOnly)}
+          className={`text-sm font-medium px-3 py-1.5 rounded-lg border transition ${
+            showPendingOnly
+              ? "bg-blue-600 text-white border-blue-600"
+              : "bg-white text-gray-600 border-gray-300 hover:border-blue-400"
+          }`}
+        >
+          {showPendingOnly ? "✓ Showing Pending Review only" : "Show Pending Review only"}
+          {" "}
+          ({articles.filter(a => a.status === "pending_review").length})
+        </button>
+      </div>
+
       <div className="grid gap-3 pb-20">
-        {articles.map(article => (
+        {(showPendingOnly ? articles.filter(a => a.status === "pending_review") : articles).map(article => (
           <div
             key={article.id}
             className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-4"
@@ -89,14 +121,23 @@ export default function AdminArticles({ onEdit, onCreate }) {
             </div>
 
             <div className="flex gap-2 shrink-0">
-              {article.status !== "published" && (
-                <button
-                  onClick={() => handleApprove(article.slug)}
-                  disabled={approving === article.slug}
-                  className="text-sm text-teal-600 hover:text-teal-700 font-medium px-3 py-1.5 border border-teal-200 rounded-lg hover:bg-teal-50 transition disabled:opacity-50"
-                >
-                  {approving === article.slug ? "Approving..." : "Approve"}
-                </button>
+              {article.status === "pending_review" && (
+                <>
+                  <button
+                    onClick={() => handleApprove(article.slug)}
+                    disabled={approving === article.slug || rejecting === article.slug}
+                    className="text-sm text-white bg-teal-600 hover:bg-teal-700 font-medium px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+                  >
+                    {approving === article.slug ? "Approving..." : "Approve"}
+                  </button>
+                  <button
+                    onClick={() => handleReject(article.slug)}
+                    disabled={approving === article.slug || rejecting === article.slug}
+                    className="text-sm text-amber-700 border border-amber-200 hover:bg-amber-50 font-medium px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+                  >
+                    {rejecting === article.slug ? "Rejecting..." : "Reject"}
+                  </button>
+                </>
               )}
               <button
                 onClick={() => onEdit(article.slug)}

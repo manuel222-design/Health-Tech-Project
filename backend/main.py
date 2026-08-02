@@ -710,6 +710,25 @@ def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depen
 
     return {"message": f"Article '{slug}' approved and published"}
 
+class RejectRequest(BaseModel):
+    reason: Optional[str] = None
+
+@app.post("/api/v1/articles/{slug}/reject")
+def reject_article(slug: str, payload: RejectRequest, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    article = db.query(Article).filter(Article.slug == slug).first()
+
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    if article.status != ArticleStatus.pending_review:
+        raise HTTPException(status_code=400, detail="Article is not pending review")
+
+    article.status = ArticleStatus.draft
+    db.commit()
+    log_audit(db, user["user_id"], "reject_article", "article", str(article.id), payload.reason or "No reason given")
+
+    return {"message": f"Article '{slug}' sent back to draft"}
+    
 @app.delete("/api/v1/articles/{slug}")
 def delete_article(
     slug: str,
