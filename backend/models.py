@@ -147,3 +147,14 @@ class SearchLog(Base):
     query         = Column(Text, nullable=False)
     results_count = Column(Integer, default=0)
     searched_at   = Column(DateTime(timezone=True), server_default=func.now())
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id     = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    action      = Column(String(50), nullable=False)   
+    target_type = Column(String(50), nullable=False)   
+    target_id   = Column(String(100), nullable=True)
+    details     = Column(Text, nullable=True)
+    created_at  = Column(DateTime(timezone=True), server_default=func.now())

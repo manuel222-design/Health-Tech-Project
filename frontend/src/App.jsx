@@ -6,6 +6,7 @@ import ArticleView from "./pages/ArticleView"
 import AdminArticles from "./pages/AdminArticles"
 import AdminUsers from "./pages/AdminUsers"
 import AdminAnalytics from "./pages/AdminAnalytics"
+import AdminAuditLog from "./pages/AdminAuditLog"
 import ArticleForm from "./pages/ArticleForm"
 import ChatWidget from "./components/ChatWidget"
 
@@ -127,6 +128,14 @@ export default function App() {
                 Analytics
               </button>
           )}
+          {isAdmin && (
+              <button
+                onClick={() => goTo("audit")}
+                className={`whitespace-nowrap hover:text-teal-100 ${currentPage === "audit" ? "font-semibold" : "text-teal-100"}`}
+              >
+                Audit Log
+              </button>
+          )}
         </div>
       </nav>
 
@@ -159,6 +168,9 @@ export default function App() {
         )}
         {currentPage === "analytics" && isAdmin && (
           <AdminAnalytics />
+        )}
+        {currentPage === "audit" && isAdmin && (
+          <AdminAuditLog />
         )}
       </main>
 

@@ -9,7 +9,7 @@ from passlib.context import CryptContext               # type: ignore
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel                         # type: ignore 
 from database import get_db
-from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole, UserRole
+from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole, UserRole, AuditLog
 import os, uuid
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
 from groq import Groq # type: ignore
@@ -18,6 +18,20 @@ from fastapi.exceptions import RequestValidationError # type: ignore
 from slowapi import Limiter, _rate_limit_exceeded_handler # type: ignore
 from slowapi.util import get_remote_address # type: ignore
 from slowapi.errors import RateLimitExceeded # type: ignore
+
+
+def log_audit(db: Session, user_id: str, action: str, target_type: str, target_id: str = None, details: str = None):
+    from models import AuditLog
+    entry = AuditLog(
+        id=uuid.uuid4(),
+        user_id=user_id,
+        action=action,
+        target_type=target_type,
+        target_id=target_id,
+        details=details
+    )
+    db.add(entry)
+    db.commit()
 
 app = FastAPI(
     title="Healthtech KB & HMIS Chatbot API",
@@ -632,6 +646,9 @@ def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db),
     db.commit()
     db.refresh(article)
 
+    log_audit(db, user["user_id"], "create_article", "article", str(article.id), f"title={article.title}")
+    log_audit(db, user["user_id"], "update_article", "article", str(article.id), f"status={article.status.value}")
+
     return {
         "message": "Article created successfully",
         "id":      str(article.id),
@@ -689,6 +706,7 @@ def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depen
 
     article.status = ArticleStatus.published
     db.commit()
+    log_audit(db, user["user_id"], "approve_article", "article", str(article.id))
 
     return {"message": f"Article '{slug}' approved and published"}
 
@@ -705,6 +723,7 @@ def delete_article(
 
     article.status = ArticleStatus.archived
     db.commit()
+    log_audit(db, user["user_id"], "archive_article", "article", str(article.id))
 
     return {"message": f"Article '{slug}' archived successfully"}
 
@@ -885,6 +904,7 @@ def update_user_role(user_id: str, payload: UpdateRoleRequest, db: Session = Dep
 
     target.role = UserRole(payload.role)
     db.commit()
+    log_audit(db, user["user_id"], "change_role", "user", user_id, f"new_role={payload.role}")
 
     return {"message": f"Role updated to {payload.role}"}
 
@@ -899,6 +919,7 @@ def toggle_user_active(user_id: str, db: Session = Depends(get_db), user: dict =
 
     target.is_active = not target.is_active
     db.commit()
+    log_audit(db, user["user_id"], "toggle_active", "user", user_id, f"is_active={target.is_active}")
 
     return {"message": "Active" if target.is_active else "Deactivated", "is_active": target.is_active}
 
@@ -961,3 +982,22 @@ def get_analytics(db: Session = Depends(get_db), user: dict = Depends(require_ad
             {"query": q, "count": c} for q, c in zero_results
         ],
     }
+
+@app.get("/api/v1/admin/audit-logs")
+def get_audit_logs(db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    logs = db.query(AuditLog).order_by(AuditLog.created_at.desc()).limit(100).all()
+
+    result = []
+    for log in logs:
+        actor = db.query(User).filter(User.id == log.user_id).first()
+        result.append({
+            "id":          str(log.id),
+            "actor_name":  actor.username if actor else "Unknown",
+            "action":      log.action,
+            "target_type": log.target_type,
+            "target_id":   log.target_id,
+            "details":     log.details,
+            "created_at":  str(log.created_at),
+        })
+
+    return result
