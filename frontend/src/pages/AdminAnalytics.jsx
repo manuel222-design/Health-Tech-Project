@@ -106,6 +106,24 @@ export default function AdminAnalytics() {
             </div>
           )}
         </div>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <h3 className="font-semibold text-gray-800 mb-3">Flagged for Review (180+ days old)</h3>
+          {data.stale_articles.length === 0 ? (
+            <p className="text-sm text-gray-400">Nothing flagged — all content is recent!</p>
+          ) : (
+            <div className="space-y-2">
+              {data.stale_articles.map((a, i) => (
+                <div key={i} className="flex justify-between text-sm">
+                  <span className="text-gray-700 truncate pr-2">{a.title}</span>
+                  <span className="text-amber-600 shrink-0">
+                    {new Date(a.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

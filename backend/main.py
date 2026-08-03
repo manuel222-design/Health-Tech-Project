@@ -1011,6 +1011,17 @@ def get_analytics(db: Session = Depends(get_db), user: dict = Depends(require_ad
     total_users = db.query(User).count()
     total_searches = db.query(SearchLog).count()
 
+    from datetime import datetime, timedelta, timezone
+    cutoff = datetime.now(timezone.utc) - timedelta(days=180)
+
+    stale_articles = db.query(Article.title, Article.slug, Article.created_at) \
+        .filter(
+            Article.status == ArticleStatus.published,
+            Article.created_at < cutoff
+        ) \
+        .order_by(Article.created_at) \
+        .limit(20).all()
+
     return {
         "totals": {
             "published_articles": total_articles,
@@ -1029,6 +1040,9 @@ def get_analytics(db: Session = Depends(get_db), user: dict = Depends(require_ad
         ],
         "zero_result_searches": [
             {"query": q, "count": c} for q, c in zero_results
+        ],
+        "stale_articles": [
+            {"title": t, "slug": s, "created_at": str(c)} for t, s, c in stale_articles
         ],
     }
 
