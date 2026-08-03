@@ -11,6 +11,8 @@ export default function Articles({ onSelectArticle }) {
   const [typeFilter, setTypeFilter] = useState("")
   const [allTags, setAllTags] = useState([])
   const [tagFilter, setTagFilter] = useState("")
+  const [suggestions, setSuggestions] = useState([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
 
   useEffect(() => {
     getArticles()
@@ -43,6 +45,27 @@ export default function Articles({ onSelectArticle }) {
     const q = e.target.value
     setSearch(q)
     runSearch(q, categoryFilter, typeFilter, tagFilter)
+
+    clearTimeout(window.__searchDebounce)
+    if (q.length < 2) {
+      setSuggestions([])
+      setShowSuggestions(false)
+      return
+    }
+    window.__searchDebounce = setTimeout(async () => {
+      try {
+        const res = await searchArticles(q, {})
+        setSuggestions(res.data.results.slice(0, 5))
+        setShowSuggestions(true)
+      } catch (err) {
+        setSuggestions([])
+      }
+    }, 300)
+  }
+
+  function handleSuggestionClick(slug) {
+    setShowSuggestions(false)
+    onSelectArticle(slug)
   }
 
   function handleCategoryFilterChange(e) {
@@ -71,14 +94,30 @@ export default function Articles({ onSelectArticle }) {
 
   return (
     <div>
-      <div className="mb-3">
+      <div className="mb-3 relative">
         <input
           type="text"
           value={search}
           onChange={handleSearch}
+          onFocus={() => search.length >= 2 && setShowSuggestions(true)}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
           placeholder="Search articles... e.g. vitals, registration, TB"
           className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
         />
+
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 overflow-hidden">
+            {suggestions.map(s => (
+              <button
+                key={s.id}
+                onMouseDown={() => handleSuggestionClick(s.slug)}
+                className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-teal-50 transition border-b border-gray-100 last:border-0"
+              >
+                {s.title}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">
