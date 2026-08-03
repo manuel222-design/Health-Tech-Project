@@ -66,6 +66,7 @@ export default function ArticleView({ slug, onBack }) {
         </div>
         <p className="text-xs text-gray-400 mb-6">
           Last updated: {new Date(article.created_at).toLocaleDateString()}
+          {article.product_version && ` · Applies to: ${article.product_version}`}
         </p>
         <hr className="mb-6" />
 

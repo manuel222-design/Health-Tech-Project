@@ -22,6 +22,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
   const [error, setError]     = useState("")
   const [hasPreviousVersion, setHasPreviousVersion] = useState(false)
   const [reverting, setReverting] = useState(false)
+  const [productVersion, setProductVersion] = useState("")
 
   useEffect(() => {
     getCategories().then(res => setCategories(res.data))
@@ -40,6 +41,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
         setTagIds(res.data.tag_ids || [])
         setContentType(res.data.content_type || "how_to")
         setHasPreviousVersion(res.data.has_previous_version || false)
+        setProductVersion(res.data.product_version || "")
       })
       .finally(() => setLoading(false))
   }, [slug])
@@ -119,7 +121,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
     setError("")
     try {
       if (isEditing) {
-        await updateArticle(slug, { title, body_markdown: body, status, category_id: categoryId || null, tag_ids: tagIds, content_type: contentType })
+        await updateArticle(slug, { title, body_markdown: body, status, category_id: categoryId || null, tag_ids: tagIds, content_type: contentType, product_version: productVersion })
       } else {
         await createArticle({
           title,
@@ -128,7 +130,8 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
           status,
           category_id: categoryId || null,
           tag_ids: tagIds,
-          content_type: contentType
+          content_type: contentType,
+          product_version: productVersion
         })
       }
       onDone()
@@ -308,6 +311,19 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
             </select>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Product Version <span className="text-gray-400">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={productVersion}
+              onChange={e => setProductVersion(e.target.value)}
+              placeholder="e.g. Taifa Care v2.4"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
+          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select

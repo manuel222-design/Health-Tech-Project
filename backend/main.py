@@ -217,6 +217,7 @@ def get_article_admin(slug: str, db: Session = Depends(get_db), user: dict = Dep
         "status":        article.status.value,
         "category_id":   str(article.category_id) if article.category_id else None,
         "content_type":  article.content_type.value if article.content_type else "how_to",
+        "product_version": article.product_version,
         "tag_ids":       tag_ids,
         "has_previous_version": bool(article.previous_body_markdown),
         "created_at":    str(article.created_at),
@@ -487,6 +488,7 @@ def get_article_by_slug(slug: str, db: Session = Depends(get_db)):
         "status":        article.status.value,
         "category_id":   str(article.category_id) if article.category_id else None,
         "content_type":  article.content_type.value if article.content_type else "how_to",
+        "product_version": article.product_version,
         "tag_ids":       tag_ids,
         "view_count":    article.view_count,
         "created_at":    str(article.created_at),
@@ -606,6 +608,7 @@ class ArticleCreateRequest(BaseModel):
     tag_ids:       list[str] = []
     status:        str = "draft"
     content_type:  str = "how_to"
+    product_version: Optional[str] = None
 class ArticleUpdateRequest(BaseModel):
     title:         Optional[str] = None
     body_markdown: Optional[str] = None
@@ -613,6 +616,7 @@ class ArticleUpdateRequest(BaseModel):
     tag_ids:       Optional[list[str]] = None
     status:        Optional[str] = None
     content_type:  Optional[str] = None
+    product_version: Optional[str] = None
 
 @app.post("/api/v1/articles", status_code=201)
 def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
@@ -635,6 +639,7 @@ def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db),
         status=ArticleStatus(requested_status),
         category_id=payload.category_id if payload.category_id else None,
         content_type=ContentType(payload.content_type),
+        product_version=payload.product_version,
         author_id=admin.id,
         view_count=0
     )
@@ -681,6 +686,9 @@ def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depen
 
     if payload.content_type is not None:
         article.content_type = ContentType(payload.content_type)
+
+    if payload.product_version is not None:
+        article.product_version = payload.product_version
 
     if payload.tag_ids is not None:
         from models import ArticleTag
