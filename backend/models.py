@@ -70,6 +70,7 @@ class Article(Base):
     body_html     = Column(Text)
     status        = Column(Enum(ArticleStatus), default=ArticleStatus.draft)
     content_type  = Column(Enum(ContentType), default=ContentType.how_to)
+    previous_body_markdown = Column(Text, nullable=True)
     category_id   = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True)
     author_id     = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     view_count    = Column(Integer, default=0)

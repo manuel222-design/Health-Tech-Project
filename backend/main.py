@@ -216,7 +216,9 @@ def get_article_admin(slug: str, db: Session = Depends(get_db), user: dict = Dep
         "body_markdown": article.body_markdown,
         "status":        article.status.value,
         "category_id":   str(article.category_id) if article.category_id else None,
+        "content_type":  article.content_type.value if article.content_type else "how_to",
         "tag_ids":       tag_ids,
+        "has_previous_version": bool(article.previous_body_markdown),
         "created_at":    str(article.created_at),
     }
 
@@ -666,6 +668,7 @@ def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depen
     if payload.title:
         article.title = payload.title
     if payload.body_markdown:
+        article.previous_body_markdown = article.body_markdown
         article.body_markdown = payload.body_markdown
     if payload.status:
         if user["role"] == "editor" and payload.status == "published":
@@ -693,6 +696,25 @@ def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depen
         "slug":    article.slug,
         "status":  article.status.value,
     }
+
+@app.post("/api/v1/articles/{slug}/revert")
+def revert_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
+    article = db.query(Article).filter(Article.slug == slug).first()
+
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    if not article.previous_body_markdown:
+        raise HTTPException(status_code=400, detail="No previous version available to revert to")
+
+    current = article.body_markdown
+    article.body_markdown = article.previous_body_markdown
+    article.previous_body_markdown = current
+
+    db.commit()
+    log_audit(db, user["user_id"], "revert_article", "article", str(article.id))
+
+    return {"message": f"Article '{slug}' reverted to previous version"}
 
 @app.post("/api/v1/articles/{slug}/approve")
 def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
@@ -728,7 +750,7 @@ def reject_article(slug: str, payload: RejectRequest, db: Session = Depends(get_
     log_audit(db, user["user_id"], "reject_article", "article", str(article.id), payload.reason or "No reason given")
 
     return {"message": f"Article '{slug}' sent back to draft"}
-    
+
 @app.delete("/api/v1/articles/{slug}")
 def delete_article(
     slug: str,
