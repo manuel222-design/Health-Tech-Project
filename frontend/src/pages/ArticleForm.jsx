@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { getArticleAdmin, createArticle, updateArticle, getCategories, getTags, createTag, createCategory } from "../services/api"
+import { getArticleAdmin, createArticle, updateArticle, getCategories, getTags, createTag, createCategory, revertArticle } from "../services/api"
 
 export default function ArticleForm({ slug, onDone, onCancel }) {
   const isEditing = Boolean(slug)
@@ -20,6 +20,8 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState("")
+  const [hasPreviousVersion, setHasPreviousVersion] = useState(false)
+  const [reverting, setReverting] = useState(false)
 
   useEffect(() => {
     getCategories().then(res => setCategories(res.data))
@@ -37,9 +39,25 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
         setCategoryId(res.data.category_id || "")
         setTagIds(res.data.tag_ids || [])
         setContentType(res.data.content_type || "how_to")
+        setHasPreviousVersion(res.data.has_previous_version || false)
       })
       .finally(() => setLoading(false))
   }, [slug])
+
+  async function handleRevert() {
+    if (!window.confirm("Revert to the previous version of this article's content?")) return
+    setReverting(true)
+    try {
+      await revertArticle(slug)
+      const res = await getArticleAdmin(slug)
+      setBody(res.data.body_markdown)
+      setHasPreviousVersion(res.data.has_previous_version)
+    } catch (err) {
+      alert("Failed to revert")
+    } finally {
+      setReverting(false)
+    }
+  }
 
   function generateSlug(text) {
     return text
@@ -180,9 +198,21 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Content <span className="text-gray-400">(Markdown supported)</span>
-            </label>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-sm font-medium text-gray-700">
+                Content <span className="text-gray-400">(Markdown supported)</span>
+              </label>
+              {isEditing && hasPreviousVersion && (
+                <button
+                  type="button"
+                  onClick={handleRevert}
+                  disabled={reverting}
+                  className="text-xs text-amber-700 border border-amber-200 hover:bg-amber-50 px-2 py-1 rounded transition disabled:opacity-50"
+                >
+                  {reverting ? "Reverting..." : "↺ Revert to previous version"}
+                </button>
+              )}
+            </div>
             <textarea
               value={body}
               onChange={e => setBody(e.target.value)}
