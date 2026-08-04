@@ -13,10 +13,14 @@ export default function Articles({ onSelectArticle }) {
   const [tagFilter, setTagFilter] = useState("")
   const [suggestions, setSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [fallbackArticles, setFallbackArticles] = useState([])
 
   useEffect(() => {
     getArticles()
-      .then(res => setArticles(res.data))
+      .then(res => {
+        setArticles(res.data)
+        setFallbackArticles(res.data.slice(0, 3))
+      })
       .finally(() => setLoading(false))
     getCategories().then(res => setCategories(res.data))
     getTags().then(res => setAllTags(res.data))
@@ -185,9 +189,29 @@ export default function Articles({ onSelectArticle }) {
           </div>
         ))}
 
-        {articles.length === 0 && (
-          <div className="text-center py-12 text-gray-400">
-            No articles found for "{search}"
+        {articles.length === 0 && !loading && (
+          <div className="text-center py-10">
+            <p className="text-gray-500 mb-1">No articles found for "{search}"</p>
+            <p className="text-sm text-gray-400 mb-6">
+              Try different keywords, or ask the chat assistant in the corner — it can often find related guidance even when search comes up empty.
+            </p>
+
+            {fallbackArticles.length > 0 && (
+              <div className="max-w-md mx-auto text-left">
+                <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">You might find these helpful</p>
+                <div className="grid gap-2">
+                  {fallbackArticles.map(a => (
+                    <div
+                      key={a.id}
+                      onClick={() => onSelectArticle(a.slug)}
+                      className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 cursor-pointer hover:border-teal-400 transition"
+                    >
+                      {a.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
