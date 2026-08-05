@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import axios from "axios"
 
-const API_BASE = window.HEALTHTECH_API_BASE || "http://127.0.0.1:8000/api/v1"
+const API_BASE = window.HEALTHTECH_API_BASE || "https://healthtech-kb-backend-2uo3.onrender.com/api/v1"
 
 async function sendMessage(message, sessionToken) {
   const context = window.HEALTHTECH_CONTEXT || null
