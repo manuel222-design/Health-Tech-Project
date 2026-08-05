@@ -809,6 +809,7 @@ def delete_article(
 class ChatRequest(BaseModel):
     message: str
     session_token: Optional[str] = None
+    screen_context: Optional[str] = None
 
 @app.post("/api/v1/chat", status_code=200)
 def chat(payload: ChatRequest, db: Session = Depends(get_db)):
@@ -829,7 +830,11 @@ def chat(payload: ChatRequest, db: Session = Depends(get_db)):
             "articles_found": []
         }
     
-    keywords = [word for word in payload.message.split() 
+    search_text = payload.message
+    if payload.screen_context:
+        search_text = f"{payload.message} {payload.screen_context}"
+
+    keywords = [word for word in search_text.split() 
                 if len(word) > 3]
                 
     relevant_articles = []

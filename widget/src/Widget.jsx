@@ -3,10 +3,15 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import axios from "axios"
 
-const API_BASE = window.HEALTHTECH_API_BASE || "http://localhost:8000/api/v1"
+const API_BASE = window.HEALTHTECH_API_BASE || "http://127.0.0.1:8000/api/v1"
 
-async function sendMessage(message) {
-  const res = await axios.post(`${API_BASE}/chat`, { message })
+async function sendMessage(message, sessionToken) {
+  const context = window.HEALTHTECH_CONTEXT || null
+  const res = await axios.post(`${API_BASE}/chat`, {
+    message,
+    session_token: sessionToken,
+    screen_context: context
+  })
   return res.data
 }
 
@@ -20,6 +25,7 @@ export default function Widget() {
   ])
   const [input, setInput]     = useState("")
   const [loading, setLoading] = useState(false)
+  const [sessionToken, setSessionToken] = useState(null)
   const bottomRef             = useRef(null)
 
   useEffect(() => {
@@ -34,9 +40,9 @@ export default function Widget() {
     setLoading(true)
 
     try {
-      const data = await sendMessage(userMessage)
+      const data = await sendMessage(userMessage, sessionToken)
+      setSessionToken(data.session_token)
       setMessages(prev => [...prev, { role: "assistant", content: data.answer }])
-    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       setMessages(prev => [...prev, {
         role: "assistant",
