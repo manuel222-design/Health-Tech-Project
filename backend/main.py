@@ -463,6 +463,32 @@ def get_feedback_summary(slug: str, db: Session = Depends(get_db)):
         "total_ratings": count
     }
 
+@app.get("/api/v1/my-notifications")
+def get_my_notifications(db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
+    from models import ArticleFeedback
+    from sqlalchemy import func
+
+    results = db.query(
+            Article.title, Article.slug,
+            func.avg(ArticleFeedback.rating).label("avg_rating"),
+            func.count(ArticleFeedback.id).label("rating_count")
+        ) \
+        .join(ArticleFeedback, ArticleFeedback.article_id == Article.id) \
+        .filter(Article.author_id == user["user_id"]) \
+        .group_by(Article.id) \
+        .having(func.avg(ArticleFeedback.rating) <= 2) \
+        .all()
+
+    return [
+        {
+            "title": t,
+            "slug": s,
+            "avg_rating": round(float(r), 1),
+            "rating_count": c
+        }
+        for t, s, r, c in results
+    ]
+
 @app.get("/api/v1/articles/{slug}")
 def get_article_by_slug(slug: str, db: Session = Depends(get_db)):
     article = db.query(Article).filter(

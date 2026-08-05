@@ -18,6 +18,7 @@ export default function App() {
     return token ? { token, username, role } : null
   })
   const [showRegister, setShowRegister] = useState(false)
+  const [notifications, setNotifications] = useState([])
   const [currentPage, setCurrentPage]   = useState("articles")
   const [selectedSlug, setSelectedSlug] = useState(null)
   const [editSlug, setEditSlug]         = useState(null)
@@ -48,6 +49,15 @@ export default function App() {
     window.openHealthtechArticle = handleSelectArticle
     return () => { delete window.openHealthtechArticle }
   }, [])
+
+  useEffect(() => {
+    if (!user) return
+    import("./services/api").then(({ getMyNotifications }) => {
+      getMyNotifications()
+        .then(res => setNotifications(res.data))
+        .catch(() => setNotifications([]))
+    })
+  }, [user])
 
   function handleEditArticle(slug) {
     setEditSlug(slug)
@@ -84,10 +94,18 @@ export default function App() {
             <span className="font-semibold text-base sm:text-lg whitespace-nowrap">Healthtech KB</span>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="hidden sm:inline text-sm text-teal-100 truncate max-w-[140px]">
-              {user.username} · {user.role}
+          <div className="flex items-center gap-4">
+          {notifications.length > 0 && (
+            <span
+              title={`${notifications.length} of your article(s) have a low rating`}
+              className="text-xs bg-red-500 text-white rounded-full px-2 py-0.5 font-medium"
+            >
+              {notifications.length} low-rated
             </span>
+          )}
+          <span className="text-sm text-teal-100">
+            {user.username} · {user.role}
+          </span>
             <button
               onClick={handleLogout}
               className="text-sm bg-teal-700 hover:bg-teal-800 px-3 py-1.5 rounded-lg transition whitespace-nowrap"

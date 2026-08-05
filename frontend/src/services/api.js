@@ -61,3 +61,5 @@ export const getAuditLogs = () => api.get('/admin/audit-logs')
 export const rejectArticle = (slug, reason) => api.post(`/articles/${slug}/reject`, { reason })
 
 export const revertArticle = (slug) => api.post(`/articles/${slug}/revert`)
+
+export const getMyNotifications = () => api.get('/my-notifications')
