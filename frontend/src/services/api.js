@@ -63,3 +63,5 @@ export const rejectArticle = (slug, reason) => api.post(`/articles/${slug}/rejec
 export const revertArticle = (slug) => api.post(`/articles/${slug}/revert`)
 
 export const getMyNotifications = () => api.get('/my-notifications')
+
+export const getUnansweredQuestions = () => api.get('/admin/unanswered-questions')

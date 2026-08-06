@@ -1111,3 +1111,28 @@ def get_audit_logs(db: Session = Depends(get_db), user: dict = Depends(require_a
         })
 
     return result
+
+@app.get("/api/v1/admin/unanswered-questions")
+def get_unanswered_questions(db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    FALLBACK_TEXT = "I don't have information about that in the knowledge base yet"
+
+    unanswered = db.query(ChatMessage).filter(
+        ChatMessage.role == MessageRole.assistant,
+        ChatMessage.content.ilike(f"%{FALLBACK_TEXT}%")
+    ).order_by(ChatMessage.created_at.desc()).limit(50).all()
+
+    results = []
+    for msg in unanswered:
+        prev_user_msg = db.query(ChatMessage).filter(
+            ChatMessage.session_id == msg.session_id,
+            ChatMessage.role == MessageRole.user,
+            ChatMessage.created_at <= msg.created_at,
+            ChatMessage.id != msg.id
+        ).order_by(ChatMessage.created_at.desc()).first()
+
+        results.append({
+            "question": prev_user_msg.content if prev_user_msg else "(unknown)",
+            "asked_at": str(msg.created_at),
+        })
+
+    return results

@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react"
-import { getAnalytics } from "../services/api"
+import { getAnalytics, getUnansweredQuestions } from "../services/api"
 
 export default function AdminAnalytics() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [unanswered, setUnanswered] = useState([])
 
   useEffect(() => {
     getAnalytics()
       .then(res => setData(res.data))
       .finally(() => setLoading(false))
+    getUnansweredQuestions().then(res => setUnanswered(res.data)).catch(() => {})
   }, [])
 
   if (loading) return (
@@ -119,6 +121,22 @@ export default function AdminAnalytics() {
                   <span className="text-amber-600 shrink-0">
                     {new Date(a.created_at).toLocaleDateString()}
                   </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <h3 className="font-semibold text-gray-800 mb-3">Unanswered Chatbot Questions</h3>
+          {unanswered.length === 0 ? (
+            <p className="text-sm text-gray-400">No unanswered questions — the chatbot is finding answers!</p>
+          ) : (
+            <div className="space-y-2">
+              {unanswered.map((u, i) => (
+                <div key={i} className="text-sm">
+                  <p className="text-gray-700">"{u.question}"</p>
+                  <p className="text-xs text-gray-400">{new Date(u.asked_at).toLocaleString()}</p>
                 </div>
               ))}
             </div>
