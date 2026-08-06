@@ -30,6 +30,27 @@ export default function ChatWidget() {
     }
   }
 
+  function handleExportTranscript() {
+    const transcript = messages
+      .map(m => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
+      .join("\n\n")
+
+    const header = `Taifa Care HMIS — Chat Transcript\nExported: ${new Date().toLocaleString()}\n${"=".repeat(40)}\n\n`
+    const fullText = header + transcript
+
+    navigator.clipboard.writeText(fullText).then(() => {
+      alert("Transcript copied to clipboard. Paste it into an email or support ticket.")
+    }).catch(() => {
+      const blob = new Blob([fullText], { type: "text/plain" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "chat-transcript.txt"
+      a.click()
+      URL.revokeObjectURL(url)
+    })
+  }
+
   async function handleSend() {
     if (!input.trim() || loading) return
 
@@ -65,9 +86,21 @@ export default function ChatWidget() {
         <div className="fixed inset-0 sm:inset-auto sm:bottom-24 sm:right-6 w-full h-full sm:w-96 sm:h-[480px] bg-white sm:rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden z-[999999]">
 
           <div className="bg-teal-600 text-white px-4 py-3 flex justify-between items-center">
-            <div>
-              <p className="font-semibold text-sm">HMIS Assistant</p>
-              <p className="text-xs text-teal-100">Powered by knowledge base</p>
+            <div className="flex items-center gap-2">
+              <div>
+                <p className="font-semibold text-sm">HMIS Assistant</p>
+                <p className="text-xs text-teal-100">Powered by knowledge base</p>
+              </div>
+              <button
+                onClick={handleExportTranscript}
+                title="Copy conversation transcript for support"
+                className="text-white hover:text-teal-200 ml-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
             </div>
             <button
               onClick={() => setOpen(false)}
