@@ -51,6 +51,7 @@ ALLOWED_ORIGINS = [
     "http://localhost:5500",
     "http://127.0.0.1:5500",
     "https://healthtech-kb-frontend.onrender.com"
+    "https://healthtech-kb-widget.onrender.com",
 ]
 
 app.add_middleware(
@@ -811,8 +812,20 @@ class ChatRequest(BaseModel):
     session_token: Optional[str] = None
     screen_context: Optional[str] = None
 
+@app.options("/api/v1/chat")
+def chat_preflight():
+    from fastapi.responses import Response
+    return Response(
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+        }
+    )
+    
 @app.post("/api/v1/chat", status_code=200)
-def chat(payload: ChatRequest, db: Session = Depends(get_db)):
+@limiter.limit("20/minute")
+def chat(request: Request, payload: ChatRequest, db: Session = Depends(get_db)):
 
     generic_phrases = ["help", "what can you do", "what can you help",
                         "hi", "hello", "hey", "who are you"]
@@ -927,16 +940,19 @@ def chat(payload: ChatRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(ai_msg)
 
-    return {
-        "message_id":     str(ai_msg.id),
-        "session_token":  session.session_token,
-        "question":       payload.message,
-        "answer":         response.choices[0].message.content,
-        "sources_used":   len(relevant_articles),
-        "articles_found": [
-            {"title": a.title, "slug": a.slug} for a in relevant_articles
-        ],
-    }
+    return JSONResponse(
+        content={
+            "message_id":     str(ai_msg.id),
+            "session_token":  session.session_token,
+            "question":       payload.message,
+            "answer":         response.choices[0].message.content,
+            "sources_used":   len(relevant_articles),
+            "articles_found": [
+                {"title": a.title, "slug": a.slug} for a in relevant_articles
+            ],
+        },
+        headers={"Access-Control-Allow-Origin": "*"}
+    )
 
 class ChatFeedbackRequest(BaseModel):
     helpful: bool
