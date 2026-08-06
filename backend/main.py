@@ -70,6 +70,20 @@ bearer_scheme = HTTPBearer()
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 logger = logging.getLogger("healthtech")
 
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data:; "
+        "connect-src 'self' https://healthtech-kb-backend-2uo3.onrender.com;"
+    )
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    return response
+    
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request, exc):
     return JSONResponse(
