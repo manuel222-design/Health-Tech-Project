@@ -50,7 +50,7 @@ ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5500",
     "http://127.0.0.1:5500",
-    "https://healthtech-kb-frontend.onrender.com"
+    "https://healthtech-kb-frontend.onrender.com",
     "https://healthtech-kb-widget.onrender.com",
 ]
 
@@ -83,7 +83,7 @@ async def add_security_headers(request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     return response
-    
+
 @app.exception_handler(RequestValidationError)
 async def validation_error_handler(request, exc):
     return JSONResponse(
