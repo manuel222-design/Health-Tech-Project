@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { getArticleAdmin, createArticle, updateArticle, getCategories, getTags, createTag, createCategory, revertArticle } from "../services/api"
+import { getArticleAdmin, createArticle, updateArticle, getCategories, getTags, createTag, createCategory, revertArticle, uploadMedia } from "../services/api"
 
 export default function ArticleForm({ slug, onDone, onCancel }) {
   const isEditing = Boolean(slug)
@@ -22,7 +22,8 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
   const [error, setError]     = useState("")
   const [hasPreviousVersion, setHasPreviousVersion] = useState(false)
   const [reverting, setReverting] = useState(false)
-  const [productVersion, setProductVersion] = useState("")
+  const [productVersion, setProductVersion] = useState("") 
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     getCategories().then(res => setCategories(res.data))
@@ -109,6 +110,21 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
       alert("Failed to create category")
     } finally {
       setCreatingCategory(false)
+    }
+  }
+  async function handleImageUpload(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const res = await uploadMedia(file, isEditing ? slug : null)
+      const markdownImage = `\n![${file.name}](${res.data.url})\n`
+      setBody(prev => prev + markdownImage)
+    } catch (err) {
+      alert("Failed to upload image")
+    } finally {
+      setUploading(false)
+      e.target.value = ""
     }
   }
 
@@ -205,17 +221,29 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
               <label className="block text-sm font-medium text-gray-700">
                 Content <span className="text-gray-400">(Markdown supported)</span>
               </label>
-              {isEditing && hasPreviousVersion && (
-                <button
-                  type="button"
-                  onClick={handleRevert}
-                  disabled={reverting}
-                  className="text-xs text-amber-700 border border-amber-200 hover:bg-amber-50 px-2 py-1 rounded transition disabled:opacity-50"
-                >
-                  {reverting ? "Reverting..." : "↺ Revert to previous version"}
-                </button>
-              )}
-            </div>
+              <div className="flex gap-2 items-center">
+                <label className="text-xs text-teal-700 border border-teal-200 hover:bg-teal-50 px-2 py-1 rounded transition cursor-pointer">
+                  {uploading ? "Uploading..." : "Upload Image"}
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="hidden"
+                  />
+                </label>
+                {isEditing && hasPreviousVersion && (
+                  <button
+                    type="button"
+                    onClick={handleRevert}
+                    disabled={reverting}
+                    className="text-xs text-amber-700 border border-amber-200 hover:bg-amber-50 px-2 py-1 rounded transition disabled:opacity-50"
+                  >
+                    {reverting ? "Reverting..." : "↺ Revert to previous version"}
+                  </button>
+                )}
+              </div>
+              </div>
             <textarea
               value={body}
               onChange={e => setBody(e.target.value)}

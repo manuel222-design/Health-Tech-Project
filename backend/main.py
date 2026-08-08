@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy import text
 from typing import Optional
-from fastapi import FastAPI, Depends, HTTPException, Request, UploadFile, File, Form # type: ignore
+from fastapi import FastAPI, Depends, HTTPException, Request, UploadFile, File # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError                                 # type: ignore 
@@ -9,10 +9,12 @@ from passlib.context import CryptContext               # type: ignore
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel                         # type: ignore 
 from database import get_db
-from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole, UserRole, AuditLog
+from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole, UserRole, AuditLog, Media
 import os, uuid
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
 from groq import Groq # type: ignore
+import cloudinary # type: ignore
+import cloudinary.uploader # type: ignore
 from fastapi.responses import JSONResponse # type: ignore
 from fastapi.exceptions import RequestValidationError # type: ignore
 from slowapi import Limiter, _rate_limit_exceeded_handler # type: ignore
@@ -68,6 +70,12 @@ TOKEN_TTL   = 8
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    secure=True
+)
 logger = logging.getLogger("healthtech")
 
 @app.middleware("http")
@@ -238,6 +246,37 @@ def get_article_admin(slug: str, db: Session = Depends(get_db), user: dict = Dep
         "created_at":    str(article.created_at),
     }
 
+@app.post("/api/v1/media/upload")
+async def upload_media(
+    file: UploadFile = File(...),
+    article_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_editor)
+):
+    allowed_types = ["image/png", "image/jpeg", "image/jpg", "image/webp"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Only PNG, JPEG, and WEBP images are allowed")
+
+    result = cloudinary.uploader.upload(file.file, folder="healthtech_kb")
+
+    from models import Media
+    media = Media(
+        id=uuid.uuid4(),
+        article_id=article_id if article_id else None,
+        filename=file.filename,
+        url=result["secure_url"],
+        type="image",
+        uploaded_by=user["user_id"]
+    )
+    db.add(media)
+    db.commit()
+
+    return {
+        "id":  str(media.id),
+        "url": media.url,
+        "filename": media.filename
+    }
+    
 @app.get("/api/v1/articles/search")
 def search_articles(
     q: str,

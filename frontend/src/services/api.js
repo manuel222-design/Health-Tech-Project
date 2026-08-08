@@ -41,6 +41,14 @@ export const sendMessage = (message, sessionToken) =>
 export const createArticle = (data) => api.post('/articles', data)
 export const updateArticle = (slug, data) => api.put(`/articles/${slug}`, data)
 export const deleteArticle = (slug) => api.delete(`/articles/${slug}`)
+export const uploadMedia = (file, articleId) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  if (articleId) formData.append('article_id', articleId)
+  return api.post('/media/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
 export default api
 
 export const submitFeedback = (slug, rating, comment) =>
