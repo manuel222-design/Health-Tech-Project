@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy import text
 from typing import Optional
-from fastapi import FastAPI, Depends, HTTPException, Request # type: ignore
+from fastapi import FastAPI, Depends, HTTPException, Request, UploadFile, File, Form # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError                                 # type: ignore 
@@ -828,7 +828,7 @@ class ChatRequest(BaseModel):
 
 @app.options("/api/v1/chat")
 def chat_preflight():
-    from fastapi.responses import Response
+    from fastapi.responses import Response # type: ignore
     return Response(
         headers={
             "Access-Control-Allow-Origin": "*",

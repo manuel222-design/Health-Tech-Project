@@ -160,3 +160,14 @@ class AuditLog(Base):
     target_id   = Column(String(100), nullable=True)
     details     = Column(Text, nullable=True)
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
+
+class Media(Base):
+    __tablename__ = "media"
+
+    id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    article_id  = Column(UUID(as_uuid=True), ForeignKey("articles.id"), nullable=True)
+    filename    = Column(String(255), nullable=False)
+    url         = Column(Text, nullable=False)
+    type        = Column(String(20), nullable=False)
+    uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    created_at  = Column(DateTime(timezone=True), server_default=func.now())
