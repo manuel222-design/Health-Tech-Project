@@ -49,6 +49,7 @@ jobs:
         working-directory: backend
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/healthtech_test
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           pytest -v
 
