@@ -39,6 +39,7 @@ class User(Base):
     email         = Column(String(255), nullable=False, unique=True)
     password_hash = Column(Text, nullable=False)
     role          = Column(Enum(UserRole), nullable=False, default=UserRole.viewer)
+    department    = Column(String(100), nullable=True)
     is_active     = Column(Boolean, default=True)
     created_at    = Column(DateTime(timezone=True), server_default=func.now())
     updated_at    = Column(DateTime(timezone=True), onupdate=func.now())

@@ -183,6 +183,7 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     role: str = "viewer"
+    department: Optional[str] = None
 
 class TagCreateRequest(BaseModel):
     name: str
