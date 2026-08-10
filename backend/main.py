@@ -26,6 +26,8 @@ from services.category_service import CategoryService
 from services.tag_service import TagService
 from repositories.feedback_repository import FeedbackRepository
 from services.feedback_service import FeedbackService
+from repositories.notification_repository import NotificationRepository
+from services.notification_service import NotificationService
 
 
 def log_audit(db: Session, user_id: str, action: str, target_type: str, target_id: str = None, details: str = None):
@@ -467,30 +469,14 @@ def get_feedback_summary(
         raise HTTPException(status_code=404, detail=str(exc))
 
 @app.get("/api/v1/my-notifications")
-def get_my_notifications(db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
-    from models import ArticleFeedback
-    from sqlalchemy import func
+def get_my_notifications(
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
+):
+    repository = NotificationRepository(db)
+    service = NotificationService(repository)
 
-    results = db.query(
-            Article.title, Article.slug,
-            func.avg(ArticleFeedback.rating).label("avg_rating"),
-            func.count(ArticleFeedback.id).label("rating_count")
-        ) \
-        .join(ArticleFeedback, ArticleFeedback.article_id == Article.id) \
-        .filter(Article.author_id == user["user_id"]) \
-        .group_by(Article.id) \
-        .having(func.avg(ArticleFeedback.rating) <= 2) \
-        .all()
-
-    return [
-        {
-            "title": t,
-            "slug": s,
-            "avg_rating": round(float(r), 1),
-            "rating_count": c
-        }
-        for t, s, r, c in results
-    ]
+    return service.get_my_notifications(user["user_id"])
 
 @app.get("/api/v1/articles/{slug}")
 def get_article_by_slug(
