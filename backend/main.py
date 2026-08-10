@@ -544,35 +544,18 @@ def get_my_notifications(db: Session = Depends(get_db), user: dict = Depends(get
     ]
 
 @app.get("/api/v1/articles/{slug}")
-def get_article_by_slug(slug: str, db: Session = Depends(get_db)):
-    article = db.query(Article).filter(
-        Article.slug == slug,
-        Article.status == ArticleStatus.published
-    ).first()
+def get_article_by_slug(
+    slug: str,
+    db: Session = Depends(get_db)
+):
+    from repositories.article_repository import ArticleRepository
+    from services.article_service import ArticleService
 
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
-    
-    article.view_count += 1
-    db.commit()
+    repository = ArticleRepository(db)
+    service = ArticleService(repository)
 
-    from models import ArticleTag
-    tag_links = db.query(ArticleTag).filter(ArticleTag.article_id == article.id).all()
-    tag_ids = [str(link.tag_id) for link in tag_links]
+    return service.get_published_article(slug)
 
-    return {
-        "id":            str(article.id),
-        "title":         article.title,
-        "slug":          article.slug,
-        "body_markdown": article.body_markdown,
-        "status":        article.status.value,
-        "category_id":   str(article.category_id) if article.category_id else None,
-        "content_type":  article.content_type.value if article.content_type else "how_to",
-        "product_version": article.product_version,
-        "tag_ids":       tag_ids,
-        "view_count":    article.view_count,
-        "created_at":    str(article.created_at),
-    }
 
 @app.get("/api/v1/articles/{slug}/pdf")
 def export_article_pdf(slug: str, db: Session = Depends(get_db)):
