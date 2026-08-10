@@ -55,10 +55,6 @@ def upgrade() -> None:
         name="messagerole",
     )
 
-    user_role.create(op.get_bind(), checkfirst=True)
-    article_status.create(op.get_bind(), checkfirst=True)
-    content_type.create(op.get_bind(), checkfirst=True)
-    message_role.create(op.get_bind(), checkfirst=True)
 
     op.create_table(
         "users",
