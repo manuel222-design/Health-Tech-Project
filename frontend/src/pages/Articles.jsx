@@ -61,7 +61,7 @@ export default function Articles({ onSelectArticle }) {
         const res = await searchArticles(q, {})
         setSuggestions(res.data.results.slice(0, 5))
         setShowSuggestions(true)
-      } catch (err) {
+      } catch {
         setSuggestions([])
       }
     }, 300)

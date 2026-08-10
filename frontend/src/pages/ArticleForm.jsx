@@ -55,7 +55,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
       const res = await getArticleAdmin(slug)
       setBody(res.data.body_markdown)
       setHasPreviousVersion(res.data.has_previous_version)
-    } catch (err) {
+    } catch {
       alert("Failed to revert")
     } finally {
       setReverting(false)
@@ -90,7 +90,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
       setAllTags(prev => prev.find(t => t.id === res.data.id) ? prev : [...prev, res.data])
       setTagIds(prev => prev.includes(res.data.id) ? prev : [...prev, res.data.id])
       setNewTagInput("")
-    } catch (err) {
+    } catch {
       alert("Failed to create tag")
     } finally {
       setCreatingTag(false)
@@ -106,7 +106,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
       setCategories(prev => prev.find(c => c.id === res.data.id) ? prev : [...prev, res.data])
       setCategoryId(res.data.id)
       setNewCategoryInput("")
-    } catch (err) {
+    } catch {
       alert("Failed to create category")
     } finally {
       setCreatingCategory(false)
@@ -120,7 +120,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
       const res = await uploadMedia(file, isEditing ? slug : null)
       const markdownImage = `\n![${file.name}](${res.data.url})\n`
       setBody(prev => prev + markdownImage)
-    } catch (err) {
+    } catch {
       alert("Failed to upload image")
     } finally {
       setUploading(false)
@@ -151,7 +151,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
         })
       }
       onDone()
-    } catch (err) {
+    } catch {
       if (err.response?.status === 400) {
         setError("That slug is already taken. Please choose a different one.")
       } else if (err.response?.status === 401 || err.response?.status === 403) {

@@ -27,7 +27,7 @@ export default function ArticleView({ slug, onBack }) {
       setSubmitted(true)
       const res = await getFeedbackSummary(slug)
       setSummary(res.data)
-    } catch (err) {
+    } catch {
       alert("Failed to submit feedback")
     }
   }

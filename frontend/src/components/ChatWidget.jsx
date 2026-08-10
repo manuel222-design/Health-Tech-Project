@@ -26,7 +26,7 @@ export default function ChatWidget() {
     ))
     try {
       await submitChatFeedback(messageId, helpful)
-    } catch (err) {
+    } catch {
     }
   }
 
@@ -70,7 +70,7 @@ export default function ChatWidget() {
         messageId: res.data.message_id,
         feedbackGiven: null
       }])
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, {
         role: "assistant",
         content: "Sorry, I couldn't connect to the server. Please try again."

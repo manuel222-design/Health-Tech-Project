@@ -24,7 +24,7 @@ export default function AdminArticles({ onEdit, onCreate }) {
     try {
       await deleteArticle(slug)
       setArticles(prev => prev.map(a => a.slug === slug ? { ...a, status: "archived" } : a))
-    } catch (err) {
+    } catch {
       alert("Failed to archive article. You may not have permission.")
     } finally {
       setDeleting(null)
@@ -38,7 +38,7 @@ export default function AdminArticles({ onEdit, onCreate }) {
       setArticles(prev => prev.map(a =>
         a.slug === slug ? { ...a, status: "published" } : a
       ))
-    } catch (err) {
+    } catch {
       alert("Failed to approve article. Admin access required.")
     } finally {
       setApproving(null)
@@ -53,7 +53,7 @@ export default function AdminArticles({ onEdit, onCreate }) {
       setArticles(prev => prev.map(a =>
         a.slug === slug ? { ...a, status: "draft" } : a
       ))
-    } catch (err) {
+    } catch {
       alert("Failed to reject article.")
     } finally {
       setRejecting(null)

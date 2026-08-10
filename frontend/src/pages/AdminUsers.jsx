@@ -20,7 +20,7 @@ export default function AdminUsers() {
     try {
       await updateUserRole(userId, newRole)
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u))
-    } catch (err) {
+    } catch {
       alert("Failed to update role")
     } finally {
       setUpdating(null)
@@ -32,7 +32,7 @@ export default function AdminUsers() {
     try {
       const res = await toggleUserActive(userId)
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, is_active: res.data.is_active } : u))
-    } catch (err) {
+    } catch {
       alert(err.response?.data?.detail || "Failed to update user")
     } finally {
       setUpdating(null)

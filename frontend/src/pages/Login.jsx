@@ -22,7 +22,7 @@ export default function Login({ onLogin, onShowRegister }) {
       localStorage.setItem("role",     res.data.role)
       localStorage.setItem("username", res.data.username)
       onLogin(res.data)
-    } catch (err) {
+    } catch {
       setError("Invalid email or password. Please try again.")
     } finally {
       setLoading(false)
