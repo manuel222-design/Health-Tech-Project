@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import HTTPException
+from fastapi import HTTPException # type: ignore
 
 from models import User, UserRole
 from repositories.user_repository import UserRepository
@@ -46,7 +46,14 @@ class AuthService:
             "username": user.username,
         }
 
-    def register(self, username: str, email: str, password: str, requested_role: str):
+    def register(
+        self,
+        username: str,
+        email: str,
+        password: str,
+        requested_role: str,
+        department: str | None = None
+    ):
         existing = self.repository.get_by_email(email)
 
         if existing:
@@ -68,6 +75,7 @@ class AuthService:
             email=email,
             password_hash=self.pwd_context.hash(password),
             role=UserRole(role),
+            department=department,
             is_active=True
         )
 

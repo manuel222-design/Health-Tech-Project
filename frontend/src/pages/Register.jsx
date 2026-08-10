@@ -8,16 +8,23 @@ export default function Register({ onRegister, onBackToLogin }) {
   const [role, setRole]         = useState("viewer")
   const [error, setError]       = useState("")
   const [loading, setLoading]   = useState(false)
+  const [department, setDepartment] = useState("")
 
   async function handleSubmit() {
-    if (!username || !email || !password) {
+    if (!username || !email || !password || !department) {
       setError("Please fill in all fields")
       return
     }
     setLoading(true)
     setError("")
     try {
-      const res = await register(username, email, password, role)
+      const res = await register(
+        username,
+        email,
+        password,
+        role,
+        department
+      )
       localStorage.setItem("token",    res.data.access_token)
       localStorage.setItem("role",     res.data.role)
       localStorage.setItem("username", res.data.username)
@@ -71,6 +78,19 @@ export default function Register({ onRegister, onBackToLogin }) {
               onChange={e => setEmail(e.target.value)}
               placeholder="jane@healthtech.co.ke"
               className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Department
+            </label>
+            <input
+             type="text"
+             value={department}
+             onChange={e => setDepartment(e.target.value)}
+             placeholder="e.g. ICT, Nursing, Administration"
+             className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
 

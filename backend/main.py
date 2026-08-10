@@ -565,7 +565,6 @@ def login(
         payload.password
     )
 
-
 @app.post("/api/v1/auth/register", status_code=201)
 def register(
     payload: RegisterRequest,
@@ -583,7 +582,8 @@ def register(
         payload.username,
         payload.email,
         payload.password,
-        payload.role
+        payload.role,
+        payload.department
     )
 
 class ArticleCreateRequest(BaseModel):

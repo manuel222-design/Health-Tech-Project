@@ -16,8 +16,14 @@ api.interceptors.request.use(config => {
 export const login = (email, password) =>
   api.post('/auth/login', { email, password })
 
-export const register = (username, email, password, role) =>
-  api.post('/auth/register', { username, email, password, role })
+export const register = (username, email, password, role, department) =>
+api.post('/auth/register', {
+  username,
+  email,
+  password,
+  role,
+  department
+})
 
 export const approveArticle = (slug) => api.post(`/articles/${slug}/approve`)
 export const getArticles   = ()     => api.get('/articles')
