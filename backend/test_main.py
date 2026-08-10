@@ -138,7 +138,7 @@ def test_login_then_delete_article():
     assert create_res.status_code == 201
 
     delete_res = client.delete(
-        f"/api/v1/articles/test-article-pytest",
+        f"/api/v1/articles/{slug}",
         headers={"Authorization": f"Bearer {token}"}
     )
     assert delete_res.status_code == 200
