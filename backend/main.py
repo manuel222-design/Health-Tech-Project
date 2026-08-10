@@ -83,9 +83,9 @@ async def add_security_headers(request, call_next):
     response = await call_next(request)
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline'; "
-        "style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' data:; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "img-src 'self' data: https://fastapi.tiangolo.com; "
         "connect-src 'self' https://healthtech-kb-backend-2uo3.onrender.com;"
     )
     response.headers["X-Content-Type-Options"] = "nosniff"
