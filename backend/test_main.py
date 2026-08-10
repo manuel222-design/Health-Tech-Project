@@ -1,5 +1,5 @@
 
-
+import uuid
 import pytest
 from fastapi.testclient import TestClient
 from main import app
@@ -88,18 +88,20 @@ def test_login_then_create_article():
     assert login_res.status_code == 200
     token = login_res.json()["access_token"]
 
+    slug = f"test-article-pytest-{uuid.uuid4().hex[:8]}"
+
     article_res = client.post(
         "/api/v1/articles",
         json={
             "title": "Test Article from Pytest",
-            "slug": "test-article-pytest",
+            "slug": slug,
             "body_markdown": "## Test\nThis is a test article.",
             "status": "draft"
         },
         headers={"Authorization": f"Bearer {token}"}
     )
     assert article_res.status_code == 201
-    assert article_res.json()["slug"] == "test-article-pytest"
+    assert article_res.json()["slug"] == slug
 
 def test_create_article_without_token():
     """Should return 401 when no token is provided"""
@@ -117,11 +119,27 @@ def test_login_then_delete_article():
         "email": "admin@healthtech.co.ke",
         "password": "Admin@1234"
     })
+    assert login_res.status_code == 200
     token = login_res.json()["access_token"]
 
+    slug = f"test-delete-article-{uuid.uuid4().hex[:8]}"
+
+    create_res = client.post(
+        "/api/v1/articles",
+        json={
+            "title": "Test Article for Delete",
+            "slug": slug,
+            "body_markdown": "## Test\nThis article will be archived.",
+            "status": "draft"
+        },
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert create_res.status_code == 201
+
     delete_res = client.delete(
-        "/api/v1/articles/test-article-pytest",
+        f"/api/v1/articles/test-article-pytest",
         headers={"Authorization": f"Bearer {token}"}
     )
     assert delete_res.status_code == 200
-    assert "deleted" in delete_res.json()["message"].lower()
+    assert "archived" in delete_res.json()["message"].lower()
