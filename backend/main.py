@@ -24,6 +24,8 @@ from repositories.category_repository import CategoryRepository
 from repositories.tag_repository import TagRepository
 from services.category_service import CategoryService
 from services.tag_service import TagService
+from repositories.feedback_repository import FeedbackRepository
+from services.feedback_service import FeedbackService
 
 
 def log_audit(db: Session, user_id: str, action: str, target_type: str, target_id: str = None, details: str = None):
@@ -431,47 +433,38 @@ def create_tag(
 
 
 @app.post("/api/v1/articles/{slug}/feedback", status_code=201)
-def submit_feedback(slug: str, payload: FeedbackRequest, db: Session = Depends(get_db)):
-    from models import ArticleFeedback
+def submit_feedback(
+    slug: str,
+    payload: FeedbackRequest,
+    db: Session = Depends(get_db)
+):
+    repository = FeedbackRepository(db)
+    service = FeedbackService(repository)
 
-    if payload.rating < 1 or payload.rating > 5:
-        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+    try:
+        return service.submit_feedback(
+            slug,
+            payload.rating,
+            payload.comment
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
 
-    article = db.query(Article).filter(Article.slug == slug).first()
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
-
-    feedback = ArticleFeedback(
-        id=uuid.uuid4(),
-        article_id=article.id,
-        rating=payload.rating,
-        comment=payload.comment
-    )
-    db.add(feedback)
-    db.commit()
-
-    return {"message": "Feedback submitted successfully"}
 
 @app.get("/api/v1/articles/{slug}/feedback/summary")
-def get_feedback_summary(slug: str, db: Session = Depends(get_db)):
-    from models import ArticleFeedback
-    from sqlalchemy import func
+def get_feedback_summary(
+    slug: str,
+    db: Session = Depends(get_db)
+):
+    repository = FeedbackRepository(db)
+    service = FeedbackService(repository)
 
-    article = db.query(Article).filter(Article.slug == slug).first()
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
-
-    result = db.query(
-        func.avg(ArticleFeedback.rating),
-        func.count(ArticleFeedback.id)
-    ).filter(ArticleFeedback.article_id == article.id).first()
-
-    avg_rating, count = result
-
-    return {
-        "average_rating": round(float(avg_rating), 1) if avg_rating else None,
-        "total_ratings": count
-    }
+    try:
+        return service.get_feedback_summary(slug)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
 
 @app.get("/api/v1/my-notifications")
 def get_my_notifications(db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
