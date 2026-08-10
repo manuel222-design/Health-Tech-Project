@@ -28,7 +28,8 @@ from repositories.feedback_repository import FeedbackRepository
 from services.feedback_service import FeedbackService
 from repositories.notification_repository import NotificationRepository
 from services.notification_service import NotificationService
-
+from repositories.user_repository import UserRepository
+from services.auth_service import AuthService
 
 def log_audit(db: Session, user_id: str, action: str, target_type: str, target_id: str = None, details: str = None):
     from models import AuditLog
@@ -545,58 +546,44 @@ def export_article_pdf(slug: str, db: Session = Depends(get_db)):
 
 @app.post("/api/v1/auth/login", status_code=200)
 @limiter.limit("5/10minutes")
-def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == payload.email).first()
+def login(
+    request: Request,
+    payload: LoginRequest,
+    db: Session = Depends(get_db)
+):
+    repository = UserRepository(db)
+    service = AuthService(
+        repository,
+        pwd_context,
+        create_token,
+        TOKEN_TTL
+    )
 
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+    return service.login(
+        payload.email,
+        payload.password
+    )
 
-    if not user.is_active:
-        raise HTTPException(status_code=403, detail="Account is deactivated")
-
-    if not pwd_context.verify(payload.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-
-    token = create_token(str(user.id), user.role.value)
-
-    return {
-        "access_token": token,
-        "token_type":   "bearer",
-        "expires_in":   TOKEN_TTL * 3600,
-        "role":         user.role.value,
-        "username":     user.username,
-    }
 
 @app.post("/api/v1/auth/register", status_code=201)
-def register(payload: RegisterRequest, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == payload.email).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    allowed_roles = ["viewer", "editor"]
-    role = payload.role if payload.role in allowed_roles else "viewer"
-
-    new_user = User(
-        id=uuid.uuid4(),
-        username=payload.username,
-        email=payload.email,
-        password_hash=pwd_context.hash(payload.password),
-        role=UserRole(role),
-        is_active=True
+def register(
+    payload: RegisterRequest,
+    db: Session = Depends(get_db)
+):
+    repository = UserRepository(db)
+    service = AuthService(
+        repository,
+        pwd_context,
+        create_token,
+        TOKEN_TTL
     )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
 
-    token = create_token(str(new_user.id), new_user.role.value)
-
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "expires_in": TOKEN_TTL * 3600,
-        "role": new_user.role.value,
-        "username": new_user.username,
-    }
+    return service.register(
+        payload.username,
+        payload.email,
+        payload.password,
+        payload.role
+    )
 
 class ArticleCreateRequest(BaseModel):
     title:         str
