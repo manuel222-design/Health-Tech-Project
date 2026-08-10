@@ -20,6 +20,10 @@ from fastapi.exceptions import RequestValidationError # type: ignore
 from slowapi import Limiter, _rate_limit_exceeded_handler # type: ignore
 from slowapi.util import get_remote_address # type: ignore
 from slowapi.errors import RateLimitExceeded # type: ignore
+from repositories.category_repository import CategoryRepository
+from repositories.tag_repository import TagRepository
+from services.category_service import CategoryService
+from services.tag_service import TagService
 
 
 def log_audit(db: Session, user_id: str, action: str, target_type: str, target_id: str = None, details: str = None):
@@ -374,105 +378,57 @@ def search_articles(
 
 @app.get("/api/v1/categories")
 def get_categories(db: Session = Depends(get_db)):
-    categories = db.query(Category).order_by(Category.sort_order).all()
-    return [
-        {
-            "id":          str(c.id),
-            "name":        c.name,
-            "slug":        c.slug,
-            "description": c.description,
-        }
-        for c in categories
-    ]
+    repository = CategoryRepository(db)
+    service = CategoryService(repository)
+
+    return service.get_categories()
+
 
 class CategoryCreateRequest(BaseModel):
     name: str
     description: Optional[str] = None
 
+
 @app.post("/api/v1/categories", status_code=201)
-def create_category(payload: CategoryCreateRequest, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
-    name = payload.name.strip()
-    if not name:
-        raise HTTPException(status_code=400, detail="Category name cannot be empty")
+def create_category(
+    payload: CategoryCreateRequest,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_editor)
+):
+    repository = CategoryRepository(db)
+    service = CategoryService(repository)
 
-    slug = name.lower().replace(" ", "-")
+    try:
+        return service.create_category(
+            payload.name,
+            payload.description
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
-    existing = db.query(Category).filter(Category.slug == slug).first()
-    if existing:
-        return {
-            "id":          str(existing.id),
-            "name":        existing.name,
-            "slug":        existing.slug,
-            "description": existing.description,
-        }
-
-    category = Category(
-        id=uuid.uuid4(),
-        name=name,
-        slug=slug,
-        description=payload.description,
-        sort_order=0
-    )
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    return {
-        "id":          str(category.id),
-        "name":        category.name,
-        "slug":        category.slug,
-        "description": category.description,
-    }
 
 @app.get("/api/v1/tags")
 def get_tags(db: Session = Depends(get_db)):
-    from models import Tag
-    tags = db.query(Tag).order_by(Tag.name).all()
-    return [
-        {
-            "id":        str(t.id),
-            "name":      t.name,
-            "slug":      t.slug,
-            "color_hex": t.color_hex,
-        }
-        for t in tags
-    ]
+    repository = TagRepository(db)
+    service = TagService(repository)
+
+    return service.get_tags()
+
 
 @app.post("/api/v1/tags", status_code=201)
-def create_tag(payload: TagCreateRequest, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
-    from models import Tag
+def create_tag(
+    payload: TagCreateRequest,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_editor)
+):
+    repository = TagRepository(db)
+    service = TagService(repository)
 
-    name = payload.name.strip()
-    if not name:
-        raise HTTPException(status_code=400, detail="Tag name cannot be empty")
+    try:
+        return service.create_tag(payload.name)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
-    slug = name.lower().replace(" ", "-")
-
-    existing = db.query(Tag).filter(Tag.slug == slug).first()
-    if existing:
-        return {
-            "id":        str(existing.id),
-            "name":      existing.name,
-            "slug":      existing.slug,
-            "color_hex": existing.color_hex,
-        }
-
-    tag = Tag(
-        id=uuid.uuid4(),
-        name=name,
-        slug=slug,
-        color_hex="#6B7280"
-    )
-    db.add(tag)
-    db.commit()
-    db.refresh(tag)
-
-    return {
-        "id":        str(tag.id),
-        "name":      tag.name,
-        "slug":      tag.slug,
-        "color_hex": tag.color_hex,
-    }
 
 @app.post("/api/v1/articles/{slug}/feedback", status_code=201)
 def submit_feedback(slug: str, payload: FeedbackRequest, db: Session = Depends(get_db)):
