@@ -56,6 +56,56 @@ def test_search_too_short():
     """Should return 400 for search query less than 2 characters"""
     response = client.get("/api/v1/articles/search?q=a")
     assert response.status_code == 400
+def test_submit_feedback():
+    """Should successfully submit article feedback"""
+    response = client.post(
+        "/api/v1/articles/how-to-register-a-patient/feedback",
+        json={
+            "rating": 5,
+            "comment": "Very helpful article"
+        }
+    )
+
+    assert response.status_code == 201
+    assert response.json()["message"] == "Feedback submitted successfully"
+
+
+def test_submit_feedback_invalid_rating():
+    """Should reject ratings outside the 1-5 range"""
+    response = client.post(
+        "/api/v1/articles/how-to-register-a-patient/feedback",
+        json={
+            "rating": 6,
+            "comment": "Invalid rating"
+        }
+    )
+
+    assert response.status_code == 400
+    assert "Rating must be between 1 and 5" in response.json()["detail"]
+
+
+def test_submit_feedback_article_not_found():
+    """Should return 404 for a non-existent article"""
+    response = client.post(
+        "/api/v1/articles/this-article-does-not-exist/feedback",
+        json={
+            "rating": 5,
+            "comment": "Test"
+        }
+    )
+
+    assert response.status_code == 404
+
+
+def test_get_feedback_summary():
+    """Should return article feedback summary"""
+    response = client.get(
+        "/api/v1/articles/how-to-register-a-patient/feedback/summary"
+    )
+
+    assert response.status_code == 200
+    assert "average_rating" in response.json()
+    assert "total_ratings" in response.json()
 
 def test_get_categories():
     """Should return list of categories"""
