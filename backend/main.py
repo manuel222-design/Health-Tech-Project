@@ -30,6 +30,8 @@ from repositories.notification_repository import NotificationRepository
 from services.notification_service import NotificationService
 from repositories.user_repository import UserRepository
 from services.auth_service import AuthService
+from repositories.dashboard_repository import DashboardRepository
+from services.dashboard_service import DashboardService
 
 def log_audit(db: Session, user_id: str, action: str, target_type: str, target_id: str = None, details: str = None):
     from models import AuditLog
@@ -1006,6 +1008,16 @@ def toggle_user_active(user_id: str, db: Session = Depends(get_db), user: dict =
     log_audit(db, user["user_id"], "toggle_active", "user", user_id, f"is_active={target.is_active}")
 
     return {"message": "Active" if target.is_active else "Deactivated", "is_active": target.is_active}
+
+@app.get("/api/v1/admin/dashboard")
+def get_admin_dashboard(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin),
+):
+    repository = DashboardRepository(db)
+    service = DashboardService(repository)
+
+    return service.get_dashboard_stats()
 
 @app.get("/api/v1/admin/analytics")
 def get_analytics(db: Session = Depends(get_db), user: dict = Depends(require_admin)):
