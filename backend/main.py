@@ -9,7 +9,7 @@ from passlib.context import CryptContext               # type: ignore
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel                         # type: ignore 
 from database import get_db
-from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole, UserRole, AuditLog, Media
+from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole, UserRole, AuditLog, Media, ArticleSMEReview
 import os, uuid
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
 from groq import Groq # type: ignore
@@ -54,14 +54,16 @@ app = FastAPI(
     version="1.0.0"
 )
 
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(
+    key_func=get_remote_address,
+    enabled=os.getenv("TESTING") != "1"
+)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:5174",
+    "http://localhost:5173",    "http://localhost:5174",
     "http://localhost:3000",
     "http://localhost:5500",
     "http://127.0.0.1:5500",
@@ -175,6 +177,14 @@ def require_admin(user: dict = Depends(get_current_user)):
         raise HTTPException(
             status_code=403,
             detail="You need Admin role to do this"
+        )
+    return user
+
+def require_sme_or_admin(user: dict = Depends(get_current_user)):
+    if user["role"] not in ["sme", "admin"]:
+        raise HTTPException(
+            status_code=403,
+            detail="You need SME or Admin role to review articles"
         )
     return user
 
@@ -751,7 +761,7 @@ def revert_article(slug: str, db: Session = Depends(get_db), user: dict = Depend
     return {"message": f"Article '{slug}' reverted to previous version"}
 
 @app.post("/api/v1/articles/{slug}/approve")
-def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_sme_or_admin)):
     article = db.query(Article).filter(Article.slug == slug).first()
 
     if not article:
@@ -761,6 +771,16 @@ def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depen
         raise HTTPException(status_code=400, detail="Article is not pending review")
 
     article.status = ArticleStatus.published
+
+    review = ArticleSMEReview(
+        id=uuid.uuid4(),
+        article_id=article.id,
+        reviewer_id=user["user_id"],
+        decision="approved",
+        comments="Article approved for publication"
+    )
+    db.add(review)
+
     db.commit()
     log_audit(db, user["user_id"], "approve_article", "article", str(article.id))
 
@@ -770,7 +790,7 @@ class RejectRequest(BaseModel):
     reason: Optional[str] = None
 
 @app.post("/api/v1/articles/{slug}/reject")
-def reject_article(slug: str, payload: RejectRequest, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+def reject_article(slug: str, payload: RejectRequest, db: Session = Depends(get_db), user: dict = Depends(require_sme_or_admin)):
     article = db.query(Article).filter(Article.slug == slug).first()
 
     if not article:
@@ -780,6 +800,16 @@ def reject_article(slug: str, payload: RejectRequest, db: Session = Depends(get_
         raise HTTPException(status_code=400, detail="Article is not pending review")
 
     article.status = ArticleStatus.draft
+
+    review = ArticleSMEReview(
+        id=uuid.uuid4(),
+        article_id=article.id,
+        reviewer_id=user["user_id"],
+        decision="changes_requested",
+        comments=payload.reason or "Changes requested by reviewer"
+    )
+    db.add(review)
+
     db.commit()
     log_audit(db, user["user_id"], "reject_article", "article", str(article.id), payload.reason or "No reason given")
 

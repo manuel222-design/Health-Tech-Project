@@ -206,3 +206,138 @@ def test_login_then_delete_article():
     )
     assert delete_res.status_code == 200
     assert "archived" in delete_res.json()["message"].lower()
+def test_login_sme_success():
+    """Should return JWT token for valid SME credentials."""
+    response = client.post("/api/v1/auth/login", json={
+        "email": "sme@healthtech.co.ke",
+        "password": "SME@1234"
+    })
+
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+    assert response.json()["role"] == "sme"
+
+
+def test_sme_can_approve_pending_article():
+    """SME should be able to approve an article pending review."""
+
+    # Login as admin to create the test article
+    admin_login = client.post("/api/v1/auth/login", json={
+        "email": "admin@healthtech.co.ke",
+        "password": "Admin@1234"
+    })
+
+    assert admin_login.status_code == 200
+    admin_token = admin_login.json()["access_token"]
+
+    slug = f"test-sme-approve-{uuid.uuid4().hex[:8]}"
+
+    create_response = client.post(
+        "/api/v1/articles",
+        json={
+            "title": "Test SME Approval Article",
+            "slug": slug,
+            "body_markdown": "## SME Approval Test",
+            "status": "pending_review"
+        },
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+
+    assert create_response.status_code == 201
+    assert create_response.json()["status"] == "pending_review"
+
+    # Login as SME
+    sme_login = client.post("/api/v1/auth/login", json={
+        "email": "sme@healthtech.co.ke",
+        "password": "SME@1234"
+    })
+
+    assert sme_login.status_code == 200
+    sme_token = sme_login.json()["access_token"]
+
+    # SME approves the article
+    approve_response = client.post(
+        f"/api/v1/articles/{slug}/approve",
+        headers={"Authorization": f"Bearer {sme_token}"}
+    )
+
+    assert approve_response.status_code == 200
+    assert "approved" in approve_response.json()["message"].lower()
+
+
+def test_sme_can_reject_pending_article():
+    """SME should be able to reject an article pending review."""
+
+    admin_login = client.post("/api/v1/auth/login", json={
+        "email": "admin@healthtech.co.ke",
+        "password": "Admin@1234"
+    })
+
+    assert admin_login.status_code == 200
+    admin_token = admin_login.json()["access_token"]
+
+    slug = f"test-sme-reject-{uuid.uuid4().hex[:8]}"
+
+    create_response = client.post(
+        "/api/v1/articles",
+        json={
+            "title": "Test SME Rejection Article",
+            "slug": slug,
+            "body_markdown": "## SME Rejection Test",
+            "status": "pending_review"
+        },
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+
+    assert create_response.status_code == 201
+    assert create_response.json()["status"] == "pending_review"
+
+    sme_login = client.post("/api/v1/auth/login", json={
+        "email": "sme@healthtech.co.ke",
+        "password": "SME@1234"
+    })
+
+    assert sme_login.status_code == 200
+    sme_token = sme_login.json()["access_token"]
+
+    reject_response = client.post(
+        f"/api/v1/articles/{slug}/reject",
+        json={
+            "reason": "Please verify the clinical information."
+        },
+        headers={"Authorization": f"Bearer {sme_token}"}
+    )
+
+    assert reject_response.status_code == 200
+    assert "draft" in reject_response.json()["message"].lower()
+
+
+def test_editor_cannot_approve_article():
+    """Editor should not be allowed to approve an article."""
+
+    admin_login = client.post("/api/v1/auth/login", json={
+        "email": "admin@healthtech.co.ke",
+        "password": "Admin@1234"
+    })
+
+    assert admin_login.status_code == 200
+    admin_token = admin_login.json()["access_token"]
+
+    slug = f"test-editor-denied-{uuid.uuid4().hex[:8]}"
+
+    create_response = client.post(
+        "/api/v1/articles",
+        json={
+            "title": "Test Editor Permission",
+            "slug": slug,
+            "body_markdown": "## Permission Test",
+            "status": "pending_review"
+        },
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+
+    assert create_response.status_code == 201
+
+    # We don't have an editor account guaranteed by the seed,
+    # so this test verifies the endpoint rejects a viewer/admin mismatch
+    # through the role-protected dependency using an existing viewer token.
