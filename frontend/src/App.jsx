@@ -45,7 +45,7 @@ export default function App() {
       setSelectedCategory("")
     }
     if (page === "articles") {
-      setSelectedCategoryId("")
+      setSelectedCategory("")
     }
   }
 

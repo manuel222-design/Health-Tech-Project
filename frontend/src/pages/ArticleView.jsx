@@ -2,6 +2,21 @@ import { useState, useEffect } from "react"
 import { getArticle, submitFeedback, getFeedbackSummary } from "../services/api"
 import ReactMarkdown from "react-markdown"
 
+function extractHeadings(markdown) {
+  const lines = markdown.split("\n")
+  const headings = []
+  for (const line of lines) {
+    const match = line.match(/^(#{2,3})\s+(.+)$/)
+    if (match) {
+      const level = match[1].length
+      const text = match[2].trim()
+      const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+      headings.push({ level, text, id })
+    }
+  }
+  return headings
+}
+
 export default function ArticleView({ slug, onBack }) {
   const [article, setArticle] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -11,11 +26,18 @@ export default function ArticleView({ slug, onBack }) {
   const [comment, setComment] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [summary, setSummary] = useState(null)
+  const [showToc, setShowToc] = useState(false)
 
   useEffect(() => {
     getArticle(slug)
       .then(res => setArticle(res.data))
-      .catch(() => setError("Article not found"))
+      .catch(err => {
+        console.error("ARTICLE LOAD ERROR:", err)
+        setError(
+          err.response?.data?.detail ||
+          `Failed to load article (${err.response?.status || "network error"})`
+       )
+      })
       .finally(() => setLoading(false))
     getFeedbackSummary(slug).then(res => setSummary(res.data))
   }, [slug])
@@ -41,6 +63,7 @@ export default function ArticleView({ slug, onBack }) {
   if (error) return (
     <div className="text-center py-12 text-red-400">{error}</div>
   )
+  const headings = extractHeadings(article.body_markdown)
 
   return (
     <div>
@@ -70,8 +93,51 @@ export default function ArticleView({ slug, onBack }) {
         </p>
         <hr className="mb-6" />
 
+        {headings.length >= 3 && (
+          <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <button
+              onClick={() => setShowToc(!showToc)}
+              className="text-sm font-medium text-gray-700 flex items-center gap-2"
+            >
+              {showToc ? "▾" : "▸"} Table of Contents
+            </button>
+            {showToc && (
+              <div className="mt-3 space-y-1">
+                {headings.map((h, i) => (
+                  <a
+                    key={i}
+                    href={`#${h.id}`}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      document.getElementById(h.id)?.scrollIntoView({ behavior: "smooth" })
+                    }}
+                    className={`block text-sm text-teal-700 hover:text-teal-900 hover:underline ${h.level === 3 ? "pl-4" : ""}`}
+                  >
+                    {h.text}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="prose prose-teal max-w-none">
-          <ReactMarkdown>{article.body_markdown}</ReactMarkdown>
+          <ReactMarkdown
+            components={{
+              h2: ({ children }) => {
+                const text = String(children)
+                const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+                return <h2 id={id}>{children}</h2>
+              },
+              h3: ({ children }) => {
+                const text = String(children)
+                const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+                return <h3 id={id}>{children}</h3>
+              },
+            }}
+          >
+            {article.body_markdown}
+          </ReactMarkdown>
         </div>
 
         <div className="mt-8 pt-6 border-t border-gray-200">
