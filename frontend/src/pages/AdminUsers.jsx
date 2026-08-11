@@ -80,6 +80,7 @@ export default function AdminUsers() {
                 <option value="viewer">Viewer</option>
                 <option value="editor">Editor</option>
                 <option value="admin">Admin</option>
+                <option value="sme">SME</option>
               </select>
 
               <button
