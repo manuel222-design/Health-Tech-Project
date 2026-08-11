@@ -61,7 +61,46 @@ export default function ArticleView({ slug, onBack }) {
   )
 
   if (error) return (
-    <div className="text-center py-12 text-red-400">{error}</div>
+    <div className="min-h-[60vh] flex items-center justify-center px-4">
+      <div className="text-center max-w-lg">
+
+        <div className="mb-6">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-red-50 border border-red-100">
+            <span className="text-3xl font-bold text-red-500">
+              404
+            </span>
+          </div>
+        </div>
+
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-3">
+          Article not found
+        </h1>
+
+        <p className="text-gray-500 leading-relaxed mb-8">
+          We couldn't find the article you're looking for. It may have been
+        removed, unpublished, or the link may be incorrect.
+        </p>
+
+        <div className="flex flex-col sm:flex-row justify-center gap-3">
+          <button
+            onClick={onBack}
+            className="px-5 py-2.5 bg-teal-600 text-white rounded-lg
+                       hover:bg-teal-700 transition font-medium"
+          >
+            Back to Knowledge Base
+          </button>
+
+          <button
+            onClick={() => window.location.reload()}
+            className="px-5 py-2.5 border border-gray-200 text-gray-700
+                       rounded-lg hover:bg-gray-50 transition font-medium"
+          >
+            Try Again
+          </button>
+        </div>
+
+      </div>
+    </div>
   )
   const headings = extractHeadings(article.body_markdown)
 

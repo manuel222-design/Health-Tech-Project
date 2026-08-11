@@ -10,6 +10,7 @@ import AdminAuditLog from "./pages/AdminAuditLog"
 import ArticleForm from "./pages/ArticleForm"
 import ChatWidget from "./components/ChatWidget"
 import Home from "./pages/Home"
+import ErrorPage from "./pages/ErrorPage"
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -20,9 +21,18 @@ export default function App() {
   })
   const [showRegister, setShowRegister] = useState(false)
   const [notifications, setNotifications] = useState([])
-  const [currentPage, setCurrentPage] = useState("articles")
+  const initialPath = window.location.pathname
+  const initialSlug = initialPath.startsWith("/article/")
+    ? initialPath.split("/article/")[1]
+    : null
+  const [currentPage, setCurrentPage] = useState(() => {
+    if (initialPath === "/") return "home"
+    if (initialPath === "/articles") return "articles"
+    if (initialPath.startsWith("/article/")) return "article"
+    return "notfound"
+  })
   const [selectedCategory, setSelectedCategory] = useState(null)
-  const [selectedSlug, setSelectedSlug] = useState(null)
+  const [selectedSlug, setSelectedSlug] = useState(initialSlug)
   const [editSlug, setEditSlug]         = useState(null)
 
   const canManage = user?.role === "editor" || user?.role === "admin"
@@ -43,15 +53,18 @@ export default function App() {
 
     if (page === "home") {
       setSelectedCategory("")
+      window.history.pushState({}, "", "/")
     }
     if (page === "articles") {
       setSelectedCategory("")
+      window.history.pushState({}, "", "/articles")
     }
   }
 
   function handleSelectArticle(slug) {
     setSelectedSlug(slug)
     setCurrentPage("article")
+    window.history.pushState({}, "", `/article/${slug}`)
   }
 
   function handleSelectCategory(categoryId) {
@@ -223,6 +236,15 @@ export default function App() {
         {currentPage === "audit" && isAdmin && (
           <AdminAuditLog />
         )}
+        {currentPage === "notfound" && (
+          <ErrorPage
+            code="404"
+            title="Page not found"
+            message="The page you are looking for does not exist or may have been moved."
+            onHome={() => goTo("home")}
+            onBack={() => goTo("articles")}
+          />
+       )}
       </main>
 
       <ChatWidget />
