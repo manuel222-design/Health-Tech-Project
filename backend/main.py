@@ -197,23 +197,52 @@ def root():
     return {"message": "Healthtech KB API is running"}
 
 @app.get("/api/v1/articles")
-def get_articles(db: Session = Depends(get_db)):
-    articles = db.query(Article).filter(
-        Article.status == ArticleStatus.published
-    ).all()
-    return [
-        {
-            "id":           str(a.id),
-            "title":        a.title,
-            "slug":         a.slug,
-            "status":       a.status.value,
-            "category_id":  str(a.category_id) if a.category_id else None,
-            "view_count":   a.view_count,
-            "published_at": str(a.published_at) if a.published_at else None,
-            "created_at":   str(a.created_at),
+def get_articles(
+    page: int = 1,
+    page_size: int = 20,
+    category_id: Optional[str] = None,
+    content_type: Optional[str] = None,
+    tag_id: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(Article).filter(Article.status == ArticleStatus.published)
+
+    if category_id:
+        query = query.filter(Article.category_id == category_id)
+    if content_type:
+        query = query.filter(Article.content_type == ContentType(content_type))
+    if tag_id:
+        from models import ArticleTag
+        query = query.join(ArticleTag, ArticleTag.article_id == Article.id) \
+                      .filter(ArticleTag.tag_id == tag_id)
+
+    total_count = query.count()
+
+    offset = (page - 1) * page_size
+    articles = query.order_by(Article.created_at.desc()) \
+                     .offset(offset).limit(page_size).all()
+    return {
+        "results": [
+            {
+                "id":           str(a.id),
+                "title":        a.title,
+                "slug":         a.slug,
+                "status":       a.status.value,
+                "category_id":  str(a.category_id) if a.category_id else None,
+                "content_type": a.content_type.value if a.content_type else "how_to",
+                "view_count":   a.view_count,
+                "published_at": str(a.published_at) if a.published_at else None,
+                "created_at":   str(a.created_at),
+            }
+            for a in articles
+        ],
+        "pagination": {
+            "page": page,
+            "page_size": page_size,
+            "total_count": total_count,
+            "total_pages": (total_count + page_size - 1) // page_size,
         }
-        for a in articles
-    ]
+    }
 
 @app.get("/api/v1/articles/admin/all")
 def get_all_articles_admin(db: Session = Depends(get_db), user: dict = Depends(require_editor)):

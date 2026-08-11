@@ -14,11 +14,24 @@ def test_root_endpoint():
     assert "running" in response.json()["message"].lower()
 
 def test_get_all_articles():
-    """Should return list of published articles"""
+    """Should return paginated published articles."""
     response = client.get("/api/v1/articles")
+
     assert response.status_code == 200
-    assert isinstance(response.json(), list)
-    assert len(response.json()) > 0
+
+    data = response.json()
+
+    assert "results" in data
+    assert "pagination" in data
+    assert isinstance(data["results"], list)
+    assert len(data["results"]) > 0
+
+    pagination = data["pagination"]
+
+    assert pagination["page"] == 1
+    assert pagination["page_size"] == 20
+    assert pagination["total_count"] > 0
+    assert pagination["total_pages"] >= 1
 
 def test_get_article_by_slug():
     """Should return one article by slug"""

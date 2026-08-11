@@ -14,12 +14,13 @@ class CategoryService:
 
         return [
             {
-                "id": str(c.id),
-                "name": c.name,
-                "slug": c.slug,
-                "description": c.description,
-            }
-            for c in categories
+                "id": str(category.id),
+            "name": category.name,
+            "slug": category.slug,
+            "description": category.description,
+            "article_count": article_count,
+        }
+        for category, article_count in categories
         ]
 
     def create_category(self, name: str, description: str | None = None):

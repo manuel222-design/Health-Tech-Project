@@ -18,7 +18,7 @@ export default function Articles({ onSelectArticle }) {
   useEffect(() => {
     getArticles()
       .then(res => {
-        setArticles(res.data)
+        setArticles(res.data.results)
         setFallbackArticles(res.data.slice(0, 3))
       })
       .finally(() => setLoading(false))
@@ -29,7 +29,7 @@ export default function Articles({ onSelectArticle }) {
   async function runSearch(q, catFilter, typeF, tagF) {
     if (q.length < 2) {
       const res = await getArticles()
-      setArticles(res.data)
+      setArticles(res.data.results)
       return
     }
     setSearching(true)

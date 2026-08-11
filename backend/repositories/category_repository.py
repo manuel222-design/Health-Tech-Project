@@ -1,6 +1,7 @@
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from models import Category
+from models import Article, Category
 
 
 class CategoryRepository:
@@ -11,7 +12,15 @@ class CategoryRepository:
 
     def get_all(self):
         return (
-            self.db.query(Category)
+            self.db.query(
+                Category,
+                func.count(Article.id).label("article_count")
+            )
+            .outerjoin(
+                Article,
+                Article.category_id == Category.id
+            )
+            .group_by(Category.id)
             .order_by(Category.sort_order)
             .all()
         )
