@@ -34,7 +34,7 @@ export const searchArticles = (q, filters = {}) => {
   const params = new URLSearchParams({ q, ...filters })
   return api.get(`/articles/search?${params.toString()}`)
 }
-
+export const getHomepage = () => api.get('/homepage')
 export const getCategories = () => api.get('/categories')
 export const createCategory = (name, description) =>
   api.post('/categories', { name, description })

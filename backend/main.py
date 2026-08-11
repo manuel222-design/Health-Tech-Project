@@ -32,6 +32,8 @@ from repositories.user_repository import UserRepository
 from services.auth_service import AuthService
 from repositories.dashboard_repository import DashboardRepository
 from services.dashboard_service import DashboardService
+from repositories.homepage_repository import HomepageRepository
+from services.homepage_service import HomepageService
 
 def log_audit(db: Session, user_id: str, action: str, target_type: str, target_id: str = None, details: str = None):
     from models import AuditLog
@@ -412,6 +414,13 @@ def search_articles(
         ]
     }
 
+
+@app.get("/api/v1/homepage")
+def get_homepage(db: Session = Depends(get_db)):
+    repository = HomepageRepository(db)
+    service = HomepageService(repository)
+
+    return service.get_homepage()
 
 @app.get("/api/v1/categories")
 def get_categories(db: Session = Depends(get_db)):
