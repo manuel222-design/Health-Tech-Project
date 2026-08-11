@@ -96,6 +96,19 @@ class ArticleFeedback(Base):
 
     article    = relationship("Article", back_populates="feedback")
 
+class ArticleSMEReview(Base):
+    __tablename__ = "article_sme_reviews"
+
+    id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    article_id  = Column(UUID(as_uuid=True), ForeignKey("articles.id"), nullable=False)
+    reviewer_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    decision    = Column(String(30), nullable=False)
+    comments    = Column(Text, nullable=True)
+    reviewed_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    article     = relationship("Article")
+    reviewer    = relationship("User")
+
 class ChatSession(Base):
     __tablename__ = "chat_sessions"
 
