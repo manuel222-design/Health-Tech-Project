@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react"
 import { getArticles, searchArticles, getCategories, getTags } from "../services/api"
 
-export default function Articles({ onSelectArticle }) {
+export default function Articles({ onSelectArticle, initialCategory = "" }) {
   const [articles, setArticles]   = useState([])
   const [loading, setLoading]     = useState(true)
   const [search, setSearch]       = useState("")
   const [searching, setSearching] = useState(false)
   const [categories, setCategories] = useState([])
-  const [categoryFilter, setCategoryFilter] = useState("")
+  const [categoryFilter, setCategoryFilter] = useState(initialCategory)
   const [typeFilter, setTypeFilter] = useState("")
   const [allTags, setAllTags] = useState([])
   const [tagFilter, setTagFilter] = useState("")
@@ -18,28 +18,66 @@ export default function Articles({ onSelectArticle }) {
   useEffect(() => {
     getArticles()
       .then(res => {
-        setArticles(res.data.results)
-        setFallbackArticles(res.data.slice(0, 3))
+        const results = res.data.results || res.data || []
+
+        setArticles(results)
+        setFallbackArticles(results.slice(0, 3))
+
+        if (initialCategory) {
+          setCategoryFilter(initialCategory)
+          setArticles(
+            results.filter(
+              article => article.category_id === initialCategory
+            )
+          )
+        }
       })
       .finally(() => setLoading(false))
+
     getCategories().then(res => setCategories(res.data))
     getTags().then(res => setAllTags(res.data))
-  }, [])
+  }, [initialCategory])
 
   async function runSearch(q, catFilter, typeF, tagF) {
     if (q.length < 2) {
       const res = await getArticles()
-      setArticles(res.data.results)
+      const results = res.data.results || res.data   
+
+      let filtered = results
+
+      if (catFilter) {
+        filtered = filtered.filter(
+          article => article.category_id === catFilter
+        )
+      }
+
+      if (typeF) {
+        filtered = filtered.filter(
+          article => article.content_type === typeF
+        )
+      }
+
+      if (tagF) {
+        filtered = filtered.filter(article =>
+          article.tags?.some(tag => tag.id === tagF)
+        )
+      }
+
+      setArticles(filtered)
       return
     }
+
     setSearching(true)
+
     try {
       const filters = {}
+
       if (catFilter) filters.category_id = catFilter
       if (typeF) filters.content_type = typeF
       if (tagF) filters.tag_id = tagF
+
       const res = await searchArticles(q, filters)
-      setArticles(res.data.results)
+      setArticles(res.data.results || [])
     } finally {
       setSearching(false)
     }

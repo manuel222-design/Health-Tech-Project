@@ -9,6 +9,7 @@ import AdminAnalytics from "./pages/AdminAnalytics"
 import AdminAuditLog from "./pages/AdminAuditLog"
 import ArticleForm from "./pages/ArticleForm"
 import ChatWidget from "./components/ChatWidget"
+import Home from "./pages/Home"
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -19,7 +20,8 @@ export default function App() {
   })
   const [showRegister, setShowRegister] = useState(false)
   const [notifications, setNotifications] = useState([])
-  const [currentPage, setCurrentPage]   = useState("articles")
+  const [currentPage, setCurrentPage] = useState("articles")
+  const [selectedCategory, setSelectedCategory] = useState(null)
   const [selectedSlug, setSelectedSlug] = useState(null)
   const [editSlug, setEditSlug]         = useState(null)
 
@@ -38,11 +40,25 @@ export default function App() {
     setCurrentPage(page)
     setSelectedSlug(null)
     setEditSlug(null)
+
+    if (page === "home") {
+      setSelectedCategory("")
+    }
+    if (page === "articles") {
+      setSelectedCategoryId("")
+    }
   }
 
   function handleSelectArticle(slug) {
     setSelectedSlug(slug)
     setCurrentPage("article")
+  }
+
+  function handleSelectCategory(categoryId) {
+    setSelectedCategory(categoryId)
+    setCurrentPage("articles")
+    setSelectedSlug(null)
+    setEditSlug(null)
   }
 
   useEffect(() => {
@@ -86,7 +102,7 @@ export default function App() {
         <div className="px-4 py-3 flex flex-wrap md:flex-nowrap justify-between items-center gap-3">
           <div
             className="flex items-center gap-3 cursor-pointer"
-            onClick={() => goTo("articles")}
+            onClick={() => goTo("home")}
           >
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shrink-0">
               <span className="text-teal-600 text-sm font-bold">HC</span>
@@ -116,6 +132,12 @@ export default function App() {
         </div>
 
         <div className="px-4 pb-3 flex items-center gap-4 text-sm overflow-x-auto">
+          <button
+            onClick={() => goTo("home")}
+            className={`whitespace-nowrap hover:text-teal-100 ${currentPage === "home" ? "font-semibold" : "text-teal-100"}`}
+          >
+            Home
+          </button>
           <button
             onClick={() => goTo("articles")}
             className={`whitespace-nowrap hover:text-teal-100 ${currentPage === "articles" || currentPage === "article" ? "font-semibold" : "text-teal-100"}`}
@@ -157,12 +179,23 @@ export default function App() {
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-6 py-8">
+      <main className="max-w-6xl mx-auto px-6 py-8">
+        {currentPage === "home" && (
+          <Home
+            onSelectArticle={handleSelectArticle}
+            onSelectCategory={handleSelectCategory}
+          />
+        )}
+
         {currentPage === "articles" && (
           <>
             <h2 className="text-2xl font-bold text-gray-800 mb-1">Knowledge Base</h2>
             <p className="text-gray-500 mb-6">HMIS guides and clinical workflows</p>
-            <Articles onSelectArticle={handleSelectArticle} />
+            <Articles
+              onSelectArticle={handleSelectArticle}
+              initialCategory={selectedCategory}
+            />
+
           </>
         )}
 
