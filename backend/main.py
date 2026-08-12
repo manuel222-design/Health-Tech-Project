@@ -143,7 +143,14 @@ def create_token(user_id: str, role: str) -> str:
         algorithm=ALGORITHM
     )
 
+REFRESH_TOKEN_TTL_DAYS = 30
 
+def create_refresh_token(user_id: str) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_TTL_DAYS)
+    return jwt.encode(
+        {"sub": user_id, "type": "refresh", "exp": expire},
+        SECRET_KEY, algorithm=ALGORITHM
+    )
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
@@ -638,6 +645,7 @@ def login(
         repository,
         pwd_context,
         create_token,
+        create_refresh_token,
         TOKEN_TTL
     )
 
@@ -645,6 +653,55 @@ def login(
         payload.email,
         payload.password
     )
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+@app.post("/api/v1/auth/refresh")
+def refresh_access_token(
+    payload: RefreshRequest,
+    db: Session = Depends(get_db)
+):
+    try:
+        decoded = jwt.decode(
+            payload.refresh_token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM]
+        )
+    except JWTError:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired refresh token"
+        )
+
+    if decoded.get("type") != "refresh":
+        raise HTTPException(
+            status_code=401,
+            detail="Not a valid refresh token"
+        )
+
+    user = db.query(User).filter(
+        User.id == decoded.get("sub")
+    ).first()
+
+    if not user or not user.is_active:
+        raise HTTPException(
+            status_code=401,
+            detail="User not found or inactive"
+        )
+
+    new_access_token = create_token(
+        str(user.id),
+        user.role.value
+    )
+
+    return {
+        "access_token": new_access_token,
+        "token_type": "bearer",
+        "expires_in": TOKEN_TTL * 3600,
+    }
+
 
 @app.post("/api/v1/auth/register", status_code=201)
 def register(
@@ -656,6 +713,7 @@ def register(
         repository,
         pwd_context,
         create_token,
+        create_refresh_token,
         TOKEN_TTL
     )
 

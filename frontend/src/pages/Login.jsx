@@ -19,6 +19,7 @@ export default function Login({ onLogin, onShowRegister }) {
     try {
       const res = await login(email, password)
       localStorage.setItem("token",    res.data.access_token)
+      localStorage.setItem("refresh_token", res.data.refresh_token)
       localStorage.setItem("role",     res.data.role)
       localStorage.setItem("username", res.data.username)
       onLogin(res.data)

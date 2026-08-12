@@ -26,6 +26,7 @@ export default function Register({ onRegister, onBackToLogin }) {
         department
       )
       localStorage.setItem("token",    res.data.access_token)
+      localStorage.setItem("refresh_token", res.data.refresh_token)
       localStorage.setItem("role",     res.data.role)
       localStorage.setItem("username", res.data.username)
       onRegister(res.data)
