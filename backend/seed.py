@@ -36,7 +36,7 @@ def seed():
                 username="Health SME",
                 email="sme@healthtech.co.ke",
                 password_hash=pwd_context.hash("SME@1234"),
-                role=UserRole.sme,
+                role=UserRole.editor,
                 is_active=True
             )
             db.add(sme)

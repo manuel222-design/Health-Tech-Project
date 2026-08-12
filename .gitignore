@@ -18,3 +18,4 @@ dist/
 /mock hmis*.png
 
 backups/
+.env

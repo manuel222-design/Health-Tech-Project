@@ -95,6 +95,13 @@ cloudinary.config(
 )
 logger = logging.getLogger("healthtech")
 
+@app.get("/health")
+def health_check():
+    return {
+        "status": "healthy",
+        "service": "Health-Tech Knowledge Base API"
+    }
+
 @app.middleware("http")
 async def add_security_headers(request, call_next):
     response = await call_next(request)
