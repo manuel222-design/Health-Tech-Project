@@ -212,6 +212,13 @@ class SMEReviewRequest(BaseModel):
     decision: str
     comments: Optional[str] = None
 
+class AdminCreateUserRequest(BaseModel):
+    username: str
+    email: str
+    password: str
+    role: str
+    department: Optional[str] = None
+
 class RegisterRequest(BaseModel):
     username: str
     email: str
@@ -710,10 +717,11 @@ def refresh_access_token(
     }
 
 
-@app.post("/api/v1/auth/register", status_code=201)
+@app.post("/api/v1/auth/register", status_code=403)
 def register(
     payload: RegisterRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
 ):
     repository = UserRepository(db)
     service = AuthService(
@@ -1197,20 +1205,61 @@ def submit_chat_feedback(message_id: str, payload: ChatFeedbackRequest, db: Sess
 
     return {"message": "Feedback recorded"}
 
-@app.get("/api/v1/admin/users")
-def list_users(db: Session = Depends(get_db), user: dict = Depends(require_admin)):
-    users = db.query(User).order_by(User.created_at.desc()).all()
-    return [
-        {
-            "id":         str(u.id),
-            "username":   u.username,
-            "email":      u.email,
-            "role":       u.role.value,
-            "is_active":  u.is_active,
-            "created_at": str(u.created_at),
-        }
-        for u in users
-    ]
+@app.post("/api/v1/admin/users", status_code=201)
+def create_admin_user(
+    payload: AdminCreateUserRequest,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    if payload.role not in ["viewer", "editor"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Admin can only create viewer or editor accounts"
+        )
+
+    existing = db.query(User).filter(
+        (User.email == payload.email) |
+        (User.username == payload.username)
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Username or email already exists"
+        )
+
+    new_user = User(
+        id=uuid.uuid4(),
+        username=payload.username,
+        email=payload.email,
+        password_hash=pwd_context.hash(payload.password),
+        role=UserRole(payload.role),
+        department=payload.department,
+        is_active=True
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    log_audit(
+        db,
+        user["user_id"],
+        "create_user",
+        "user",
+        str(new_user.id),
+        f"role={payload.role}"
+    )
+
+    return {
+        "id": str(new_user.id),
+        "username": new_user.username,
+        "email": new_user.email,
+        "role": new_user.role.value,
+        "department": new_user.department,
+        "is_active": new_user.is_active,
+        "message": "User created successfully"
+    }
 
 class UpdateRoleRequest(BaseModel):
     role: str

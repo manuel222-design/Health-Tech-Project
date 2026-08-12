@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react"
 import { getArticle, submitFeedback, getFeedbackSummary } from "../services/api"
 import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+
+ReactMarkdown.use(remarkGfm)
 
 function extractHeadings(markdown) {
   const lines = markdown.split("\n")
@@ -160,7 +163,7 @@ export default function ArticleView({ slug, onBack }) {
           </div>
         )}
 
-        <div className="prose prose-teal max-w-none">
+        <div className="article-content max-w-none">
           <ReactMarkdown
             components={{
               h2: ({ children }) => {
