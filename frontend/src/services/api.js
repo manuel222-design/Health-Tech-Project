@@ -25,6 +25,18 @@ api.post('/auth/register', {
   department
 })
 
+export const submitSMEReview = (slug, decision, comments) =>
+  api.post(`/articles/${slug}/sme-review`, {
+    decision,
+    comments
+  })
+
+export const getPendingSMEArticles = () =>
+  api.get('/articles/sme/pending')
+
+export const getSMEReviews = (slug) =>
+  api.get(`/articles/${slug}/sme-reviews`)
+
 export const approveArticle = (slug) => api.post(`/articles/${slug}/approve`)
 export const getArticles   = ()     => api.get('/articles')
 export const getAllArticlesAdmin = () => api.get('/articles/admin/all')

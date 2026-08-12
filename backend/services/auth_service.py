@@ -62,7 +62,7 @@ class AuthService:
                 detail="Email already registered"
             )
 
-        allowed_roles = ["viewer", "editor"]
+        allowed_roles = ["viewer", "editor", "sme"]
         role = (
             requested_role
             if requested_role in allowed_roles

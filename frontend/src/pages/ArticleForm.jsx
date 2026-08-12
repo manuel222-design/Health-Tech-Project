@@ -362,6 +362,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
               <option value="draft">Draft</option>
               <option value="published">Published</option>
               <option value="archived">Archived</option>
+              <option value="pending_review">Pending Review</option>
             </select>
           </div>
 

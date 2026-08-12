@@ -36,7 +36,7 @@ export default function App() {
   const [editSlug, setEditSlug]         = useState(null)
 
   const canManage = user?.role === "editor" || user?.role === "admin"
-
+  const isSME = user?.role === "sme"
   const isAdmin = user?.role === "admin"
 
   function handleLogin(userData) { setUser(userData) }
@@ -89,11 +89,13 @@ export default function App() {
   }, [user])
 
   function handleEditArticle(slug) {
+    if (!canManage) return
     setEditSlug(slug)
     setCurrentPage("form")
   }
 
   function handleCreateArticle() {
+    if (!canManage) return
     setEditSlug(null)
     setCurrentPage("form")
   }
@@ -157,9 +159,19 @@ export default function App() {
           >
             Knowledge Base
           </button>
-          {canManage && (
+          {(canManage || isSME) && (
             <button
               onClick={() => goTo("admin")}
+              className={`whitespace-nowrap hover:text-teal-100 ${
+                currentPage === "admin" ? "font-semibold" : "text-teal-100"
+              }`}
+            >
+              SME Review
+            </button>
+          )}
+          {canManage && (
+            <button
+              onClick={() => goTo("form")}
               className={`whitespace-nowrap hover:text-teal-100 ${currentPage === "admin" || currentPage === "form" ? "font-semibold" : "text-teal-100"}`}
             >
               Manage Articles
@@ -216,8 +228,8 @@ export default function App() {
           <ArticleView slug={selectedSlug} onBack={() => goTo("articles")} />
         )}
 
-        {currentPage === "admin" && canManage && (
-          <AdminArticles onEdit={handleEditArticle} onCreate={handleCreateArticle} />
+        {currentPage === "admin" && (canManage || isSME) && (
+          <AdminArticles onEdit={handleEditArticle} onCreate={handleCreateArticle} userRole={user.role} />
         )}
 
         {currentPage === "form" && canManage && (

@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react"
-import { getAllArticlesAdmin, deleteArticle, approveArticle, rejectArticle } from "../services/api"
+import { getAllArticlesAdmin, getPendingSMEArticles, deleteArticle, submitSMEReview } from "../services/api"
 
-export default function AdminArticles({ onEdit, onCreate }) {
+export default function AdminArticles({ onEdit, onCreate, userRole }) {
+  const isSME = userRole === "sme"
+  const canManage = userRole === "editor" || userRole === "admin"
   const [articles, setArticles] = useState([])
   const [loading, setLoading]   = useState(true)
   const [deleting, setDeleting] = useState(null)
@@ -11,7 +13,11 @@ export default function AdminArticles({ onEdit, onCreate }) {
 
   function loadArticles() {
     setLoading(true)
-    getAllArticlesAdmin()
+    const request = isSME
+     ? getPendingSMEArticles()
+     : getAllArticlesAdmin()
+
+    request
       .then(res => setArticles(res.data))
       .finally(() => setLoading(false))
   }
@@ -33,28 +39,59 @@ export default function AdminArticles({ onEdit, onCreate }) {
 
   async function handleApprove(slug) {
     setApproving(slug)
+
     try {
-      await approveArticle(slug)
-      setArticles(prev => prev.map(a =>
-        a.slug === slug ? { ...a, status: "published" } : a
-      ))
-    } catch {
-      alert("Failed to approve article. Admin access required.")
+      await submitSMEReview(
+        slug,
+        "approved",
+        "Article approved for publication"
+      )
+
+      setArticles(prev =>
+        prev.map(a =>
+          a.slug === slug
+            ? { ...a, status: "published" }
+            : a
+        )
+      )
+    } catch (error) {
+      alert(
+        error.response?.data?.detail ||
+        "Failed to approve article."
+      )
     } finally {
       setApproving(null)
     }
   }
 
   async function handleReject(slug) {
-    const reason = window.prompt("Reason for rejecting this article (optional):")
+    const reason = window.prompt(
+      "Reason for requesting changes (optional):"
+    )
+
+    if (reason === null) return
+
     setRejecting(slug)
+
     try {
-      await rejectArticle(slug, reason || "")
-      setArticles(prev => prev.map(a =>
-        a.slug === slug ? { ...a, status: "draft" } : a
-      ))
-    } catch {
-      alert("Failed to reject article.")
+      await submitSMEReview(
+        slug,
+        "rejected",
+        reason || "Changes requested by SME"
+      )
+
+      setArticles(prev =>
+        prev.map(a =>
+          a.slug === slug
+            ? { ...a, status: "draft" }
+            : a
+        )
+      )
+    } catch (error) {
+      alert(
+        error.response?.data?.detail ||
+        "Failed to reject article."
+      )
     } finally {
       setRejecting(null)
     }
@@ -70,15 +107,24 @@ export default function AdminArticles({ onEdit, onCreate }) {
     <div>
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Manage Articles</h2>
-          <p className="text-gray-500 text-sm">Create, edit, and delete knowledge base articles</p>
+          <h2 className="text-2xl font-bold text-gray-800">
+            {isSME ? "SME Article Review" : "Manage Articles"}
+          </h2>
+
+          <p className="text-gray-500 text-sm">
+            {isSME
+              ? "Review and sign off articles submitted for publication"
+              : "Create, edit, and delete knowledge base articles"}
+          </p>
         </div>
-        <button
-          onClick={onCreate}
-          className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition"
-        >
-          + New Article
-        </button>
+        {canManage && (
+          <button
+            onClick={onCreate}
+            className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition"
+          >
+            + New Article
+          </button>
+        )}
       </div>
 
       <div className="mb-6">
@@ -139,20 +185,24 @@ export default function AdminArticles({ onEdit, onCreate }) {
                   </button>
                 </>
               )}
-              <button
-                onClick={() => onEdit(article.slug)}
-                className="text-sm text-teal-600 hover:text-teal-700 font-medium px-3 py-1.5 border border-teal-200 rounded-lg hover:bg-teal-50 transition"
-              >
-                Edit
-              </button>
-              {article.status !== "archived" && (
-                <button
-                  onClick={() => handleDelete(article.slug, article.title)}
-                  disabled={deleting === article.slug}
-                  className="text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1.5 border border-red-200 rounded-lg hover:bg-red-50 transition disabled:opacity-50"
-                >
-                  {deleting === article.slug ? "Archiving..." : "Archive"}
-                </button>
+              {canManage && (
+                <>
+                  <button
+                    onClick={() => onEdit(article.slug)}
+                    className="text-sm text-teal-600 hover:text-teal-700 font-medium px-3 py-1.5 border border-teal-200 rounded-lg hover:bg-teal-50 transition"
+                  >
+                    Edit
+                  </button>
+                  {article.status !== "archived" && (
+                    <button
+                      onClick={() => handleDelete(article.slug, article.title)}
+                      disabled={deleting === article.slug}
+                      className="text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1.5 border border-red-200 rounded-lg hover:bg-red-50 transition disabled:opacity-50"
+                    >
+                      {deleting === article.slug ? "Archiving..." : "Archive"}
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>

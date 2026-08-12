@@ -34,6 +34,8 @@ from repositories.dashboard_repository import DashboardRepository
 from services.dashboard_service import DashboardService
 from repositories.homepage_repository import HomepageRepository
 from services.homepage_service import HomepageService
+from repositories.sme_review_repository import SMEReviewRepository
+from services.sme_review_service import SMEReviewService
 
 def log_audit(db: Session, user_id: str, action: str, target_type: str, target_id: str = None, details: str = None):
     from models import AuditLog
@@ -192,6 +194,10 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+class SMEReviewRequest(BaseModel):
+    decision: str
+    comments: Optional[str] = None
+
 class RegisterRequest(BaseModel):
     username: str
     email: str
@@ -270,6 +276,31 @@ def get_all_articles_admin(db: Session = Depends(get_db), user: dict = Depends(r
             "category_id":  str(a.category_id) if a.category_id else None,
             "view_count":   a.view_count,
             "created_at":   str(a.created_at),
+        }
+        for a in articles
+    ]
+
+@app.get("/api/v1/articles/sme/pending")
+def get_pending_sme_articles(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_sme_or_admin)
+):
+    articles = (
+        db.query(Article)
+        .filter(Article.status == ArticleStatus.pending_review)
+        .order_by(Article.created_at.desc())
+        .all()
+    )
+
+    return [
+        {
+            "id": str(a.id),
+            "title": a.title,
+            "slug": a.slug,
+            "status": a.status.value,
+            "category_id": str(a.category_id) if a.category_id else None,
+            "view_count": a.view_count,
+            "created_at": str(a.created_at),
         }
         for a in articles
     ]
@@ -814,6 +845,107 @@ def reject_article(slug: str, payload: RejectRequest, db: Session = Depends(get_
     log_audit(db, user["user_id"], "reject_article", "article", str(article.id), payload.reason or "No reason given")
 
     return {"message": f"Article '{slug}' sent back to draft"}
+
+@app.post("/api/v1/articles/{slug}/sme-review")
+def submit_sme_review(
+    slug: str,
+    payload: SMEReviewRequest,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    if user["role"] != "sme":
+        raise HTTPException(
+            status_code=403,
+            detail="Only SME users can review articles"
+        )
+
+    article = (
+        db.query(Article)
+        .filter(Article.slug == slug)
+        .first()
+    )
+
+    if not article:
+        raise HTTPException(
+            status_code=404,
+            detail="Article not found"
+        )
+
+    repository = SMEReviewRepository(db)
+    service = SMEReviewService(repository)
+
+    review = service.submit_review(
+        article=article,
+        reviewer=user,
+        decision=payload.decision,
+        comments=payload.comments,
+    )
+
+    log_audit(
+        db,
+        user["user_id"],
+        "sme_review",
+        "article",
+        str(article.id),
+        f"decision={payload.decision}; comments={payload.comments or 'No comments'}",
+    )
+
+    return {
+        "message": (
+            "Article approved and published"
+            if payload.decision == "approved"
+            else "Article rejected and returned to draft"
+        ),
+        "article_id": str(article.id),
+        "slug": article.slug,
+        "decision": review.decision,
+        "status": article.status.value,
+        "reviewer_id": str(review.reviewer_id),
+        "comments": review.comments,
+    }
+
+@app.get("/api/v1/articles/{slug}/sme-reviews")
+def get_sme_reviews(
+    slug: str,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    if user["role"] not in ["sme", "admin", "editor"]:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to view SME reviews"
+        )
+
+    article = (
+        db.query(Article)
+        .filter(Article.slug == slug)
+        .first()
+    )
+
+    if not article:
+        raise HTTPException(
+            status_code=404,
+            detail="Article not found"
+        )
+
+    repository = SMEReviewRepository(db)
+    reviews = repository.get_for_article(article.id)
+
+    return [
+        {
+            "id": str(review.id),
+            "article_id": str(review.article_id),
+            "reviewer_id": str(review.reviewer_id),
+            "decision": review.decision,
+            "comments": review.comments,
+            "reviewed_at": (
+                str(review.reviewed_at)
+                if review.reviewed_at
+                else None
+            ),
+        }
+        for review in reviews
+    ]
 
 @app.delete("/api/v1/articles/{slug}")
 def delete_article(
