@@ -5,7 +5,6 @@ export default function Register({ onRegister, onBackToLogin }) {
   const [username, setUsername] = useState("")
   const [email, setEmail]       = useState("")
   const [password, setPassword] = useState("")
-  const [role, setRole]         = useState("viewer")
   const [error, setError]       = useState("")
   const [loading, setLoading]   = useState(false)
   const [department, setDepartment] = useState("")
@@ -22,7 +21,6 @@ export default function Register({ onRegister, onBackToLogin }) {
         username,
         email,
         password,
-        role,
         department
       )
       localStorage.setItem("token",    res.data.access_token)
@@ -86,6 +84,9 @@ export default function Register({ onRegister, onBackToLogin }) {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Department
             </label>
+            <p className="text-xs text-gray-400 mt-1">
+  	      Your account will be created with standard access. An administrator can assign additional permissions when required.
+	    </p>
             <input
              type="text"
              value={department}
@@ -106,17 +107,7 @@ export default function Register({ onRegister, onBackToLogin }) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <select
-              value={role}
-              onChange={e => setRole(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-            >
-              <option value="viewer">Viewer — read articles, use chatbot</option>
-              <option value="editor">Editor — create and submit articles</option>
-            </select>
-          </div>
+
 
           <button
             onClick={handleSubmit}

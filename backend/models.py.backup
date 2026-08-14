@@ -61,22 +61,6 @@ class Category(Base):
 
     articles    = relationship("Article", back_populates="category")
 
-class Product(Base):
-    __tablename__ = "products"
-
-    id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name        = Column(String(150), nullable=False, unique=True)
-    slug        = Column(String(150), nullable=False, unique=True)
-    description = Column(Text, nullable=True)
-    version     = Column(String(50), nullable=True)
-    icon        = Column(String(50), nullable=True)
-    is_active   = Column(Boolean, default=True, nullable=False)
-    sort_order  = Column(Integer, default=0)
-    created_at  = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at  = Column(DateTime(timezone=True), onupdate=func.now())
-
-    articles = relationship("Article", back_populates="product")
-
 class Article(Base):
     __tablename__ = "articles"
 
@@ -89,16 +73,7 @@ class Article(Base):
     content_type  = Column(Enum(ContentType), default=ContentType.how_to)
     previous_body_markdown = Column(Text, nullable=True)
     product_version = Column(String(50), nullable=True)
-    product_id      = Column(
-        UUID(as_uuid=True),
-        ForeignKey("products.id"),
-        nullable=True
-    )
-    category_id    = Column(
-        UUID(as_uuid=True),
-        ForeignKey("categories.id"),
-        nullable=True
-    )
+    category_id   = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True)
     author_id     = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     view_count    = Column(Integer, default=0)
     published_at  = Column(DateTime(timezone=True), nullable=True)
@@ -107,7 +82,6 @@ class Article(Base):
 
     author        = relationship("User", back_populates="articles")
     category      = relationship("Category", back_populates="articles")
-    product       = relationship("Product", back_populates="articles")
     feedback      = relationship("ArticleFeedback", back_populates="article")
     tags          = relationship("ArticleTag", back_populates="article")
 

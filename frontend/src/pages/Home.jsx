@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { getHomepage } from "../services/api"
 
 export default function Home({ onSelectArticle, onSelectCategory }) {
+console.log("HOME COMPONENT LOADED")
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -9,7 +10,7 @@ export default function Home({ onSelectArticle, onSelectCategory }) {
   useEffect(() => {
     getHomepage()
       .then(res => setData(res.data))
-      .catch(() => setError("Failed to load homepage"))
+      .catch(() => setError("Failed to load dashboard"))
       .finally(() => setLoading(false))
   }, [])
 
@@ -18,7 +19,9 @@ export default function Home({ onSelectArticle, onSelectCategory }) {
       <div className="flex items-center justify-center py-24">
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 text-sm">Loading Healthtech Knowledge Base...</p>
+          <p className="text-sm text-slate-500">
+            Loading Taifa Care dashboard...
+          </p>
         </div>
       </div>
     )
@@ -28,10 +31,10 @@ export default function Home({ onSelectArticle, onSelectCategory }) {
     return (
       <div className="bg-white border border-red-200 rounded-2xl p-8 text-center">
         <div className="text-red-500 text-3xl mb-3">!</div>
-        <h2 className="font-semibold text-gray-800 mb-1">
-          Unable to load homepage
+        <h2 className="font-semibold text-slate-800 mb-1">
+          Unable to load dashboard
         </h2>
-        <p className="text-sm text-gray-500">{error}</p>
+        <p className="text-sm text-slate-500">{error}</p>
       </div>
     )
   }
@@ -40,208 +43,341 @@ export default function Home({ onSelectArticle, onSelectCategory }) {
   const categories = data?.categories || []
 
   const totalArticles = categories.reduce(
-    (total, category) => total + category.article_count,
+    (total, category) => total + (category.article_count || 0),
+    0
+  )
+
+  const totalViews = featuredArticles.reduce(
+    (total, article) => total + (article.view_count || 0),
     0
   )
 
   return (
-    <div className="space-y-12 pb-10">
+    <div className="space-y-7 pb-10">
 
-      {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-700 via-teal-600 to-cyan-600 text-white shadow-lg">
-        <div className="absolute -right-16 -top-20 w-64 h-64 rounded-full bg-white/10" />
-        <div className="absolute -right-8 bottom-[-90px] w-72 h-72 rounded-full bg-white/5" />
+      {/* Welcome */}
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-700 via-teal-600 to-cyan-600 text-white shadow-md">
+        <div className="absolute right-0 top-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute right-24 bottom-0 w-32 h-32 rounded-full bg-white/5 translate-y-1/2" />
 
-        <div className="relative px-6 py-10 sm:px-10 sm:py-14 lg:px-12">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-3 py-1.5 mb-5">
-              <span className="w-2 h-2 rounded-full bg-teal-200" />
-              <span className="text-xs font-semibold tracking-wide text-teal-50">
-                TAIFA CARE HMIS KNOWLEDGE BASE
-              </span>
+        <div className="relative px-6 py-7 sm:px-8 sm:py-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+
+            <div>
+              <div className="inline-flex items-center gap-2 mb-3">
+                <span className="w-2 h-2 rounded-full bg-teal-200" />
+                <span className="text-xs uppercase tracking-wider text-teal-100 font-semibold">
+                  Knowledge Centre
+                </span>
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2">
+                Welcome back, {localStorage.getItem("username") || "User"}
+              </h2>
+
+              <p className="text-sm sm:text-base text-teal-50 max-w-2xl">
+                Access trusted Taifa Care guidance, healthcare workflows and
+                practical resources from one place.
+              </p>
             </div>
-
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-5">
-              Everything you need to work smarter with Taifa Care.
-            </h1>
-
-            <p className="text-teal-50 text-base sm:text-lg leading-relaxed max-w-2xl mb-8">
-              Find practical HMIS guides, clinical workflows and step-by-step
-              resources designed to help healthcare teams get the most from
-              Taifa Care.
-            </p>
 
             <button
-              onClick={() => {
-                window.scrollTo({ top: 0, behavior: "smooth" })
-                document
-                  .querySelector("[data-knowledge-base]")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }}
-              className="inline-flex items-center gap-2 bg-white text-teal-700 font-semibold px-5 py-3 rounded-xl shadow-sm hover:bg-teal-50 transition"
+              onClick={() => document.querySelector("[data-quick-actions]")?.scrollIntoView({ behavior: "smooth" })}
+              className="shrink-0 inline-flex items-center justify-center gap-2 bg-white text-teal-700 font-semibold px-5 py-3 rounded-xl shadow-sm hover:bg-teal-50 transition"
             >
-              Explore the knowledge base
+              Explore Centre
               <span>→</span>
             </button>
-          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-10 max-w-xl">
-            <div className="bg-white/10 border border-white/10 rounded-xl px-4 py-3">
-              <p className="text-2xl font-bold">{totalArticles}</p>
-              <p className="text-xs text-teal-100 mt-1">Published guides</p>
-            </div>
-
-            <div className="bg-white/10 border border-white/10 rounded-xl px-4 py-3">
-              <p className="text-2xl font-bold">{categories.length}</p>
-              <p className="text-xs text-teal-100 mt-1">Categories</p>
-            </div>
-
-            <div className="bg-white/10 border border-white/10 rounded-xl px-4 py-3 col-span-2 sm:col-span-1">
-              <p className="text-2xl font-bold">{featuredArticles.length}</p>
-              <p className="text-xs text-teal-100 mt-1">Featured guides</p>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Articles */}
-      <section>
-        <div className="flex items-end justify-between gap-4 mb-5">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-1.5 h-6 bg-teal-600 rounded-full" />
-              <h2 className="text-2xl font-bold text-gray-800">
-                Featured Articles
-              </h2>
+
+      {/* Statistics */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs uppercase tracking-wide text-slate-400 font-semibold">
+              Published Guides
+            </span>
+            <div className="w-9 h-9 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center">
+              ▤
             </div>
-
-            <p className="text-gray-500 text-sm ml-3.5">
-              Popular and important guides to get you started
-            </p>
           </div>
-        </div>
-
-        {featuredArticles.length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded-2xl p-8 text-center">
-            <p className="text-gray-500">No featured articles available.</p>
+          <div className="text-2xl font-bold text-slate-800">
+            {totalArticles}
           </div>
-        ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {featuredArticles.map((article, index) => (
-              <button
-                key={article.id}
-                onClick={() => onSelectArticle(article.slug)}
-                className="group text-left bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-teal-300 transition-all duration-200"
-              >
-                <div className="flex items-center justify-between mb-5">
-                  <span className="inline-block text-xs font-semibold uppercase tracking-wide bg-teal-50 text-teal-700 px-3 py-1 rounded-full">
-                    {article.content_type?.replaceAll("_", " ") || "Guide"}
-                  </span>
-
-                  <span className="text-xs text-gray-400">
-                    #{String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
-
-                <h3 className="font-bold text-gray-800 text-lg leading-snug mb-4 group-hover:text-teal-700 transition">
-                  {article.title}
-                </h3>
-
-                <div className="flex items-center text-sm font-medium text-teal-600">
-                  <span className="text-xs text-gray-400">
-                    {article.view_count}
-                    {article.view_count === 1 ? "view" : "views"}
-                  </span>
-
-                  <span className="ml-2 group-hover:translate-x-1 transition-transform">
-                    Read guide →
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Categories */}
-      <section data-knowledge-base>
-        <div className="mb-5">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="w-1.5 h-6 bg-teal-600 rounded-full" />
-            <h2 className="text-2xl font-bold text-gray-800">
-              Browse by Category
-            </h2>
-          </div>
-
-          <p className="text-gray-500 text-sm ml-3.5">
-            Find guides organized around healthcare workflows
+          <p className="text-xs text-slate-400 mt-1">
+            Available knowledge resources
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-5">
-          {categories.map((category, index) => (
-            <button
-              key={category.id}
-              onClick={() => onSelectCategory(category.id)}
-              className="group bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer text-left"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 shrink-0 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-bold text-lg group-hover:bg-teal-600 group-hover:text-white transition">
+
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs uppercase tracking-wide text-slate-400 font-semibold">
+              Categories
+            </span>
+            <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              ◈
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-slate-800">
+            {categories.length}
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            Healthcare knowledge areas
+          </p>
+        </div>
+
+
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs uppercase tracking-wide text-slate-400 font-semibold">
+              Featured
+            </span>
+            <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+              ★
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-slate-800">
+            {featuredArticles.length}
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            Recommended guides
+          </p>
+        </div>
+
+
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs uppercase tracking-wide text-slate-400 font-semibold">
+              Guide Views
+            </span>
+            <div className="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+              ◉
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-slate-800">
+            {totalViews}
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            Views across featured guides
+          </p>
+        </div>
+
+      </section>
+
+
+      {/* Quick Actions */}
+      <section data-quick-actions>
+
+        <div className="mb-4">
+          <h2 className="text-lg font-bold text-slate-800">
+            Quick Actions
+          </h2>
+          <p className="text-sm text-slate-500">
+            Common tasks and knowledge centre shortcuts
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-4">
+
+          <button
+            onClick={() => document.querySelector("[data-knowledge]")?.scrollIntoView({ behavior: "smooth" })}
+            className="group bg-white border border-slate-200 rounded-xl p-5 text-left hover:border-teal-300 hover:shadow-md transition"
+          >
+            <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center text-lg mb-4 group-hover:bg-teal-600 group-hover:text-white transition">
+              ⌕
+            </div>
+            <h3 className="font-semibold text-slate-800">
+              Browse Knowledge
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Find guides and healthcare resources.
+            </p>
+          </button>
+
+
+          <button
+            onClick={() => featuredArticles[0] && onSelectArticle(featuredArticles[0].slug)}
+            className="group bg-white border border-slate-200 rounded-xl p-5 text-left hover:border-teal-300 hover:shadow-md transition"
+          >
+            <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-lg mb-4 group-hover:bg-blue-600 group-hover:text-white transition">
+              ★
+            </div>
+            <h3 className="font-semibold text-slate-800">
+              Featured Guide
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Open a recommended knowledge resource.
+            </p>
+          </button>
+
+
+          <button
+            onClick={() => document.querySelector("[data-knowledge]")?.scrollIntoView({ behavior: "smooth" })}
+            className="group bg-white border border-slate-200 rounded-xl p-5 text-left hover:border-teal-300 hover:shadow-md transition"
+          >
+            <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-lg mb-4 group-hover:bg-purple-600 group-hover:text-white transition">
+              ◈
+            </div>
+            <h3 className="font-semibold text-slate-800">
+              Browse Categories
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Explore healthcare workflow areas.
+            </p>
+          </button>
+
+        </div>
+      </section>
+
+
+      {/* Knowledge Centre Updates */}
+      <section>
+
+        <div className="flex items-end justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-slate-800">
+              Knowledge Centre Updates
+            </h2>
+            <p className="text-sm text-slate-500">
+              Featured and frequently accessed guidance
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+
+          {featuredArticles.length === 0 ? (
+            <div className="p-8 text-center text-sm text-slate-500">
+              No featured guides available.
+            </div>
+          ) : (
+            featuredArticles.slice(0, 5).map((article, index) => (
+              <button
+                key={article.id}
+                onClick={() => onSelectArticle(article.slug)}
+                className="w-full flex items-center gap-4 px-5 py-4 border-b last:border-b-0 border-slate-100 hover:bg-slate-50 text-left transition group"
+              >
+
+                <div className="w-9 h-9 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center text-xs font-bold shrink-0">
                   {String(index + 1).padStart(2, "0")}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="font-bold text-gray-800 text-lg group-hover:text-teal-700 transition">
-                      {category.name}
-                    </h3>
+                  <h3 className="font-medium text-sm text-slate-800 truncate group-hover:text-teal-700 transition">
+                    {article.title}
+                  </h3>
 
-                    <span className="shrink-0 bg-gray-50 border border-gray-200 text-gray-600 text-xs font-semibold px-2.5 py-1 rounded-full">
-                      {category.article_count}
-                    </span>
-                  </div>
-
-                  <p className="text-sm text-gray-500 leading-relaxed mt-2">
-                    {category.description}
+                  <p className="text-xs text-slate-400 mt-1">
+                    {article.content_type?.replaceAll("_", " ") || "Guide"}
+                    {" · "}
+                    {article.view_count || 0} views
                   </p>
-
-                  <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100">
-                    <span className="text-xs text-gray-400">
-                      {category.article_count} guides
-                    </span>
-
-                    <span className="text-sm font-medium text-teal-600">
-                      Browse guides →
-                    </span>
-                  </div>
                 </div>
-              </div>
-            </button>
-          ))}
+
+                <span className="text-slate-400 group-hover:text-teal-600 group-hover:translate-x-1 transition">
+                  →
+                </span>
+
+              </button>
+            ))
+          )}
+
         </div>
       </section>
 
-      {/* Bottom CTA */}
-      <section className="bg-gray-900 rounded-2xl px-6 py-8 sm:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-        <div>
-          <h2 className="text-lg font-bold text-white mb-1">
-            Can't find what you're looking for?
+
+      {/* Knowledge Areas */}
+      <section data-knowledge>
+
+        <div className="mb-4">
+          <h2 className="text-lg font-bold text-slate-800">
+            Knowledge Areas
           </h2>
-          <p className="text-sm text-gray-400">
-            Search the full knowledge base for specific Taifa Care guidance.
+          <p className="text-sm text-slate-500">
+            Browse healthcare guidance by operational area
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            window.scrollTo({ top: 0, behavior: "smooth" })
-          }}
-          className="shrink-0 bg-teal-600 hover:bg-teal-500 text-white font-semibold px-5 py-2.5 rounded-xl transition"
-        >
-          Search the knowledge base
-        </button>
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+
+          {categories.map((category, index) => (
+            <button
+              key={category.id}
+              onClick={() => onSelectCategory(category.id)}
+              className="group bg-white border border-slate-200 rounded-xl p-5 text-left hover:border-teal-300 hover:shadow-md hover:-translate-y-0.5 transition-all"
+            >
+
+              <div className="flex items-start justify-between gap-3">
+
+                <div className="w-11 h-11 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center font-bold shrink-0 group-hover:bg-teal-600 group-hover:text-white transition">
+                  {String(index + 1).padStart(2, "0")}
+                </div>
+
+                <span className="bg-slate-50 border border-slate-200 text-slate-500 text-[11px] font-semibold px-2 py-1 rounded-full">
+                  {category.article_count || 0} guides
+                </span>
+
+              </div>
+
+              <h3 className="font-semibold text-slate-800 mt-4 group-hover:text-teal-700 transition">
+                {category.name}
+              </h3>
+
+              <p className="text-xs text-slate-500 leading-relaxed mt-2 line-clamp-2">
+                {category.description || "Healthcare knowledge and operational guidance."}
+              </p>
+
+              <div className="flex items-center justify-between mt-5 pt-3 border-t border-slate-100">
+                <span className="text-[11px] text-slate-400">
+                  Knowledge area
+                </span>
+
+                <span className="text-xs font-semibold text-teal-600">
+                  Explore →
+                </span>
+              </div>
+
+            </button>
+          ))}
+
+        </div>
+      </section>
+
+
+      {/* Footer CTA */}
+      <section className="rounded-xl bg-slate-900 px-6 py-7 sm:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+
+        <div>
+          <h2 className="text-base font-bold text-white">
+            Need help with Taifa Care?
+          </h2>
+
+          <p className="text-xs text-slate-400 mt-1">
+            Use the Healthtech AI assistant for quick guidance while working.
+          </p>
+        </div>
+
+        <div className="inline-flex items-center gap-2 text-sm font-semibold text-teal-300">
+          <span>AI Assistant</span>
+          <span>→</span>
+        </div>
+
       </section>
 
     </div>
   )
+}
+
+function userDisplayName() {
+  const username = localStorage.getItem("username") || "User"
+
+  return username
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, letter => letter.toUpperCase())
 }

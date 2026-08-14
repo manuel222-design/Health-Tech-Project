@@ -1,4 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  color: #1f2937;
+  background-color: #f9fafb;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
 /* Article content styling */
 .article-content {
   font-size: 1.05rem;
@@ -114,4 +136,79 @@
     display: block;
     overflow-x: auto;
   }
+}
+
+/* Dark mode */
+html.dark body {
+  color: #e5e7eb;
+  background-color: #111827;
+}
+
+html.dark .bg-gray-50 {
+  background-color: #111827;
+}
+
+html.dark .bg-white {
+  background-color: #1f2937;
+}
+
+html.dark .bg-gray-100 {
+  background-color: #374151;
+}
+
+html.dark .bg-gray-200 {
+  background-color: #4b5563;
+}
+
+html.dark .text-gray-800,
+html.dark .text-gray-900,
+html.dark .text-gray-700 {
+  color: #f3f4f6;
+}
+
+html.dark .text-gray-600,
+html.dark .text-gray-500 {
+  color: #d1d5db;
+}
+
+html.dark .border-gray-200,
+html.dark .border-gray-300 {
+  border-color: #4b5563;
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #1f2937;
+  color: #f3f4f6;
+  border-color: #4b5563;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #9ca3af;
+}
+
+/* Article content */
+html.dark .article-content {
+  color: #d1d5db;
+}
+
+html.dark .article-content h2,
+html.dark .article-content h3,
+html.dark .article-content strong {
+  color: #f3f4f6;
+}
+
+html.dark .article-content blockquote {
+  background: #134e4a;
+}
+
+html.dark .article-content th {
+  background: #374151;
+}
+
+html.dark .article-content th,
+html.dark .article-content td {
+  border-color: #4b5563;
 }

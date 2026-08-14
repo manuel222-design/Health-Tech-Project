@@ -54,7 +54,6 @@ class AuthService:
         username: str,
         email: str,
         password: str,
-        requested_role: str,
         department: str | None = None
     ):
         existing = self.repository.get_by_email(email)
@@ -65,12 +64,7 @@ class AuthService:
                 detail="Email already registered"
             )
 
-        allowed_roles = ["viewer", "editor", "sme"]
-        role = (
-            requested_role
-            if requested_role in allowed_roles
-            else "viewer"
-        )
+        role = "viewer"
 
         new_user = User(
             id=uuid.uuid4(),

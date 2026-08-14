@@ -9,7 +9,7 @@ from passlib.context import CryptContext               # type: ignore
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel                         # type: ignore 
 from database import get_db
-from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole, UserRole, AuditLog, Media, ArticleSMEReview
+from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, Product, ChatSession, ChatMessage, MessageRole, UserRole, AuditLog, Media, ArticleSMEReview
 import os, uuid
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
 from groq import Groq # type: ignore
@@ -36,6 +36,8 @@ from repositories.homepage_repository import HomepageRepository
 from services.homepage_service import HomepageService
 from repositories.sme_review_repository import SMEReviewRepository
 from services.sme_review_service import SMEReviewService
+from repositories.product_repository import ProductRepository
+from services.product_service import ProductService
 
 def log_audit(db: Session, user_id: str, action: str, target_type: str, target_id: str = None, details: str = None):
     from models import AuditLog
@@ -197,6 +199,9 @@ def require_admin(user: dict = Depends(get_current_user)):
     return user
 
 def require_sme_or_admin(user: dict = Depends(get_current_user)):
+
+    print("CURRENT USER ROLE:", user)
+
     if user["role"] not in ["sme", "admin"]:
         raise HTTPException(
             status_code=403,
@@ -223,7 +228,6 @@ class RegisterRequest(BaseModel):
     username: str
     email: str
     password: str
-    role: str = "viewer"
     department: Optional[str] = None
 
 class TagCreateRequest(BaseModel):
@@ -237,6 +241,39 @@ class FeedbackRequest(BaseModel):
 def root():
     return {"message": "Healthtech KB API is running"}
 
+@app.get("/api/v1/homepage")
+def get_homepage(db: Session = Depends(get_db)):
+    repository = HomepageRepository(db)
+    service = HomepageService(repository)
+    return service.get_homepage()
+
+
+@app.get("/api/v1/categories")
+def get_categories(db: Session = Depends(get_db)):
+    categories = db.query(Category).all()
+
+    results = []
+
+    for category in categories:
+        article_count = (
+            db.query(Article)
+            .filter(
+                Article.category_id == category.id,
+                Article.status == ArticleStatus.published
+            )
+            .count()
+        )
+
+        results.append({
+            "id": str(category.id),
+            "name": category.name,
+            "description": category.description,
+            "article_count": article_count
+        })
+
+    return results
+
+
 @app.get("/api/v1/articles")
 def get_articles(
     page: int = 1,
@@ -244,6 +281,7 @@ def get_articles(
     category_id: Optional[str] = None,
     content_type: Optional[str] = None,
     tag_id: Optional[str] = None,
+    product_id: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     query = db.query(Article).filter(Article.status == ArticleStatus.published)
@@ -256,6 +294,9 @@ def get_articles(
         from models import ArticleTag
         query = query.join(ArticleTag, ArticleTag.article_id == Article.id) \
                       .filter(ArticleTag.tag_id == tag_id)
+    
+    if product_id:
+        query = query.filter(Article.product_id == product_id)
 
     total_count = query.count()
 
@@ -270,8 +311,11 @@ def get_articles(
                 "slug":         a.slug,
                 "status":       a.status.value,
                 "category_id":  str(a.category_id) if a.category_id else None,
+                "category_name": a.category.name if a.category else None,
                 "content_type": a.content_type.value if a.content_type else "how_to",
                 "view_count":   a.view_count,
+                "product_id":   str(a.product_id) if a.product_id else None,
+                "product_name": a.product.name if a.product else None,
                 "published_at": str(a.published_at) if a.published_at else None,
                 "created_at":   str(a.created_at),
             }
@@ -295,6 +339,7 @@ def get_all_articles_admin(db: Session = Depends(get_db), user: dict = Depends(r
             "slug":         a.slug,
             "status":       a.status.value,
             "category_id":  str(a.category_id) if a.category_id else None,
+            "category_name": a.category.name if a.category else None,
             "view_count":   a.view_count,
             "created_at":   str(a.created_at),
         }
@@ -388,6 +433,7 @@ def search_articles(
     category_id: str = None,
     content_type: str = None,
     tag_id: str = None,
+    product_id: str = None,
     db: Session = Depends(get_db)
 ):
     if not q or len(q.strip()) < 2:
@@ -403,6 +449,10 @@ def search_articles(
     if content_type:
         filters.append("content_type = :content_type")
         params["content_type"] = content_type
+
+    if product_id:
+        filters.append("product_id = :product_id")
+        params["product_id"] = product_id
 
     tag_join = ""
     if tag_id:
@@ -455,61 +505,53 @@ def search_articles(
         ]
     }
 
-    log = SearchLog(
-        id=uuid.uuid4(),
-        query=q,
-        results_count=len(rows)
-    )
-    db.add(log)
-    db.commit()
+@app.get("/api/v1/products")
+def get_products(db: Session = Depends(get_db)):
+    repository = ProductRepository(db)
+    service = ProductService(repository)
 
-    return {
-        "query":        q,
-        "total_results": len(rows),
-        "results": [
-            {
-                "id":    str(row.id),
-                "title": row.title,
-                "slug":  row.slug,
-            }
-            for row in rows
-        ]
-    }
+    return service.get_products()
 
 
-@app.get("/api/v1/homepage")
-def get_homepage(db: Session = Depends(get_db)):
-    repository = HomepageRepository(db)
-    service = HomepageService(repository)
-
-    return service.get_homepage()
-
-@app.get("/api/v1/categories")
-def get_categories(db: Session = Depends(get_db)):
-    repository = CategoryRepository(db)
-    service = CategoryService(repository)
-
-    return service.get_categories()
-
-
-class CategoryCreateRequest(BaseModel):
+class ProductCreateRequest(BaseModel):
     name: str
     description: Optional[str] = None
+    version: Optional[str] = None
+    icon: Optional[str] = None
 
+@app.get("/api/v1/products/{slug}")
+def get_product_details(
+    slug: str,
+    db: Session = Depends(get_db)
+):
+    repository = ProductRepository(db)
+    service = ProductService(repository)
 
-@app.post("/api/v1/categories", status_code=201)
-def create_category(
-    payload: CategoryCreateRequest,
+    result = service.get_product_details(slug)
+
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found"
+        )
+
+    return result
+
+@app.post("/api/v1/products", status_code=201)
+def create_product(
+    payload: ProductCreateRequest,
     db: Session = Depends(get_db),
     user: dict = Depends(require_editor)
 ):
-    repository = CategoryRepository(db)
-    service = CategoryService(repository)
+    repository = ProductRepository(db)
+    service = ProductService(repository)
 
     try:
-        return service.create_category(
+        return service.create_product(
             payload.name,
-            payload.description
+            payload.description,
+            payload.version,
+            payload.icon
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
@@ -582,6 +624,29 @@ def get_my_notifications(
 
     return service.get_my_notifications(user["user_id"])
 
+@app.get("/api/v1/content-notifications")
+def get_content_notifications(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_editor)
+):
+    logs = (
+        db.query(AuditLog)
+        .filter(AuditLog.target_type == "article")
+        .order_by(AuditLog.created_at.desc())
+        .limit(20)
+        .all()
+    )
+
+    return [
+        {
+            "id": str(log.id),
+            "action": log.action,
+            "details": log.details,
+            "created_at": str(log.created_at),
+        }
+        for log in logs
+    ]
+
 @app.get("/api/v1/articles/{slug}")
 def get_article_by_slug(
     slug: str,
@@ -648,7 +713,7 @@ def export_article_pdf(slug: str, db: Session = Depends(get_db)):
     )
 
 @app.post("/api/v1/auth/login", status_code=200)
-@limiter.limit("5/10minutes")
+@limiter.limit("10/minute")
 def login(
     request: Request,
     payload: LoginRequest,
@@ -717,13 +782,13 @@ def refresh_access_token(
     }
 
 
-@app.post("/api/v1/auth/register", status_code=403)
+@app.post("/api/v1/auth/register", status_code=201)
 def register(
     payload: RegisterRequest,
-    db: Session = Depends(get_db),
-    user: dict = Depends(require_admin)
+    db: Session = Depends(get_db)
 ):
     repository = UserRepository(db)
+
     service = AuthService(
         repository,
         pwd_context,
@@ -736,7 +801,7 @@ def register(
         payload.username,
         payload.email,
         payload.password,
-        payload.role,
+        "viewer",
         payload.department
     )
 
@@ -748,6 +813,7 @@ class ArticleCreateRequest(BaseModel):
     tag_ids:       list[str] = []
     status:        str = "draft"
     content_type:  str = "how_to"
+    product_id:    Optional[str] = None
     product_version: Optional[str] = None
 class ArticleUpdateRequest(BaseModel):
     title:         Optional[str] = None
@@ -756,6 +822,7 @@ class ArticleUpdateRequest(BaseModel):
     tag_ids:       Optional[list[str]] = None
     status:        Optional[str] = None
     content_type:  Optional[str] = None
+    product_id:    Optional[str] = None
     product_version: Optional[str] = None
 
 @app.post("/api/v1/articles", status_code=201)
@@ -778,6 +845,7 @@ def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db),
         body_html="",
         status=ArticleStatus(requested_status),
         category_id=payload.category_id if payload.category_id else None,
+        product_id=payload.product_id if payload.product_id else None,
         content_type=ContentType(payload.content_type),
         product_version=payload.product_version,
         author_id=admin.id,
@@ -824,6 +892,9 @@ def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depen
     if payload.category_id is not None:
         article.category_id = payload.category_id if payload.category_id else None
 
+    if payload.product_id is not None:
+        article.product_id = payload.product_id if payload.product_id else None
+
     if payload.content_type is not None:
         article.content_type = ContentType(payload.content_type)
 
@@ -866,6 +937,8 @@ def revert_article(slug: str, db: Session = Depends(get_db), user: dict = Depend
 
 @app.post("/api/v1/articles/{slug}/approve")
 def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_sme_or_admin)):
+
+    print("APPROVE USER:", user)
     article = db.query(Article).filter(Article.slug == slug).first()
 
     if not article:
@@ -1211,10 +1284,10 @@ def create_admin_user(
     db: Session = Depends(get_db),
     user: dict = Depends(require_admin)
 ):
-    if payload.role not in ["viewer", "editor"]:
+    if payload.role not in ["viewer", "editor", "sme"]:
         raise HTTPException(
             status_code=400,
-            detail="Admin can only create viewer or editor accounts"
+            detail="Admin can only create viewer, editor, or SME accounts"
         )
 
     existing = db.query(User).filter(
@@ -1260,6 +1333,25 @@ def create_admin_user(
         "is_active": new_user.is_active,
         "message": "User created successfully"
     }
+
+@app.get("/api/v1/admin/users")
+def list_users(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    users = db.query(User).order_by(User.created_at.desc()).all()
+
+    return [
+        {
+            "id": str(u.id),
+            "username": u.username,
+            "email": u.email,
+            "role": u.role.value,
+            "department": u.department,
+            "is_active": u.is_active,
+        }
+        for u in users
+    ]
 
 class UpdateRoleRequest(BaseModel):
     role: str

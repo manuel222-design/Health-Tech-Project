@@ -39,14 +39,13 @@ api.interceptors.response.use(
 export const login = (email, password) =>
   api.post('/auth/login', { email, password })
 
-export const register = (username, email, password, role, department) =>
-api.post('/auth/register', {
-  username,
-  email,
-  password,
-  role,
-  department
-})
+export const register = (username, email, password, department) =>
+  api.post('/auth/register', {
+    username,
+    email,
+    password,
+    department
+  })
 
 export const submitSMEReview = (slug, decision, comments) =>
   api.post(`/articles/${slug}/sme-review`, {
@@ -61,7 +60,10 @@ export const getSMEReviews = (slug) =>
   api.get(`/articles/${slug}/sme-reviews`)
 
 export const approveArticle = (slug) => api.post(`/articles/${slug}/approve`)
-export const getArticles   = ()     => api.get('/articles')
+export const getArticles = (filters = {}) => {
+  const params = new URLSearchParams(filters)
+  return api.get(`/articles?${params.toString()}`)
+}
 export const getAllArticlesAdmin = () => api.get('/articles/admin/all')
 export const getArticleAdmin = (slug) => api.get(`/articles/admin/${slug}`)
 export const getArticle    = (slug) => api.get(`/articles/${slug}`)
@@ -71,6 +73,13 @@ export const searchArticles = (q, filters = {}) => {
 }
 export const getHomepage = () => api.get('/homepage')
 export const getCategories = () => api.get('/categories')
+export const getProducts = () => api.get('/products')
+export const getProductDetails = (slug) =>
+api.get(`/products/${slug}`)
+
+export const createProduct = (data) =>
+  api.post('/products', data)
+
 export const createCategory = (name, description) =>
   api.post('/categories', { name, description })
 export const getTags = () => api.get('/tags')
@@ -114,3 +123,6 @@ export const revertArticle = (slug) => api.post(`/articles/${slug}/revert`)
 export const getMyNotifications = () => api.get('/my-notifications')
 
 export const getUnansweredQuestions = () => api.get('/admin/unanswered-questions')
+
+export const getContentNotifications = () =>
+  api.get('/content-notifications')

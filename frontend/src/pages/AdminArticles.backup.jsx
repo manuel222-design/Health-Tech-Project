@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { getAllArticlesAdmin, getPendingSMEArticles, deleteArticle, approveArticle, rejectArticle } from "../services/api"
+import { getAllArticlesAdmin, getPendingSMEArticles, deleteArticle, submitSMEReview, approveArticle, rejectArticle } from "../services/api"
 
 export default function AdminArticles({ onEdit, onCreate, userRole }) {
   const isSME = userRole === "sme"
@@ -73,7 +73,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
     setRejecting(slug)
 
     try {
-      await rejectArticle(slug, reason || "Changes requested")
+      await rejectArticle(slug, reason)
 
       setArticles(prev =>
         prev.map(a =>

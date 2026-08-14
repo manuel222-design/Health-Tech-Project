@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { getArticles, searchArticles, getCategories, getTags } from "../services/api"
+import { getArticles, searchArticles, getCategories, getTags, getProducts } from "../services/api"
 
 export default function Articles({ onSelectArticle, initialCategory = "" }) {
   const [articles, setArticles]   = useState([])
@@ -11,6 +11,8 @@ export default function Articles({ onSelectArticle, initialCategory = "" }) {
   const [typeFilter, setTypeFilter] = useState("")
   const [allTags, setAllTags] = useState([])
   const [tagFilter, setTagFilter] = useState("")
+  const [products, setProducts] = useState([])
+  const [productFilter, setProductFilter] = useState("")
   const [suggestions, setSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [fallbackArticles, setFallbackArticles] = useState([])
@@ -36,34 +38,22 @@ export default function Articles({ onSelectArticle, initialCategory = "" }) {
 
     getCategories().then(res => setCategories(res.data))
     getTags().then(res => setAllTags(res.data))
+    getProducts().then(res => setProducts(res.data))
   }, [initialCategory])
 
-  async function runSearch(q, catFilter, typeF, tagF) {
+  async function runSearch(q, catFilter, typeF, tagF, productF) {
     if (q.length < 2) {
-      const res = await getArticles()
-      const results = res.data.results || res.data   
+      const filters = {}
 
-      let filtered = results
+      if (catFilter) filters.category_id = catFilter
+      if (typeF) filters.content_type = typeF
+      if (tagF) filters.tag_id = tagF
+      if (productF) filters.product_id = productF
 
-      if (catFilter) {
-        filtered = filtered.filter(
-          article => article.category_id === catFilter
-        )
-      }
+      const res = await getArticles(filters)
+      const results = res.data.results || res.data || []
 
-      if (typeF) {
-        filtered = filtered.filter(
-          article => article.content_type === typeF
-        )
-      }
-
-      if (tagF) {
-        filtered = filtered.filter(article =>
-          article.tags?.some(tag => tag.id === tagF)
-        )
-      }
-
-      setArticles(filtered)
+      setArticles(results)
       return
     }
 
@@ -75,6 +65,7 @@ export default function Articles({ onSelectArticle, initialCategory = "" }) {
       if (catFilter) filters.category_id = catFilter
       if (typeF) filters.content_type = typeF
       if (tagF) filters.tag_id = tagF
+      if (productF) filters.product_id = productF
 
       const res = await searchArticles(q, filters)
       setArticles(res.data.results || [])
@@ -86,7 +77,7 @@ export default function Articles({ onSelectArticle, initialCategory = "" }) {
   function handleSearch(e) {
     const q = e.target.value
     setSearch(q)
-    runSearch(q, categoryFilter, typeFilter, tagFilter)
+    runSearch(q, categoryFilter, typeFilter, tagFilter, productFilter)
 
     clearTimeout(window.__searchDebounce)
     if (q.length < 2) {
@@ -113,19 +104,25 @@ export default function Articles({ onSelectArticle, initialCategory = "" }) {
   function handleCategoryFilterChange(e) {
     const val = e.target.value
     setCategoryFilter(val)
-    runSearch(search, val, typeFilter, tagFilter)
+    runSearch(search, val, typeFilter, tagFilter, productFilter)
   }
 
   function handleTypeFilterChange(e) {
     const val = e.target.value
     setTypeFilter(val)
-    runSearch(search, categoryFilter, val, tagFilter)
+    runSearch(search, categoryFilter, val, tagFilter, productFilter)
   }
 
   function handleTagFilterChange(e) {
     const val = e.target.value
     setTagFilter(val)
-    runSearch(search, categoryFilter, typeFilter, val)
+    runSearch(search, categoryFilter, typeFilter, val, productFilter)
+  }
+
+  function handleProductFilterChange(e) {
+    const val = e.target.value
+    setProductFilter(val)
+    runSearch(search, categoryFilter, typeFilter, tagFilter, val)
   }
 
   if (loading) return (
@@ -199,7 +196,22 @@ export default function Articles({ onSelectArticle, initialCategory = "" }) {
           ))}
         </select>
       </div>
-
+     
+      <select
+        value={productFilter}
+        onChange={handleProductFilterChange}
+        className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+      >
+         <option value="">All products</option>
+         
+         {products.map(product => (
+            <option key={product.id} value={product.id}>
+              {product.icon ? `${product.icon} ` : ""}
+              {product.name}
+              {product.version ? ` — v${product.version}` : ""}
+            </option>
+      ))}
+      </select>   
       <p className="text-sm text-gray-500 mb-4">
         {searching ? "Searching..." : `${articles.length} article${articles.length !== 1 ? "s" : ""} found`}
       </p>

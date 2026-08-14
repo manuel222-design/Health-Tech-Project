@@ -3,13 +3,12 @@ import { getArticle, submitFeedback, getFeedbackSummary } from "../services/api"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
-ReactMarkdown.use(remarkGfm)
 
 function extractHeadings(markdown) {
   const lines = markdown.split("\n")
   const headings = []
   for (const line of lines) {
-    const match = line.match(/^(#{2,3})\s+(.+)$/)
+    const match = line.match(/^(#{1,3})\s+(.+)$/)
     if (match) {
       const level = match[1].length
       const text = match[2].trim()
@@ -122,7 +121,7 @@ export default function ArticleView({ slug, onBack }) {
             {article.title}
           </h1>
           <a
-            href={`http://127.0.0.1:8000/api/v1/articles/${slug}/pdf`}
+            href={`http://127.0.0.1:8001/api/v1/articles/${slug}/pdf`}
             download
             className="shrink-0 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition whitespace-nowrap"
           >
@@ -135,7 +134,7 @@ export default function ArticleView({ slug, onBack }) {
         </p>
         <hr className="mb-6" />
 
-        {headings.length >= 3 && (
+        {headings.length > 0 && (
           <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
             <button
               onClick={() => setShowToc(!showToc)}
@@ -165,6 +164,7 @@ export default function ArticleView({ slug, onBack }) {
 
         <div className="article-content max-w-none">
           <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
             components={{
               h2: ({ children }) => {
                 const text = String(children)

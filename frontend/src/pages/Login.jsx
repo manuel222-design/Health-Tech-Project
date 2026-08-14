@@ -3,102 +3,181 @@ import { useState } from "react"
 import { login } from "../services/api"
 
 export default function Login({ onLogin, onShowRegister }) {
-  const [email, setEmail]       = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError]       = useState("")
-  const [loading, setLoading]   = useState(false)
 
-  async function handleSubmit() {
-    if (!email || !password) {
+  const [email,setEmail] = useState("")
+  const [password,setPassword] = useState("")
+  const [error,setError] = useState("")
+  const [loading,setLoading] = useState(false)
+
+
+  async function handleSubmit(){
+
+    if(!email || !password){
       setError("Please enter both email and password")
       return
     }
+
     setLoading(true)
     setError("")
 
-    try {
-      const res = await login(email, password)
-      localStorage.setItem("token",    res.data.access_token)
-      localStorage.setItem("refresh_token", res.data.refresh_token)
-      localStorage.setItem("role",     res.data.role)
-      localStorage.setItem("username", res.data.username)
-      onLogin(res.data)
-    } catch {
-      setError("Invalid email or password. Please try again.")
-    } finally {
+
+    try{
+
+      const res = await login(email,password)
+
+      const userData = {
+        token: res.data.access_token,
+        refresh_token: res.data.refresh_token,
+        username: res.data.username,
+        role: res.data.role
+      }
+
+
+      localStorage.setItem(
+        "token",
+        userData.token
+      )
+
+      localStorage.setItem(
+        "refresh_token",
+        userData.refresh_token
+      )
+
+      localStorage.setItem(
+        "username",
+        userData.username
+      )
+
+      localStorage.setItem(
+        "role",
+        userData.role
+      )
+
+
+      onLogin(userData)
+
+
+    }catch(error){
+
+      console.log(error)
+
+      setError(
+        "Invalid email or password. Please try again."
+      )
+
+    }finally{
+
       setLoading(false)
+
     }
+
   }
 
-  return (
-    <main className="min-h-screen bg-linear-to-br from-teal-600 to-blue-800 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
 
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl font-bold">HC</span>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Healthtech Knowledge Base
-          </h1>
-          <p className="text-gray-500 mt-1">
-            Sign in to access HMIS guides
-          </p>
-        </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
-            {error}
-          </div>
-        )}
+return (
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email address
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="admin@healthtech.co.ke"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div>
+<main className="min-h-screen bg-gradient-to-br from-teal-600 to-blue-800 flex items-center justify-center p-4">
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div>
 
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition duration-200 disabled:opacity-50"
-          >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
-        </div>
+<div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
 
-        <button
-          onClick={onShowRegister}
-          className="w-full text-teal-700 hover:text-teal-800 text-sm font-medium py-2 mt-2"
-        >
-          Don't have an account? Create one
-        </button>
 
-        <p className="text-center text-xs text-gray-500 mt-4">
-          Taifa Care HMIS Knowledge Base & Chatbot System
-        </p>
-      </div>
-    </main>
-  )
+<div className="text-center mb-8">
+
+<div className="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+
+<span className="text-white text-2xl font-bold">
+TC
+</span>
+
+</div>
+
+
+<h1 className="text-2xl font-bold text-gray-800">
+Taifa Care HMIS
+</h1>
+
+
+<p className="text-gray-500 mt-1">
+Sign in to access knowledge system
+</p>
+
+
+</div>
+
+
+
+{error && (
+
+<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
+
+{error}
+
+</div>
+
+)}
+
+
+
+<div className="space-y-4">
+
+
+<input
+type="email"
+value={email}
+onChange={e=>setEmail(e.target.value)}
+placeholder="Email address"
+className="w-full border rounded-lg px-4 py-3"
+/>
+
+
+<input
+type="password"
+value={password}
+onChange={e=>setPassword(e.target.value)}
+placeholder="Password"
+className="w-full border rounded-lg px-4 py-3"
+/>
+
+
+
+<button
+
+onClick={handleSubmit}
+
+disabled={loading}
+
+className="w-full bg-teal-600 text-white py-3 rounded-lg"
+
+>
+
+{loading ? "Signing in..." : "Sign In"}
+
+</button>
+
+
+</div>
+
+
+<button
+
+onClick={onShowRegister}
+
+className="w-full mt-4 text-teal-700"
+
+>
+
+Create account
+
+</button>
+
+
+</div>
+
+
+</main>
+
+)
+
 }
