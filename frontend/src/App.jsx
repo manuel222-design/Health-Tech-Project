@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
-import Dashboard from "./pages/Dashboard"
 import Articles from "./pages/Articles"
 import ArticleView from "./pages/ArticleView"
 import AdminArticles from "./pages/AdminArticles"
@@ -13,9 +12,8 @@ import ProductDetails from "./pages/ProductDetails"
 import ArticleForm from "./pages/ArticleForm"
 import ChatWidget from "./components/ChatWidget"
 import Home from "./pages/Home"
-import Landing from "./pages/Landing"
 import ErrorPage from "./pages/ErrorPage"
-import { getCategories,getMyNotifications, getContentNotifications} from "./services/api"
+import { getCategories } from "./services/api"
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -23,12 +21,11 @@ export default function App() {
     const username = localStorage.getItem("username")
     const role = localStorage.getItem("role")
 
-    return token ? { token, username: username || "User", role: role || "viewer" } : null
+    return token ? { token, username, role } : null
   })
 
   const [showRegister, setShowRegister] = useState(false)
   const [notifications, setNotifications] = useState([])
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [sidebarCategories, setSidebarCategories] = useState([])
 
   const [darkMode, setDarkMode] = useState(
@@ -44,9 +41,12 @@ export default function App() {
     : null
 
   const [currentPage, setCurrentPage] = useState(() => {
-    return localStorage.getItem("token") ? "home" : "landing"
+    if (initialPath === "/") return "home"
+    if (initialPath === "/articles") return "articles"
+    if (initialPath.startsWith("/article/")) return "article"
+
+    return "notfound"
   })
-    
 
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [selectedSlug, setSelectedSlug] = useState(initialSlug)
@@ -60,42 +60,7 @@ export default function App() {
   const isAdmin = user?.role === "admin"
 
   function handleLogin(userData) {
-
-      localStorage.setItem(
-        "token",
-        userData.access_token
-      )
-
-      localStorage.setItem(
-        "refresh_token",
-        userData.refresh_token
-      )
-
-      localStorage.setItem(
-        "username",
-        userData.username
-      )
-
-      localStorage.setItem(
-        "role",
-        userData.role
-      )
-
-      setUser({
-        token: userData.access_token,
-        username: userData.username,
-        role: userData.role
-      })
-
-      setCurrentPage("home")
-      setShowLanding(false)
-      setShowRegister(false)
-
-      window.history.pushState(
-        {},
-        "",
-        "/dashboard"
-      )
+    setUser(userData)
   }
 
   useEffect(() => {
@@ -109,25 +74,10 @@ export default function App() {
       .catch(() => setSidebarCategories([]))
   }, [])
 
-  function handleLogout(){
-    
+  function handleLogout() {
     localStorage.clear()
-
     setUser(null)
-
-    setNotifications([])
-
-    setProfileOpen(false)
-
-    window.history.pushState(
-      {},
-      "",
-      "/"
-    )
-
-    setCurrentPage("landing")
-
-  } 
+  }
 
   function goTo(page) {
     setCurrentPage(page)
@@ -136,7 +86,7 @@ export default function App() {
 
     if (page === "home") {
       setSelectedCategory("")
-      window.history.pushState({}, "", "/dashboard")
+      window.history.pushState({}, "", "/")
     }
 
     if (page === "articles") {
@@ -177,18 +127,12 @@ export default function App() {
   useEffect(() => {
     if (!user) return
 
-    Promise.all([
-      getMyNotifications(),
-      getContentNotifications()
-    ])
-      .then(([ratings, content]) => {
-        setNotifications([
-          ...(ratings.data || []),
-          ...(content.data || [])
-       ])
-      })
-      .catch(() => setNotifications([]))
-    }, [user])
+    import("./services/api").then(({ getMyNotifications }) => {
+      getMyNotifications()
+        .then(res => setNotifications(res.data))
+        .catch(() => setNotifications([]))
+    })
+  }, [user])
 
   function handleEditArticle(slug) {
     if (!canManage) return
@@ -209,7 +153,6 @@ export default function App() {
   }
 
   if (!user) {
-
     if (showRegister) {
       return (
         <Register
@@ -219,23 +162,10 @@ export default function App() {
       )
     }
 
-    if (currentPage === "login") {
-      return (
-        <Login
-          onLogin={handleLogin}
-          onShowRegister={() => setShowRegister(true)}
-        />
-      )
-    }
-
     return (
-      <Landing
-        onLogin={() => {
-          setCurrentPage("login")
-        }}
-        onRegister={() => {
-          setShowRegister(true)
-        }}
+      <Login
+        onLogin={handleLogin}
+        onShowRegister={() => setShowRegister(true)}
       />
     )
   }
@@ -300,47 +230,88 @@ export default function App() {
                 : "text-slate-400 hover:bg-slate-800 hover:text-white"
             }`}
           >
-            <span>🏠</span>
+            <span>▦</span>
             <span>Dashboard</span>
           </button>
 
 
 
-          <div className="pt-5 pb-2 px-3 text-[10px] uppercase tracking-wider text-slate-500 font-semibold flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-slate-800">
+          <div className="pt-5 pb-2 px-3 text-[10px] uppercase tracking-wider text-slate-600 font-semibold">
+            Knowledge
+          </div>
+
+          <button
+            onClick={() => goTo("articles")}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
+              currentPage === "articles" ||
+              currentPage === "article"
+                ? "bg-slate-800 text-white border-l-2 border-teal-500"
+                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+            }`}
+          >
+            <span>▤</span>
+            <span>Knowledge Base</span>
+          </button>  
+
+          {sidebarCategories.length > 0 && (
+            <div className="ml-3 mt-2 pl-3 border-l border-slate-800 space-y-1">
+              {sidebarCategories.map(category => (
+                <button
+                  key={category.id}
+                  onClick={() => handleSelectCategory(category.id)}
+                  className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-xs text-left transition ${
+                    currentPage === "articles" && selectedCategory === category.id
+                      ? "bg-slate-800 text-teal-400"
+                      : "text-slate-500 hover:bg-slate-800 hover:text-slate-200"
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0"></span>
+                  <span className="truncate">{category.name}</span>
+                  <span className="ml-auto text-[10px] text-slate-600">
+                    {category.article_count || 0}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {(canManage || isSME) && (
+            <>
+              <div className="pt-5 pb-2 px-3 text-[10px] uppercase tracking-wider text-slate-600 font-semibold">
                 Content Management
               </div>
 
-              {isSME && (
-                <button
-                  onClick={() => goTo("admin")}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
-                    currentPage === "admin"
-                      ? "bg-slate-800 text-white border-l-2 border-teal-500"
-                      : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                  }`}
-                >
-                  <span className="w-5 text-center">✓</span>
-                  <span>SME Review</span>
+              <button
+                onClick={() => goTo("admin")}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
+                  currentPage === "admin"
+                    ? "bg-slate-800 text-white border-l-2 border-teal-500"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                }`}
+              >
+                <span>✓</span>
+                <span>SME Review</span>
 
-                  {notifications.length > 0 && (
-                    <span className="ml-auto bg-red-500 text-white text-[10px] rounded-full px-1.5 py-0.5">
-                      {notifications.length}
-                    </span>
-                  )}
-                </button>
-              )}
+                {notifications.length > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-[10px] rounded-full px-1.5 py-0.5">
+                    {notifications.length}
+                  </span>
+                )}
+              </button>
+            </>
+          )}
 
 
           {canManage && (
             <button
-              onClick={() => goTo("admin")}
+              onClick={() => goTo("form")}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                 currentPage === "form"
                   ? "bg-slate-800 text-white border-l-2 border-teal-500"
                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
             >
-              <span className="w-5 text-center">✎</span>
+              <span>✎</span>
               <span>Manage Articles</span>
             </button>
           )}
@@ -354,14 +325,14 @@ export default function App() {
                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
             >
-              <span className="w-5 text-center">▣</span>
+              <span>▣</span>
               <span>Products</span>
             </button>
           )}
 
           {isAdmin && (
             <>
-              <div className="pt-5 pb-2 px-3 text-[10px] uppercase tracking-wider text-slate-500 font-semibold flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-slate-800">
+              <div className="pt-5 pb-2 px-3 text-[10px] uppercase tracking-wider text-slate-600 font-semibold">
                 Administration
               </div>
 
@@ -373,7 +344,7 @@ export default function App() {
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
-                <span className="w-5 text-center">♙</span>
+                <span>♙</span>
                 <span>Users</span>
               </button>
 
@@ -385,7 +356,7 @@ export default function App() {
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
-                <span className="w-5 text-center">▥</span>
+                <span>▥</span>
                 <span>Analytics</span>
               </button>
 
@@ -397,7 +368,7 @@ export default function App() {
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
-                <span className="w-5 text-center">◷</span>
+                <span>◷</span>
                 <span>Audit Log</span>
               </button>
             </>
@@ -460,83 +431,14 @@ export default function App() {
 
           <div className="flex items-center gap-4">
 
-            <div className="relative">
-              <button
-                onClick={() => setNotificationsOpen(prev => !prev)}
-                className="relative w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition"
-                title="Notifications"
-                aria-label="Notifications"
+            {notifications.length > 0 && (
+              <span
+                title={`${notifications.length} of your articles have a low rating`}
+                className="text-xs bg-red-50 text-red-600 border border-red-100 rounded-full px-2.5 py-1 font-medium"
               >
-                <span className="text-lg">🔔</span>
-
-                {notifications.length > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {notifications.length > 99 ? "99+" : notifications.length}
-                  </span>
-                )}
-              </button>
-
-              {notificationsOpen && (
-                <div className="absolute right-0 top-11 w-80 max-h-96 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-50">
-                  <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-                    <span className="font-semibold text-sm text-slate-800">
-                      Notifications
-                    </span>
-                    <span className="text-xs text-slate-400">
-                      {notifications.length} total
-                    </span>
-                  </div>
-
-                  {notifications.length === 0 ? (
-                    <div className="px-4 py-8 text-center text-sm text-slate-400">
-                      No notifications
-                    </div>
-                  ) : (
-                    notifications.map((notification, index) => {
-                      const title =
-                        notification.title ||
-                        notification.subject ||
-                        "Notification"
-
-                      const message =
-                        notification.message ||
-                        notification.content ||
-                        notification.detail ||
-                        notification.description ||
-                        "You have a new notification."
-
-                      return (
-                        <div
-                          key={notification.id || index}
-                          onClick={() => setNotificationsOpen(false)}
-                          className="px-4 py-3 border-b border-slate-100 hover:bg-slate-50 transition"
-                        >
-                          <div className="flex gap-3">
-                            <span className="mt-0.5 text-teal-600">●</span>
-
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium text-slate-700">
-                                {title}
-                              </p>
-
-                              <p className="text-xs text-slate-500 mt-0.5">
-                                {message}
-                              </p>
-
-                              {(notification.created_at || notification.createdAt) && (
-                                <p className="text-[10px] text-slate-400 mt-1">
-                                  {notification.created_at || notification.createdAt}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })
-                  )}
-                </div>
-              )}
-            </div>
+                {notifications.length} low-rated
+              </span>
+            )}
 
 
 
@@ -558,16 +460,16 @@ export default function App() {
             >
               <div className="text-right">
                 <div className="text-xs font-medium text-slate-700">
-                  {user?.username || "User"}
+                  {user.username}
                 </div>
                 
                 <div className="text-[11px] text-slate-400 capitalize">
-                  {user?.role || "viewer"}
+                  {user.role}
                 </div>
               </div>
               
               <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs font-semibold">
-                {(user?.username || "U").substring(0, 2).toUpperCase()}
+                {(user.username || "U").substring(0, 2).toUpperCase()}
               </div>
               
               <span className="text-slate-400 text-xs">
@@ -579,12 +481,26 @@ export default function App() {
               <div className="absolute right-6 top-14 w-56 bg-white border border-slate-200 rounded-xl shadow-lg py-2 z-50">
                 <div className="px-4 py-2 border-b border-slate-100">
                   <p className="text-sm font-medium text-slate-800">
-                    {user?.username || "User"}
+                    {user.username}
                   </p>
                   <p className="text-xs text-slate-400 capitalize">
-                    {user?.role || "viewer"}
+                    {user.role}
                   </p>
                 </div>
+                
+                <button
+                  onClick={() => setProfileOpen(false)}
+                  className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                >
+                  My Profile
+                </button>
+
+                <button
+                  onClick={() => setProfileOpen(false)}
+                  className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                >
+                  Account Settings
+                </button>
                 
                 <div className="border-t border-slate-100 my-1" />
 
@@ -641,7 +557,7 @@ export default function App() {
             <AdminArticles
               onEdit={handleEditArticle}
               onCreate={handleCreateArticle}
-              userRole={user?.role || "viewer"}
+              userRole={user.role}
             />
           )}
 

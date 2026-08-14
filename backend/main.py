@@ -77,7 +77,9 @@ ALLOWED_ORIGINS = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=[
+        "http://127.0.0.1:5173"
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "X-Session-Token"],
@@ -112,7 +114,7 @@ async def add_security_headers(request, call_next):
         "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         "img-src 'self' data: https://fastapi.tiangolo.com; "
-        "connect-src 'self' https://healthtech-kb-backend-2uo3.onrender.com;"
+        "connect-src 'self' http://127.0.0.1:8000 http://localhost:8000 https://healthtech-kb-backend-2uo3.onrender.com;"
     )
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
@@ -801,7 +803,6 @@ def register(
         payload.username,
         payload.email,
         payload.password,
-        "viewer",
         payload.department
     )
 
