@@ -169,7 +169,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
             </div>
 
             <div className="flex gap-2 shrink-0">
-              {article.status === "pending_review" && (
+              {article.status === "pending_review" && canManage && (
                 <>
                   <button
                     onClick={() => handleApprove(article.slug)}

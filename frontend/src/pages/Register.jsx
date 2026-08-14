@@ -6,7 +6,8 @@ export default function Register({ onRegister, onBackToLogin }) {
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [department, setDepartment] = useState("")
+  const [role, setRole] = useState("viewer")
+  const [department, setDepartment] = useState("")  
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -39,7 +40,39 @@ export default function Register({ onRegister, onBackToLogin }) {
         )
       }
 
-      onRegister(res.data)
+      localStorage.setItem(
+        "username",
+        res.data.username
+      )
+
+      localStorage.setItem(
+        "role",
+        res.data.role
+      )
+
+      const userData = {
+        token: res.data.access_token,
+        refresh_token: res.data.refresh_token,
+        username: res.data.username,
+        role: res.data.role
+      }
+
+      localStorage.setItem(
+        "token",
+        userData.token
+      )
+
+      localStorage.setItem(
+        "username",
+        userData.username
+      )
+
+      localStorage.setItem(
+        "role",
+        userData.role
+      )
+
+      onRegister(userData)
 
     } catch (err) {
 
@@ -108,7 +141,21 @@ export default function Register({ onRegister, onBackToLogin }) {
           required
         />
 
-
+        <select
+          className="w-full border p-3 rounded mb-3"
+          value={role}
+          onChange={(e)=>setRole(e.target.value)}
+        >
+          <option value="viewer">
+            Viewer
+          </option>
+          <option value="editor">
+            Editor
+          </option>
+          <option value="sme">
+            SME
+          </option>
+        </select>
         <input
           className="w-full border p-3 rounded mb-4"
           placeholder="Department (optional)"

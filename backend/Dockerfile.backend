@@ -1,0 +1,51 @@
+# ==========================================
+# STAGE 1: Builder
+# ==========================================
+FROM python:3.13-slim AS builder
+
+WORKDIR /app
+
+# Install compilation tools needed for C-extensions (like libpq / psycopg2)
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a virtual environment to isolate dependencies cleanly
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+# ==========================================
+# STAGE 2: Runtime (Final Production Image)
+# ==========================================
+FROM python:3.13-slim AS runtime
+
+WORKDIR /app
+
+# Install ONLY the runtime database client library (no heavy build tools)
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root system user for security
+RUN useradd -m -r appuser && \
+    chown -R appuser:appuser /app
+
+# Copy the pre-compiled Python environment from the builder stage
+COPY --from=builder /opt/venv /opt/venv
+
+# Ensure the app uses the builder's virtual environment packages
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy the rest of your application code
+COPY --chown=appuser:appuser . .
+
+USER appuser
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
