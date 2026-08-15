@@ -2,187 +2,184 @@ import { useState } from "react"
 import { register } from "../services/api"
 
 export default function Register({ onRegister, onBackToLogin }) {
-
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [role, setRole] = useState("viewer")
-  const [department, setDepartment] = useState("")  
+  const [department, setDepartment] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
 
+    if (!username.trim() || !email.trim() || !password) {
+      setError("Please complete the required fields")
+      return
+    }
+
     setError("")
     setLoading(true)
 
     try {
-
       const res = await register(
-        username,
-        email,
+        username.trim(),
+        email.trim(),
         password,
-        department
-      )
-
-      console.log("REGISTER SUCCESS:", res.data)
-
-      localStorage.setItem(
-        "token",
-        res.data.access_token
-      )
-
-      if (res.data.refresh_token) {
-        localStorage.setItem(
-          "refresh_token",
-          res.data.refresh_token
-        )
-      }
-
-      localStorage.setItem(
-        "username",
-        res.data.username
-      )
-
-      localStorage.setItem(
-        "role",
-        res.data.role
+        department.trim() || null
       )
 
       const userData = {
         token: res.data.access_token,
-        refresh_token: res.data.refresh_token,
-        username: res.data.username,
-        role: res.data.role
+        refresh_token: res.data.refresh_token || null,
+        username: res.data.username || username.trim(),
+        role: res.data.role || "viewer",
       }
 
-      localStorage.setItem(
-        "token",
-        userData.token
-      )
+      if (!userData.token) {
+        throw new Error("Registration succeeded but no access token was returned")
+      }
 
-      localStorage.setItem(
-        "username",
-        userData.username
-      )
+      localStorage.setItem("token", userData.token)
 
-      localStorage.setItem(
-        "role",
-        userData.role
-      )
+      if (userData.refresh_token) {
+        localStorage.setItem("refresh_token", userData.refresh_token)
+      } else {
+        localStorage.removeItem("refresh_token")
+      }
+
+      localStorage.setItem("username", userData.username)
+      localStorage.setItem("role", userData.role)
 
       onRegister(userData)
-
     } catch (err) {
-
-      console.error(
-        "REGISTER ERROR:",
-        err.response?.data || err
-      )
+      console.error("REGISTER ERROR:", err)
 
       setError(
         err.response?.data?.detail ||
         err.response?.data?.message ||
-        "Registration failed"
+        err.message ||
+        "Registration failed. Please try again."
       )
-
     } finally {
       setLoading(false)
     }
   }
 
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100">
+    <main className="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-blue-800 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span className="text-white text-2xl font-bold">
+              TC
+            </span>
+          </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-xl shadow-md w-full max-w-md"
-      >
+          <h1 className="text-2xl font-bold text-gray-800">
+            Create Account
+          </h1>
 
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">
-          Create Account
-        </h2>
-
+          <p className="text-gray-500 mt-1">
+            Join the Taifa Care HMIS Knowledge System
+          </p>
+        </div>
 
         {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
             {error}
           </div>
         )}
 
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Username
+            </label>
 
-        <input
-          className="w-full border p-3 rounded mb-3"
-          placeholder="Username"
-          value={username}
-          onChange={(e)=>setUsername(e.target.value)}
-          required
-        />
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Your name"
+              autoComplete="username"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              required
+            />
+          </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email address
+            </label>
 
-        <input
-          className="w-full border p-3 rounded mb-3"
-          placeholder="Email"
-          type="email"
-          value={email}
-          onChange={(e)=>setEmail(e.target.value)}
-          required
-        />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              autoComplete="email"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              required
+            />
+          </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
 
-        <input
-          className="w-full border p-3 rounded mb-3"
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={(e)=>setPassword(e.target.value)}
-          required
-        />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Create a password"
+              autoComplete="new-password"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              required
+            />
+          </div>
 
-        <select
-          className="w-full border p-3 rounded mb-3"
-          value={role}
-          onChange={(e)=>setRole(e.target.value)}
-        >
-          <option value="viewer">
-            Viewer
-          </option>
-          <option value="editor">
-            Editor
-          </option>
-          <option value="sme">
-            SME
-          </option>
-        </select>
-        <input
-          className="w-full border p-3 rounded mb-4"
-          placeholder="Department (optional)"
-          value={department}
-          onChange={(e)=>setDepartment(e.target.value)}
-        />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Department
+              <span className="text-gray-400 font-normal"> (optional)</span>
+            </label>
 
+            <input
+              type="text"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              placeholder="e.g. Clinical, ICT, Administration"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
 
-        <button
-          disabled={loading}
-          className="w-full bg-teal-600 text-white py-3 rounded-lg hover:bg-teal-700"
-        >
-          {loading ? "Creating Account..." : "Register"}
-        </button>
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-500">
+            New accounts start with Viewer access. An administrator can
+            assign additional roles and permissions after registration.
+          </div>
 
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "Creating Account..." : "Create Account"}
+          </button>
+        </form>
 
         <button
           type="button"
           onClick={onBackToLogin}
-          className="w-full mt-4 text-gray-600"
+          className="w-full text-teal-700 hover:text-teal-800 text-sm font-medium py-2 mt-3"
         >
-          Back to Login
+          Already have an account? Sign in
         </button>
 
-
-      </form>
-
-    </div>
+        <p className="text-center text-xs text-gray-500 mt-4">
+          Taifa Care HMIS Knowledge Base & Chatbot System
+        </p>
+      </div>
+    </main>
   )
 }

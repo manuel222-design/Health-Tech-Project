@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
+import Landing from "./pages/Landing"
 import Articles from "./pages/Articles"
 import ArticleView from "./pages/ArticleView"
 import AdminArticles from "./pages/AdminArticles"
@@ -11,19 +12,28 @@ import Products from "./pages/Products"
 import ProductDetails from "./pages/ProductDetails"
 import ArticleForm from "./pages/ArticleForm"
 import ChatWidget from "./components/ChatWidget"
-import Landing from "./pages/Landing"
+import Home from "./pages/Home"
 import ErrorPage from "./pages/ErrorPage"
-import { getCategories } from "./services/api"
+import { getCategories, getMyNotifications, getContentNotifications } from "./services/api"
 
 export default function App() {
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem("token")
     const username = localStorage.getItem("username")
     const role = localStorage.getItem("role")
+    const refresh_token = localStorage.getItem("refresh_token")
 
-    return token ? { token, username, role } : null
+    if (!token) return null
+
+    return {
+      token,
+      refresh_token,
+      username: username || "User",
+      role: role || "viewer",
+    }
   })
 
+  const [showLogin, setShowLogin] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
   const [notifications, setNotifications] = useState([])
   const [sidebarCategories, setSidebarCategories] = useState([])
@@ -31,7 +41,7 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(
     () => localStorage.getItem("darkMode") === "true"
   )
-  
+
   const [profileOpen, setProfileOpen] = useState(false)
 
   const initialPath = window.location.pathname
@@ -41,7 +51,10 @@ export default function App() {
     : null
 
   const [currentPage, setCurrentPage] = useState(() => {
-    if (initialPath === "/") return "home"
+    if (initialPath === "/" || initialPath === "/landing") return "landing"
+    if (initialPath === "/login") return "login"
+    if (initialPath === "/register") return "register"
+    if (initialPath === "/dashboard") return "home"
     if (initialPath === "/articles") return "articles"
     if (initialPath.startsWith("/article/")) return "article"
 
@@ -59,8 +72,113 @@ export default function App() {
   const isSME = user?.role === "sme"
   const isAdmin = user?.role === "admin"
 
+  function normalizeUser(userData) {
+    const token =
+      userData?.token ||
+      userData?.access_token ||
+      null
+
+    const refresh_token =
+      userData?.refresh_token ||
+      localStorage.getItem("refresh_token") ||
+      null
+
+    const username =
+      userData?.username ||
+      localStorage.getItem("username") ||
+      "User"
+
+    const role =
+      userData?.role ||
+      localStorage.getItem("role") ||
+      "viewer"
+
+    return {
+      token,
+      refresh_token,
+      username,
+      role,
+    }
+  }
+
+  function persistUser(userData) {
+    const normalized = normalizeUser(userData)
+
+    if (!normalized.token) {
+      throw new Error("No access token returned")
+    }
+
+    localStorage.setItem("token", normalized.token)
+    localStorage.setItem("username", normalized.username)
+    localStorage.setItem("role", normalized.role)
+
+    if (normalized.refresh_token) {
+      localStorage.setItem(
+        "refresh_token",
+        normalized.refresh_token
+      )
+    }
+
+    return normalized
+  }
+
   function handleLogin(userData) {
-    setUser(userData)
+    try {
+      const normalized = persistUser(userData)
+
+      setUser(normalized)
+      setShowLogin(false)
+      setShowRegister(false)
+      setProfileOpen(false)
+      setCurrentPage("home")
+
+      window.history.pushState(
+        {},
+        "",
+        "/dashboard"
+      )
+    } catch (error) {
+      console.error("LOGIN STATE ERROR:", error)
+    }
+  }
+
+  function openLogin() {
+    setShowRegister(false)
+    setShowLogin(true)
+    setCurrentPage("login")
+
+    window.history.pushState(
+      {},
+      "",
+      "/login"
+    )
+  }
+
+  function openRegister() {
+    setShowLogin(false)
+    setShowRegister(true)
+    setCurrentPage("register")
+
+    window.history.pushState(
+      {},
+      "",
+      "/register"
+    )
+  }
+
+  function goLanding() {
+    setShowLogin(false)
+    setShowRegister(false)
+    setCurrentPage("landing")
+    setSelectedSlug(null)
+    setSelectedProductSlug(null)
+    setEditSlug(null)
+
+    window.history.pushState(
+      {},
+      "",
+      "/"
+    )
   }
 
   useEffect(() => {
@@ -75,45 +193,84 @@ export default function App() {
   }, [])
 
   function handleLogout() {
-    localStorage.clear()
+    localStorage.removeItem("token")
+    localStorage.removeItem("refresh_token")
+    localStorage.removeItem("username")
+    localStorage.removeItem("role")
+
     setUser(null)
+    setNotifications([])
+    setProfileOpen(false)
+    setShowLogin(false)
+    setShowRegister(false)
+    setCurrentPage("landing")
+
+    window.history.pushState(
+      {},
+      "",
+      "/"
+    )
   }
 
   function goTo(page) {
     setCurrentPage(page)
     setSelectedSlug(null)
     setEditSlug(null)
+    setShowLogin(false)
+    setShowRegister(false)
 
     if (page === "home") {
       setSelectedCategory("")
-      window.history.pushState({}, "", "/")
+      window.history.pushState(
+        {},
+        "",
+        "/dashboard"
+      )
     }
 
     if (page === "articles") {
       setSelectedCategory("")
-      window.history.pushState({}, "", "/articles")
+      window.history.pushState(
+        {},
+        "",
+        "/articles"
+      )
     }
   }
 
   function handleSelectArticle(slug) {
     setSelectedSlug(slug)
     setCurrentPage("article")
-    window.history.pushState({}, "", `/article/${slug}`)
+
+    window.history.pushState(
+      {},
+      "",
+      `/article/${slug}`
+    )
   }
-  
+
   function handleSelectProduct(slug) {
     setSelectedProductSlug(slug)
     setCurrentPage("product")
-    window.history.pushState({}, "", `/product/${slug}`)
-  }
 
+    window.history.pushState(
+      {},
+      "",
+      `/product/${slug}`
+    )
+  }
 
   function handleSelectCategory(categoryId) {
     setSelectedCategory(categoryId)
     setCurrentPage("articles")
     setSelectedSlug(null)
     setEditSlug(null)
-    window.history.pushState({}, "", "/articles")
+
+    window.history.pushState(
+      {},
+      "",
+      "/articles"
+    )
   }
 
   useEffect(() => {
@@ -125,13 +282,24 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    if (!user) return
+    if (!user) {
+      setNotifications([])
+      return
+    }
 
-    import("./services/api").then(({ getMyNotifications }) => {
-      getMyNotifications()
-        .then(res => setNotifications(res.data))
-        .catch(() => setNotifications([]))
-    })
+    Promise.all([
+      getMyNotifications(),
+      getContentNotifications(),
+    ])
+      .then(([ratings, content]) => {
+        setNotifications([
+          ...(ratings.data || []),
+          ...(content.data || []),
+        ])
+      })
+      .catch(() => {
+        setNotifications([])
+      })
   }, [user])
 
   function handleEditArticle(slug) {
@@ -152,20 +320,33 @@ export default function App() {
     setCurrentPage("admin")
   }
 
+  /*
+   * PUBLIC FLOW
+   */
+
   if (!user) {
-    if (showRegister) {
+    if (showRegister || currentPage === "register") {
       return (
         <Register
           onRegister={handleLogin}
-          onBackToLogin={() => setShowRegister(false)}
+          onBackToLogin={openLogin}
+        />
+      )
+    }
+
+    if (showLogin || currentPage === "login") {
+      return (
+        <Login
+          onLogin={handleLogin}
+          onShowRegister={openRegister}
         />
       )
     }
 
     return (
-      <Login
-        onLogin={handleLogin}
-        onShowRegister={() => setShowRegister(true)}
+      <Landing
+        onLogin={openLogin}
+        onRegister={openRegister}
       />
     )
   }
@@ -180,23 +361,20 @@ export default function App() {
     product: "Product Details",
     users: "User Management",
     analytics: "Analytics",
-    audit: "Audit Log"
+    audit: "Audit Log",
   }
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-800">
 
-
+      {/* Desktop Sidebar */}
       <aside className="fixed left-0 top-0 bottom-0 w-60 bg-slate-900 text-slate-300 hidden md:flex flex-col z-40">
 
-
         <div className="px-5 py-5 border-b border-slate-800">
-
           <div
             className="flex items-center gap-3 cursor-pointer"
             onClick={() => goTo("home")}
           >
-
             <div className="w-9 h-9 bg-teal-600 rounded-lg flex items-center justify-center shrink-0">
               <span className="text-white font-bold text-sm">
                 TC
@@ -212,15 +390,10 @@ export default function App() {
                 HMIS Knowledge System
               </div>
             </div>
-
           </div>
-
         </div>
 
-
-
         <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
-
 
           <button
             onClick={() => goTo("home")}
@@ -233,8 +406,6 @@ export default function App() {
             <span>▦</span>
             <span>Dashboard</span>
           </button>
-
-
 
           <div className="pt-5 pb-2 px-3 text-[10px] uppercase tracking-wider text-slate-600 font-semibold">
             Knowledge
@@ -251,22 +422,29 @@ export default function App() {
           >
             <span>▤</span>
             <span>Knowledge Base</span>
-          </button>  
+          </button>
 
           {sidebarCategories.length > 0 && (
             <div className="ml-3 mt-2 pl-3 border-l border-slate-800 space-y-1">
               {sidebarCategories.map(category => (
                 <button
                   key={category.id}
-                  onClick={() => handleSelectCategory(category.id)}
+                  onClick={() =>
+                    handleSelectCategory(category.id)
+                  }
                   className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-xs text-left transition ${
-                    currentPage === "articles" && selectedCategory === category.id
+                    currentPage === "articles" &&
+                    selectedCategory === category.id
                       ? "bg-slate-800 text-teal-400"
                       : "text-slate-500 hover:bg-slate-800 hover:text-slate-200"
                   }`}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0"></span>
-                  <span className="truncate">{category.name}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0" />
+
+                  <span className="truncate">
+                    {category.name}
+                  </span>
+
                   <span className="ml-auto text-[10px] text-slate-600">
                     {category.article_count || 0}
                   </span>
@@ -301,7 +479,6 @@ export default function App() {
             </>
           )}
 
-
           {canManage && (
             <button
               onClick={() => goTo("form")}
@@ -320,7 +497,8 @@ export default function App() {
             <button
               onClick={() => goTo("products")}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
-                currentPage === "products" || currentPage === "product"
+                currentPage === "products" ||
+                currentPage === "product"
                   ? "bg-slate-800 text-white border-l-2 border-teal-500"
                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
@@ -375,21 +553,15 @@ export default function App() {
           )}
 
         </nav>
-
-
-
-
       </aside>
 
-
-
+      {/* Mobile Header */}
       <div className="md:hidden bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
 
         <div
           className="flex items-center gap-2 cursor-pointer"
           onClick={() => goTo("home")}
         >
-
           <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center font-bold text-xs">
             TC
           </div>
@@ -397,7 +569,6 @@ export default function App() {
           <span className="font-semibold text-sm">
             Taifa Care HMIS
           </span>
-
         </div>
 
         <button
@@ -406,18 +577,14 @@ export default function App() {
         >
           Sign out
         </button>
-
       </div>
-
-
 
       <div className="md:ml-60 min-h-screen">
 
-
+        {/* Header */}
         <header className="relative bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
 
           <div>
-
             <h1 className="text-lg font-semibold text-slate-800">
               {pageTitle[currentPage] || "Taifa Care HMIS"}
             </h1>
@@ -425,53 +592,63 @@ export default function App() {
             <p className="text-xs text-slate-400 mt-0.5">
               Taifa Care Health Management Information System
             </p>
-
           </div>
-
 
           <div className="flex items-center gap-4">
 
             {notifications.length > 0 && (
               <span
-                title={`${notifications.length} of your articles have a low rating`}
+                title={`${notifications.length} notification${notifications.length !== 1 ? "s" : ""}`}
                 className="text-xs bg-red-50 text-red-600 border border-red-100 rounded-full px-2.5 py-1 font-medium"
               >
-                {notifications.length} low-rated
+                {notifications.length} notifications
               </span>
             )}
 
-
-
             <button
-              onClick={() => setDarkMode(prev => !prev)}
+              onClick={() =>
+                setDarkMode(prev => !prev)
+              }
               className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition"
-              title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              title={
+                darkMode
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+              }
+              aria-label={
+                darkMode
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+              }
             >
               {darkMode ? "☀" : "☾"}
             </button>
 
-
-
             <button
-              onClick={() => setProfileOpen(prev => !prev)}
+              onClick={() =>
+                setProfileOpen(prev => !prev)
+              }
               className="hidden sm:flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-100 transition"
               aria-label="Open user menu"
             >
               <div className="text-right">
+
                 <div className="text-xs font-medium text-slate-700">
-                  {user.username}
+                  {user?.username || "User"}
                 </div>
-                
+
                 <div className="text-[11px] text-slate-400 capitalize">
-                  {user.role}
+                  {user?.role || "viewer"}
                 </div>
+
               </div>
-              
+
               <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs font-semibold">
-                {(user.username || "U").substring(0, 2).toUpperCase()}
+                {(user?.username || "U")
+                  .substring(0, 2)
+                  .toUpperCase()}
               </div>
-              
+
               <span className="text-slate-400 text-xs">
                 ▾
               </span>
@@ -479,29 +656,37 @@ export default function App() {
 
             {profileOpen && (
               <div className="absolute right-6 top-14 w-56 bg-white border border-slate-200 rounded-xl shadow-lg py-2 z-50">
+
                 <div className="px-4 py-2 border-b border-slate-100">
+
                   <p className="text-sm font-medium text-slate-800">
-                    {user.username}
+                    {user?.username || "User"}
                   </p>
+
                   <p className="text-xs text-slate-400 capitalize">
-                    {user.role}
+                    {user?.role || "viewer"}
                   </p>
+
                 </div>
-                
+
                 <button
-                  onClick={() => setProfileOpen(false)}
+                  onClick={() =>
+                    setProfileOpen(false)
+                  }
                   className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
                 >
                   My Profile
                 </button>
 
                 <button
-                  onClick={() => setProfileOpen(false)}
+                  onClick={() =>
+                    setProfileOpen(false)
+                  }
                   className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
                 >
                   Account Settings
                 </button>
-                
+
                 <div className="border-t border-slate-100 my-1" />
 
                 <button
@@ -510,15 +695,12 @@ export default function App() {
                 >
                   Sign out
                 </button>
-                
+
               </div>
             )}
 
           </div>
-
         </header>
-
-
 
         <main className="max-w-7xl mx-auto px-6 py-7">
 
@@ -557,7 +739,7 @@ export default function App() {
             <AdminArticles
               onEdit={handleEditArticle}
               onCreate={handleCreateArticle}
-              userRole={user.role}
+              userRole={user?.role || "viewer"}
             />
           )}
 
@@ -570,7 +752,9 @@ export default function App() {
           )}
 
           {currentPage === "products" && canManage && (
-            <Products onSelectProduct={handleSelectProduct} />
+            <Products
+              onSelectProduct={handleSelectProduct}
+            />
           )}
 
           {currentPage === "product" && selectedProductSlug && (
@@ -604,10 +788,7 @@ export default function App() {
           )}
 
         </main>
-
       </div>
-
-
 
       <ChatWidget />
 
