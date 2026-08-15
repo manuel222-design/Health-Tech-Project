@@ -3,21 +3,27 @@ export default function Landing({ onLogin, onRegister }) {
     <div className="min-h-screen bg-slate-50 text-slate-800">
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-700 via-slate-800 to-teal-700 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 text-white">
 
-        {/* Background decoration */}
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-teal-500/10 blur-3xl" />
-        <div className="absolute bottom-0 -left-40 w-[400px] h-[400px] rounded-full bg-cyan-500/10 blur-3xl" />
+        {/* restrained accent glow */}
+        <div className="absolute -top-44 -right-44 w-[520px] h-[520px] rounded-full bg-teal-400/10 blur-3xl" />
+        <div className="absolute bottom-0 -left-48 w-[420px] h-[420px] rounded-full bg-cyan-400/5 blur-3xl" />
 
         {/* Navigation */}
         <nav className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 py-6 flex items-center justify-between">
+
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/20">
-              <span className="font-bold text-lg">TC</span>
+            <div className="w-11 h-11 bg-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/15">
+              <span className="font-bold text-lg text-slate-950">
+                TC
+              </span>
             </div>
 
             <div>
-              <div className="font-bold text-base">Taifa Care</div>
+              <div className="font-bold text-base">
+                Taifa Care
+              </div>
+
               <div className="text-xs text-slate-400">
                 HMIS Knowledge System
               </div>
@@ -28,14 +34,16 @@ export default function Landing({ onLogin, onRegister }) {
             <span className="w-2 h-2 rounded-full bg-teal-400" />
             Secure Healthcare Information
           </div>
+
         </nav>
 
+
         {/* Hero content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 pt-10 pb-20 lg:pt-16 lg:pb-28">
+        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 pt-8 pb-16 lg:pt-12 lg:pb-20">
 
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
-            {/* Left */}
+            {/* LEFT */}
             <div>
 
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-teal-400/20 bg-teal-400/10 text-teal-300 text-xs font-semibold mb-6">
@@ -43,9 +51,9 @@ export default function Landing({ onLogin, onRegister }) {
                 HEALTHCARE INFORMATION MANAGEMENT
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.07]">
                 Smarter healthcare.
-                <span className="block text-teal-400">
+                <span className="block text-teal-400 mt-1">
                   Better information.
                 </span>
               </h1>
@@ -61,30 +69,52 @@ export default function Landing({ onLogin, onRegister }) {
 
                 <button
                   onClick={onRegister}
-                  className="px-6 py-3.5 bg-teal-500 hover:bg-teal-400 text-slate-950 rounded-xl font-bold transition shadow-lg shadow-teal-500/20"
+                  className="px-6 py-3.5 bg-teal-500 hover:bg-teal-400 text-slate-950 rounded-xl font-bold transition shadow-lg shadow-teal-500/15"
                 >
                   Get Started →
                 </button>
 
                 <button
                   onClick={onLogin}
-                  className="px-6 py-3.5 border border-slate-600 hover:border-teal-400 text-white rounded-xl font-semibold transition"
+                  className="px-6 py-3.5 border border-slate-600 hover:border-teal-400 hover:bg-white/5 text-white rounded-xl font-semibold transition"
                 >
                   Sign in to Taifa Care
                 </button>
 
               </div>
 
+              {/* Supporting trust indicators */}
+              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-slate-400">
+
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                  Secure access
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                  Centralized knowledge
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                  Healthcare focused
+                </div>
+
+              </div>
+
             </div>
 
-            {/* Right hero visual */}
+
+            {/* RIGHT HERO CARD */}
             <div className="relative">
 
-              <div className="absolute -inset-6 bg-teal-200/30 blur-3xl rounded-full" />
+              <div className="absolute -inset-5 bg-teal-300/10 blur-3xl rounded-full" />
 
-              <div className="relative bg-white rounded-3xl border border-slate-200 shadow-xl p-7 sm:p-9">
+              <div className="relative bg-white rounded-3xl border border-slate-200 shadow-2xl p-7 sm:p-8">
 
-                <div className="flex items-center justify-between mb-10">
+                {/* Card header */}
+                <div className="flex items-center justify-between">
 
                   <div>
                     <p className="text-xs uppercase tracking-[0.2em] text-teal-600 font-bold">
@@ -96,14 +126,16 @@ export default function Landing({ onLogin, onRegister }) {
                     </p>
                   </div>
 
-                  <div className="w-11 h-11 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 text-xl">
-                    +
+                  <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                    <span className="w-2 h-2 rounded-full bg-teal-500" />
+                    Secure
                   </div>
 
                 </div>
 
 
-                <div>
+                {/* Main message */}
+                <div className="mt-10">
 
                   <p className="text-sm font-semibold text-teal-600 mb-3">
                     Connected healthcare information
@@ -125,23 +157,52 @@ export default function Landing({ onLogin, onRegister }) {
                 </div>
 
 
-                <div className="mt-8 rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 flex items-center gap-3">
+                {/* Three subtle capabilities */}
+                <div className="grid grid-cols-3 gap-3 mt-8">
+
+                  <HeroCapability
+                    title="Knowledge"
+                    text="Trusted guides"
+                  />
+
+                  <HeroCapability
+                    title="Workflows"
+                    text="Practical tools"
+                  />
+
+                  <HeroCapability
+                    title="AI Support"
+                    text="Smart assistance"
+                  />
+
+                </div>
+
+
+                {/* Bottom indicator */}
+                <div className="mt-7 rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 flex items-center gap-3">
+
                   <span className="w-2.5 h-2.5 rounded-full bg-teal-500" />
+
                   <span className="text-xs text-slate-500">
                     Built for modern healthcare teams
                   </span>
+
                 </div>
 
               </div>
 
             </div>
+
           </div>
+
         </div>
+
       </section>
 
 
       {/* FEATURES */}
       <section className="bg-white border-b border-slate-200">
+
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16">
 
           <div className="text-center mb-10">
@@ -190,15 +251,19 @@ export default function Landing({ onLogin, onRegister }) {
             />
 
           </div>
+
         </div>
+
       </section>
 
 
       {/* HOW IT WORKS */}
       <section className="bg-slate-50">
+
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16">
 
           <div className="text-center">
+
             <p className="text-xs uppercase tracking-widest text-teal-600 font-bold">
               Getting started
             </p>
@@ -206,6 +271,7 @@ export default function Landing({ onLogin, onRegister }) {
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
               A simple journey to better information
             </h2>
+
           </div>
 
           <div className="grid md:grid-cols-3 gap-5 mt-10">
@@ -232,12 +298,15 @@ export default function Landing({ onLogin, onRegister }) {
             />
 
           </div>
+
         </div>
+
       </section>
 
 
       {/* CTA */}
       <section className="bg-teal-900">
+
         <div className="max-w-5xl mx-auto px-5 sm:px-8 py-14 text-center">
 
           <div className="inline-flex w-12 h-12 rounded-xl bg-teal-500/20 border border-teal-400/20 items-center justify-center text-teal-300 text-xl mb-5">
@@ -261,20 +330,25 @@ export default function Landing({ onLogin, onRegister }) {
           </button>
 
         </div>
+
       </section>
 
 
       {/* FOOTER */}
       <footer className="bg-slate-950 text-slate-500">
+
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-7 flex flex-col sm:flex-row justify-between gap-3 text-xs">
 
           <div className="flex items-center gap-2">
+
             <div className="w-7 h-7 bg-teal-500 rounded-lg flex items-center justify-center text-xs font-bold text-slate-950">
               TC
             </div>
+
             <span>
               © {new Date().getFullYear()} Taifa Care · HMIS Knowledge System
             </span>
+
           </div>
 
           <span>
@@ -282,6 +356,7 @@ export default function Landing({ onLogin, onRegister }) {
           </span>
 
         </div>
+
       </footer>
 
     </div>
@@ -289,61 +364,19 @@ export default function Landing({ onLogin, onRegister }) {
 }
 
 
-
-function HeroStat({ number, label }) {
+function HeroCapability({ title, text }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-black/10 px-3 py-4">
-      <p className="text-lg font-bold text-white">
-        {number}
-      </p>
-      <p className="text-[10px] text-slate-400 mt-1">
-        {label}
-      </p>
-    </div>
-  )
-}
-
-function TrustItem({ icon, title, text }) {
-  return (
-    <div>
-      <div className="text-teal-300 text-lg mb-1">{icon}</div>
-      <p className="text-xs font-semibold text-white">{title}</p>
-      <p className="text-[10px] text-slate-500 mt-0.5">{text}</p>
-    </div>
-  )
-}
-
-
-function PreviewNav({ text, active }) {
-  return (
-    <div className={`px-2 py-2 rounded-md ${
-      active
-        ? "bg-teal-600 text-white"
-        : "text-slate-500"
-    }`}>
-      {text}
-    </div>
-  )
-}
-
-
-function PreviewStat({ number, label }) {
-  return (
-    <div className="bg-white border border-slate-200 rounded-lg p-2">
-      <p className="text-sm font-bold text-slate-800">{number}</p>
-      <p className="text-[8px] text-slate-400">{label}</p>
-    </div>
-  )
-}
-
-
-function PreviewArticle({ text }) {
-  return (
-    <div className="flex items-center gap-2 py-2 border-t border-slate-100">
-      <div className="w-5 h-5 rounded bg-teal-50 text-teal-600 flex items-center justify-center text-[8px]">
-        ▤
+    <div className="rounded-xl bg-slate-50 border border-slate-200 px-3 py-3">
+      <div className="flex items-center gap-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+        <span className="text-xs font-semibold text-slate-700">
+          {title}
+        </span>
       </div>
-      <span className="text-[9px] text-slate-600">{text}</span>
+
+      <p className="text-[10px] text-slate-400 mt-1">
+        {text}
+      </p>
     </div>
   )
 }
@@ -353,22 +386,22 @@ function Feature({ icon, title, text, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="text-left bg-white border border-slate-200 rounded-2xl p-6 hover:border-teal-400 hover:shadow-lg hover:-translate-y-1 transition-all group"
+      className="group bg-white border border-slate-200 rounded-xl p-5 text-left hover:border-teal-300 hover:shadow-md transition-all"
     >
-      <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center text-xl mb-5 group-hover:bg-teal-100 transition">
+      <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center text-lg mb-4 group-hover:bg-teal-600 group-hover:text-white transition">
         {icon}
       </div>
 
-      <h3 className="font-bold text-slate-900">
+      <h3 className="font-semibold text-slate-800">
         {title}
       </h3>
 
-      <p className="text-sm text-slate-500 mt-2 leading-relaxed">
+      <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
         {text}
       </p>
 
-      <div className="mt-5 text-xs font-bold text-teal-600">
-        Sign in to explore →
+      <div className="mt-4 text-xs font-semibold text-teal-600">
+        Explore →
       </div>
     </button>
   )
@@ -379,23 +412,25 @@ function Step({ number, title, text, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="text-left bg-white border border-slate-200 rounded-2xl p-6 hover:border-teal-400 hover:shadow-md transition group"
+      className="group bg-white border border-slate-200 rounded-xl p-6 text-left hover:border-teal-300 hover:shadow-md transition-all"
     >
-      <div className="w-9 h-9 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs font-bold mb-5">
-        {number}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold tracking-widest text-teal-600">
+          {number}
+        </span>
+
+        <span className="text-slate-300 group-hover:text-teal-500 transition">
+          →
+        </span>
       </div>
 
-      <h3 className="font-bold text-slate-900">
+      <h3 className="text-base font-bold text-slate-800 mt-6">
         {title}
       </h3>
 
-      <p className="text-sm text-slate-500 mt-2 leading-relaxed">
+      <p className="text-sm text-slate-500 leading-relaxed mt-2">
         {text}
       </p>
-
-      <div className="mt-4 text-xs font-bold text-teal-600">
-        Continue →
-      </div>
     </button>
   )
 }
