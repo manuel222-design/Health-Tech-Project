@@ -11,7 +11,7 @@ import Products from "./pages/Products"
 import ProductDetails from "./pages/ProductDetails"
 import ArticleForm from "./pages/ArticleForm"
 import ChatWidget from "./components/ChatWidget"
-import Home from "./pages/Home"
+import Landing from "./pages/Landing"
 import ErrorPage from "./pages/ErrorPage"
 import { getCategories } from "./services/api"
 
