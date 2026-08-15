@@ -126,16 +126,3 @@ export const getUnansweredQuestions = () => api.get('/admin/unanswered-questions
 
 export const getContentNotifications = () =>
   api.get('/content-notifications')
-
-
-export const forgotPassword = (email) =>
-  api.post('/auth/forgot-password', {
-    email
-  })
-
-export const resetPassword = (email, otp, newPassword) =>
-  api.post('/auth/reset-password', {
-    email,
-    otp,
-    new_password: newPassword
-})
