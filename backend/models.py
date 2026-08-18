@@ -11,7 +11,6 @@ class UserRole(str, enum.Enum):
     viewer = "viewer"
     editor = "editor"
     admin  = "admin"
-    sme    = "sme"
 
 class ArticleStatus(str, enum.Enum):
     draft     = "draft"

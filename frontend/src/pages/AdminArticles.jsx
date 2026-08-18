@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react"
-import { getAllArticlesAdmin, getPendingSMEArticles, deleteArticle, approveArticle, rejectArticle } from "../services/api"
+import { getAllArticlesAdmin, deleteArticle, approveArticle, rejectArticle } from "../services/api"
 
 export default function AdminArticles({ onEdit, onCreate, userRole }) {
-  const isSME = userRole === "sme"
   const canManage = userRole === "editor" || userRole === "admin"
   const [articles, setArticles] = useState([])
   const [loading, setLoading]   = useState(true)
@@ -13,11 +12,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
 
   function loadArticles() {
     setLoading(true)
-    const request = isSME
-     ? getPendingSMEArticles()
-     : getAllArticlesAdmin()
-
-    request
+    getAllArticlesAdmin()
       .then(res => setArticles(res.data))
       .finally(() => setLoading(false))
   }
@@ -103,13 +98,13 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">
-            {isSME ? "SME Article Review" : "Manage Articles"}
+            {userRole === "editor" || userRole === "admin"
+              ? "Content Review"
+              : "Manage Articles"}
           </h2>
 
           <p className="text-gray-500 text-sm">
-            {isSME
-              ? "Review and sign off articles submitted for publication"
-              : "Create, edit, and delete knowledge base articles"}
+            Review, approve, reject, and manage knowledge base articles.
           </p>
         </div>
         {canManage && (

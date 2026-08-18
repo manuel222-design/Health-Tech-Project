@@ -282,9 +282,6 @@ export default function App() {
     user?.role === "editor" ||
     user?.role === "admin"
 
-  const isSME =
-    user?.role === "sme"
-
   const isAdmin =
     user?.role === "admin"
 
@@ -715,7 +712,7 @@ export default function App() {
           getMyNotifications(),
         ]
 
-        if (user.role === "admin" || user.role === "sme" || user.role === "editor") {
+        if (user.role === "admin" || user.role === "editor") {
           requests.push(getContentNotifications())
         }
 
@@ -811,6 +808,31 @@ export default function App() {
   function handleNotificationClick(notification) {
     setNotificationsOpen(false)
 
+    // Mark the clicked notification as handled locally.
+    // The current notification API does not persist read state,
+    // so removing it from the local list keeps the badge accurate
+    // immediately after the user opens it.
+    setNotifications(prev =>
+      prev.filter(item => {
+        const clickedId = notification?.id
+        const itemId = item?.id
+
+        if (clickedId && itemId) {
+          return itemId !== clickedId
+        }
+
+        return !(
+          item?.source === notification?.source &&
+          (
+            item?.slug === notification?.slug ||
+            item?.article_slug === notification?.article_slug ||
+            item?.article_title === notification?.article_title ||
+            item?.title === notification?.title
+          )
+        )
+      })
+    )
+
     if (
       notification?.type === "article_review" ||
       notification?.notification_type === "article_review"
@@ -829,7 +851,7 @@ export default function App() {
       return
     }
 
-    if (isSME || isAdmin) {
+    if (isAdmin || canManage) {
       goTo("review")
       return
     }
@@ -899,7 +921,7 @@ export default function App() {
 
   const pageAllowed =
   currentPage === "review"
-    ? (isSME || isAdmin)
+    ? canManage
     : currentPage === "manage" ||
       currentPage === "form" ||
       currentPage === "products" ||
@@ -1136,7 +1158,7 @@ export default function App() {
           )}
 
 
-          {(isSME || isAdmin) && (
+          {canManage && (
 
             <>
 
@@ -1865,7 +1887,7 @@ export default function App() {
 
 
           {currentPage === "review" &&
-            (isSME || isAdmin) && (
+            canManage && (
 
               <AdminArticles
                 onEdit={handleEditArticle}
