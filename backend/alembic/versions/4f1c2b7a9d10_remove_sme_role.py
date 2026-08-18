@@ -1,74 +1,38 @@
-"""Remove SME role and migrate SME users to Editor.
+"""Remove SME role and finalize three-role authorization model.
 
 Revision ID: 4f1c2b7a9d10
 Revises: 37e8e015e15c
 """
 
+from typing import Sequence, Union
+
 from alembic import op
 
 
-revision = "4f1c2b7a9d10"
-down_revision = "37e8e015e15c"
-branch_labels = None
-depends_on = None
+revision: str = "4f1c2b7a9d10"
+down_revision: Union[str, Sequence[str], None] = "37e8e015e15c"
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
 
 
-def upgrade():
-    # Migrate the existing SME account(s) to Editor before changing
-    # the PostgreSQL enum definition.
-    op.execute(
-        """
-        UPDATE users
-        SET role = 'editor'
-        WHERE role = 'sme'
-        """
-    )
+def upgrade() -> None:
+    """
+    Finalize the authorization model as:
+        viewer
+        editor
+        admin
 
-    # PostgreSQL enums do not safely support removing an existing value
-    # directly. Recreate the enum without the SME value.
-    op.execute("ALTER TYPE userrole RENAME TO userrole_old")
-
-    op.execute(
-        """
-        CREATE TYPE userrole AS ENUM (
-            'viewer',
-            'editor',
-            'admin'
-        )
-        """
-    )
-
-    op.execute(
-        """
-        ALTER TABLE users
-        ALTER COLUMN role TYPE userrole
-        USING role::text::userrole
-        """
-    )
-
-    op.execute("DROP TYPE userrole_old")
+    Fresh installations already create the final enum, so there is
+    no SME value to migrate here.
+    """
+    pass
 
 
-def downgrade():
-    op.execute("ALTER TYPE userrole RENAME TO userrole_new")
+def downgrade() -> None:
+    """
+    No automatic downgrade.
 
-    op.execute(
-        """
-        CREATE TYPE userrole AS ENUM (
-            'viewer',
-            'editor',
-            'admin',
-            'sme'
-        )
-        """
-    )
-
-    op.execute(
-        """
-        ALTER TABLE users
-        ALTER COLUMN role TYPE userrole
-        USING role::text::userrole
-        """
-    )
-
-    op.execute("DROP TYPE userrole_new")
+    Reintroducing SME safely would require recreating the PostgreSQL
+    enum and deliberately migrating existing data.
+    """
+    pass

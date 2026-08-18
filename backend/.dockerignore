@@ -1,9 +1,9 @@
-# VCS
+ VCS
 .git
 .gitignore
 .gitattributes
 
-# Dependencies / build output
+ Dependencies / build output
 node_modules
 vendor
 venv
@@ -15,7 +15,7 @@ build
 target
 *.o
 
-# Secrets and env
+ Secrets and env
 .env
 .env.*
 *.pem
@@ -23,18 +23,18 @@ target
 secrets/
 credentials.json
 
-# Editor / OS
+ Editor / OS
 .vscode
 .idea
 .DS_Store
 *.swp
 
-# Docs, tests, CI
+ Docs, tests, CI
 *.md
 docs/
 .github/
 
-# Logs and local data
+ Logs and local data
 *.log
 tmp/
 testdata/

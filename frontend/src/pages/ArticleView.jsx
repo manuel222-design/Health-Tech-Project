@@ -231,7 +231,7 @@ export default function ArticleView({
 
   const apiBase =
     import.meta.env.VITE_API_BASE ||
-    "http://127.0.0.1:8000/api/v1"
+    "/api/v1"
 
   const pdfUrl =
     `${apiBase}/articles/${slug}/pdf`
@@ -658,9 +658,6 @@ export default function ArticleView({
           </div>
 
 
-          {/* =================================================
-              FEEDBACK
-          ================================================= */}
           <section className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8 mt-6">
 
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
