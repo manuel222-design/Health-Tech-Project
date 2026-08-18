@@ -122,7 +122,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
     setUploading(true)
     try {
       const res = await uploadMedia(file, isEditing ? slug : null)
-      const markdownImage = `\n![${file.name}](${res.data.url})\n`
+      const markdownImage = `\n\n![${file.name}](${res.data.url})\n\n`
       setBody(prev => prev + markdownImage)
     } catch {
       alert("Failed to upload image")

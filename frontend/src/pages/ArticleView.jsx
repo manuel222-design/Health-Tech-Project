@@ -286,9 +286,6 @@ export default function ArticleView({
   return (
     <div className="max-w-6xl mx-auto pb-16">
 
-      {/* =====================================================
-          TOP NAVIGATION
-      ===================================================== */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
 
         <button
@@ -312,9 +309,6 @@ export default function ArticleView({
       </div>
 
 
-      {/* =====================================================
-          ARTICLE HEADER
-      ===================================================== */}
       <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
 
         <div className="h-1.5 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500" />
@@ -413,12 +407,8 @@ export default function ArticleView({
       </section>
 
 
-      {/* =====================================================
-          ARTICLE BODY AREA
-      ===================================================== */}
       <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-6 mt-6">
 
-        {/* TABLE OF CONTENTS */}
         {headings.length > 0 && (
           <aside className="lg:sticky lg:top-6 lg:self-start">
 
@@ -479,7 +469,6 @@ export default function ArticleView({
         )}
 
 
-        {/* CONTENT */}
         <article className="min-w-0">
 
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8 lg:p-10">
@@ -490,8 +479,6 @@ export default function ArticleView({
                 remarkPlugins={[remarkGfm]}
                 components={{
 
-                  /* Hide duplicate Markdown H1 because
-                     the article header already displays it. */
                   h1: () => null,
 
                   h2: ({ children }) => {
@@ -580,10 +567,12 @@ export default function ArticleView({
                   ),
 
                   table: ({ children }) => (
-                    <div className="overflow-x-auto my-6 border border-slate-200 rounded-xl">
-                      <table className="w-full border-collapse text-sm">
-                        {children}
-                      </table>
+                    <div className="my-8 w-full overflow-x-auto">
+                      <div className="inline-block min-w-full border border-slate-200 rounded-xl overflow-hidden">
+                        <table className="w-full border-collapse text-sm">
+                          {children}
+                        </table>
+                      </div>
                     </div>
                   ),
 
@@ -635,7 +624,7 @@ export default function ArticleView({
                           src={src}
                           alt={alt || "Article image"}
                           loading="lazy"
-                          className="w-full h-auto object-contain"
+                          className="max-w-full h-auto object-contain mx-auto"
                         />
                       </div>
 
