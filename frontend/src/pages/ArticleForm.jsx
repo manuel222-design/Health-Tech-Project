@@ -181,7 +181,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
         onClick={onCancel}
         className="flex items-center gap-2 text-teal-600 hover:text-teal-700 mb-6 text-sm font-medium"
       >
-        ← Back to articles
+        ← Back to Article Management
       </button>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6">

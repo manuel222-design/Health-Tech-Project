@@ -59,4 +59,3 @@ Markdown==3.10.3
 xhtml2pdf
 
 markdown==3.10.3
-xhtml2pdf

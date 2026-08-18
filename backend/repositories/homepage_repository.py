@@ -1,7 +1,14 @@
 from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
+from datetime import datetime, timezone
 
-from models import Article, ArticleStatus, Category
+from models import (
+    Article,
+    ArticleStatus,
+    AuditLog,
+    Category,
+    SearchLog,
+)
 
 
 class HomepageRepository:
@@ -37,3 +44,45 @@ class HomepageRepository:
             .order_by(Category.sort_order, Category.name)
             .all()
         )
+
+    def get_today_activity(self):
+        """Return timestamped activity totals for the current UTC day."""
+
+        now = datetime.now(timezone.utc)
+        start_of_day = now.replace(
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+
+        searches = (
+            self.db.query(func.count(SearchLog.id))
+            .filter(SearchLog.searched_at >= start_of_day)
+            .scalar()
+            or 0
+        )
+
+        published_guides = (
+            self.db.query(func.count(Article.id))
+            .filter(
+                Article.status == ArticleStatus.published,
+                Article.published_at >= start_of_day,
+            )
+            .scalar()
+            or 0
+        )
+
+        system_actions = (
+            self.db.query(func.count(AuditLog.id))
+            .filter(AuditLog.created_at >= start_of_day)
+            .scalar()
+            or 0
+        )
+
+        return {
+            "searches": searches,
+            "published_guides": published_guides,
+            "system_actions": system_actions,
+        }
+

@@ -11,6 +11,8 @@ class HomepageService:
         articles = self.repository.get_featured_articles()
         categories = self.repository.get_categories_with_counts()
 
+        today_activity = self.repository.get_today_activity()
+
         return {
             "featured_articles": [
                 {
@@ -46,4 +48,5 @@ class HomepageService:
                 }
                 for category, article_count in categories
             ],
+            "today_activity": today_activity,
         }

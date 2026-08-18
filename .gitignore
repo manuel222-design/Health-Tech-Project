@@ -19,3 +19,11 @@ dist/
 
 backups/
 .env
+
+# Development rollback backups
+*.before-*
+*.backup*
+*.save
+
+# One-time local repair scripts
+backend/fix_article_headings.py

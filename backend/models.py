@@ -161,6 +161,30 @@ class ChatMessage(Base):
 
     session     = relationship("ChatSession", back_populates="messages")
 
+class ChatFeedback(Base):
+    __tablename__ = "chat_feedback"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    message_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("chat_messages.id"),
+        nullable=False
+    )
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=True
+    )
+    helpful = Column(Boolean, nullable=False)
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+
+    message = relationship("ChatMessage")
+    user = relationship("User")
+
+
 class Tag(Base):
     __tablename__ = "tags"
 

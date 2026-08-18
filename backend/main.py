@@ -9,7 +9,7 @@ from passlib.context import CryptContext               # type: ignore
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel                         # type: ignore 
 from database import get_db
-from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, Product, ChatSession, ChatMessage, MessageRole, UserRole, AuditLog, Media, ArticleSMEReview
+from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, Product, ChatSession, ChatMessage, ChatFeedback, MessageRole, UserRole, AuditLog, Media, ArticleSMEReview
 import os, uuid
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
 from groq import Groq # type: ignore
@@ -78,10 +78,7 @@ ALLOWED_ORIGINS = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5173",
-        "http://localhost:5173"
-    ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "X-Session-Token"],
@@ -185,6 +182,38 @@ def get_current_user(
 
     except JWTError:
         raise HTTPException(status_code=401, detail="Token invalid or expired")
+
+optional_bearer_scheme = HTTPBearer(auto_error=False)
+
+def get_optional_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_bearer_scheme),
+):
+    if credentials is None:
+        return None
+
+    try:
+        payload = jwt.decode(
+            credentials.credentials,
+            SECRET_KEY,
+            algorithms=[ALGORITHM]
+        )
+
+        user_id = payload.get("sub")
+        role = payload.get("role")
+
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        return {
+            "user_id": user_id,
+            "role": role,
+        }
+
+    except JWTError:
+        raise HTTPException(
+            status_code=401,
+            detail="Token invalid or expired"
+        )
 
 def require_editor(user: dict = Depends(get_current_user)):
     if user["role"] not in ["editor", "admin"]:
@@ -443,6 +472,10 @@ def search_articles(
     if not q or len(q.strip()) < 2:
         raise HTTPException(status_code=400, detail="Search query too short")
 
+    # Normalize common product-name variants so that user queries
+    # such as "TaifaCare" and "Taifa Care" retrieve the same content.
+    q = re.sub(r"\\btaifacare\\b", "Taifa Care", q, flags=re.IGNORECASE)
+
     filters = ["status = 'published'"]
     params = {"q": q}
 
@@ -466,20 +499,120 @@ def search_articles(
     filter_clause = " AND ".join(filters)
 
     search_query = text(f"""
-        SELECT DISTINCT articles.id, articles.title, articles.slug, articles.status,
-               articles.category_id, articles.content_type,
-               ts_rank(
-                   setweight(to_tsvector('english', articles.title), 'A') ||
-                   setweight(to_tsvector('english', articles.body_markdown), 'B'),
-                   plainto_tsquery('english', :q)
-               ) AS rank
+        SELECT
+            articles.id,
+            articles.title,
+            articles.slug,
+            articles.status,
+            articles.category_id,
+            categories.name AS category_name,
+            articles.content_type,
+            articles.product_id,
+            products.name AS product_name,
+            articles.product_version,
+            (
+                CASE
+                    WHEN lower(articles.title) = lower(:q)
+                        THEN 1000
+
+                    WHEN articles.title ILIKE '%' || :q || '%'
+                        THEN 500
+
+                    WHEN coalesce(
+                        string_agg(DISTINCT tags.name, ' '),
+                        ''
+                    ) ILIKE '%' || :q || '%'
+                        THEN 250
+
+                    ELSE 0
+                END
+                +
+                (
+                    ts_rank(
+                        setweight(
+                            to_tsvector(
+                                'english',
+                                coalesce(articles.title, '')
+                            ),
+                            'A'
+                        )
+                        ||
+                        setweight(
+                            to_tsvector(
+                                'english',
+                                coalesce(
+                                    string_agg(
+                                        DISTINCT tags.name,
+                                        ' '
+                                    ),
+                                    ''
+                                )
+                            ),
+                            'B'
+                        )
+                        ||
+                        setweight(
+                            to_tsvector(
+                                'english',
+                                coalesce(
+                                    articles.body_markdown,
+                                    ''
+                                )
+                            ),
+                            'C'
+                        ),
+                        plainto_tsquery('english', :q)
+                    ) * 100
+                )
+            ) AS rank
         FROM articles
         {tag_join}
+        LEFT JOIN categories
+            ON categories.id = articles.category_id
+        LEFT JOIN products
+            ON products.id = articles.product_id
+        LEFT JOIN article_tags article_tag_search
+            ON article_tag_search.article_id = articles.id
+        LEFT JOIN tags
+            ON tags.id = article_tag_search.tag_id
         WHERE {filter_clause}
-          AND (
-                setweight(to_tsvector('english', articles.title), 'A') ||
-                setweight(to_tsvector('english', articles.body_markdown), 'B')
-              ) @@ plainto_tsquery('english', :q)
+        GROUP BY
+            articles.id,
+            articles.title,
+            articles.slug,
+            articles.status,
+            articles.category_id,
+            categories.name,
+            articles.content_type,
+            articles.product_id,
+            products.name,
+            articles.product_version,
+            articles.body_markdown
+        HAVING (
+            setweight(
+                to_tsvector(
+                    'english',
+                    coalesce(articles.title, '')
+                ),
+                'A'
+            )
+            ||
+            setweight(
+                to_tsvector(
+                    'english',
+                    coalesce(string_agg(DISTINCT tags.name, ' '), '')
+                ),
+                'B'
+            )
+            ||
+            setweight(
+                to_tsvector(
+                    'english',
+                    coalesce(articles.body_markdown, '')
+                ),
+                'C'
+            )
+        ) @@ plainto_tsquery('english', :q)
         ORDER BY rank DESC
         LIMIT 20
     """)
@@ -503,7 +636,11 @@ def search_articles(
                 "title":        row.title,
                 "slug":         row.slug,
                 "category_id":  str(row.category_id) if row.category_id else None,
+                "category_name": row.category_name,
                 "content_type": row.content_type,
+                "product_id": str(row.product_id) if row.product_id else None,
+                "product_name": row.product_name,
+                "product_version": row.product_version,
             }
             for row in rows
         ]
@@ -631,24 +768,28 @@ def get_my_notifications(
 @app.get("/api/v1/content-notifications")
 def get_content_notifications(
     db: Session = Depends(get_db),
-    user: dict = Depends(require_editor)
+    user: dict = Depends(require_sme_or_admin)
 ):
-    logs = (
-        db.query(AuditLog)
-        .filter(AuditLog.target_type == "article")
-        .order_by(AuditLog.created_at.desc())
-        .limit(20)
+    pending_articles = (
+        db.query(Article)
+        .filter(
+            Article.status == ArticleStatus.pending_review
+        )
+        .order_by(Article.created_at.desc())
         .all()
     )
 
     return [
         {
-            "id": str(log.id),
-            "action": log.action,
-            "details": log.details,
-            "created_at": str(log.created_at),
+            "id": f"review-{article.id}",
+            "type": "article_review",
+            "title": "Article awaiting review",
+            "message": article.title,
+            "slug": article.slug,
+            "article_title": article.title,
+            "created_at": str(article.created_at),
         }
-        for log in logs
+        for article in pending_articles
     ]
 
 @app.get("/api/v1/articles/{slug}")
@@ -1122,20 +1263,14 @@ class ChatRequest(BaseModel):
     session_token: Optional[str] = None
     screen_context: Optional[str] = None
 
-@app.options("/api/v1/chat")
-def chat_preflight():
-    from fastapi.responses import Response # type: ignore
-    return Response(
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-        }
-    )
-    
 @app.post("/api/v1/chat", status_code=200)
 @limiter.limit("20/minute")
-def chat(request: Request, payload: ChatRequest, db: Session = Depends(get_db)):
+def chat(
+    request: Request,
+    payload: ChatRequest,
+    db: Session = Depends(get_db),
+    user: Optional[dict] = Depends(get_optional_user),
+):
 
     generic_phrases = ["help", "what can you do", "what can you help",
                         "hi", "hello", "hey", "who are you"]
@@ -1153,80 +1288,289 @@ def chat(request: Request, payload: ChatRequest, db: Session = Depends(get_db)):
             "articles_found": []
         }
     
-    search_text = payload.message
-    if payload.screen_context:
-        search_text = f"{payload.message} {payload.screen_context}"
+    search_text = payload.message.strip()
 
-    keywords = [word for word in search_text.split() 
-                if len(word) > 3]
-                
+    # Normalize common product-name variants before knowledge retrieval.
+    # This keeps "TaifaCare" consistent with articles written as
+    # "Taifa Care".
+    search_text = re.sub(
+        r"\\btaifacare\\b",
+        "Taifa Care",
+        search_text,
+        flags=re.IGNORECASE
+    )
+
     relevant_articles = []
     prior_messages = []
+
     if payload.session_token:
         existing_session = db.query(ChatSession).filter(
             ChatSession.session_token == payload.session_token
         ).first()
-        if existing_session:
-            prior_msgs = db.query(ChatMessage).filter(
-                ChatMessage.session_id == existing_session.id
-            ).order_by(ChatMessage.created_at).limit(10).all()
-            prior_messages = [
-                {"role": m.role.value, "content": m.content} for m in prior_msgs
-            ]
-    for keyword in keywords:
-        results = db.query(Article).filter(
-            Article.status == ArticleStatus.published,
-            Article.title.ilike(f"%{keyword}%") |
-            Article.body_markdown.ilike(f"%{keyword}%")
-        ).all()
-        for r in results:
-            if r not in relevant_articles:
-                relevant_articles.append(r)
-                
-    relevant_articles = relevant_articles[:3]
 
-    if relevant_articles:
-        context = "\n\n".join([
-            f"Article: {a.title}\n{a.body_markdown}"
-            for a in relevant_articles
-        ])
-        context_note = f"Use ONLY the following knowledge base articles to answer:\n\n{context}"
-    else:
-        context_note = "No relevant articles found in the knowledge base."
+        if existing_session:
+            prior_msgs = (
+                db.query(ChatMessage)
+                .filter(ChatMessage.session_id == existing_session.id)
+                .order_by(ChatMessage.created_at)
+                .limit(10)
+                .all()
+            )
+
+            prior_messages = [
+                {"role": m.role.value, "content": m.content}
+                for m in prior_msgs
+            ]
+
+    # Search the entire question as one PostgreSQL full-text query.
+    # This prevents unrelated articles from being selected because of
+    # individual generic words such as "hospital", "patient", or "system".
+    chat_search = text("""
+        SELECT
+            a.id,
+            a.title,
+            a.slug,
+            a.body_markdown,
+            a.content_type,
+            ts_rank(
+                setweight(
+                    to_tsvector('english', coalesce(a.title, '')),
+                    'A'
+                )
+                ||
+                setweight(
+                    to_tsvector(
+                        'english',
+                        coalesce(string_agg(DISTINCT t.name, ' '), '')
+                    ),
+                    'B'
+                )
+                ||
+                setweight(
+                    to_tsvector('english', coalesce(a.body_markdown, '')),
+                    'C'
+                ),
+                plainto_tsquery('english', :q)
+            ) AS rank
+        FROM articles a
+        LEFT JOIN article_tags at
+            ON at.article_id = a.id
+        LEFT JOIN tags t
+            ON t.id = at.tag_id
+        WHERE a.status = 'published'
+        GROUP BY
+            a.id,
+            a.title,
+            a.slug,
+            a.body_markdown,
+            a.content_type
+        HAVING (
+            setweight(
+                to_tsvector('english', coalesce(a.title, '')),
+                'A'
+            )
+            ||
+            setweight(
+                to_tsvector(
+                    'english',
+                    coalesce(string_agg(DISTINCT t.name, ' '), '')
+                ),
+                'B'
+            )
+            ||
+            setweight(
+                to_tsvector('english', coalesce(a.body_markdown, '')),
+                'C'
+            )
+        ) @@ plainto_tsquery('english', :q)
+        ORDER BY rank DESC
+        LIMIT 3
+    """)
+
+    chat_rows = db.execute(
+        chat_search,
+        {"q": search_text}
+    ).fetchall()
+
+    relevant_articles = [
+        db.query(Article)
+        .filter(Article.id == row.id)
+        .first()
+        for row in chat_rows
+    ]
+
+    relevant_articles = [
+        article for article in relevant_articles
+        if article is not None
+    ]
+
+    # ------------------------------------------------------------
+    # Keyword fallback for natural-language questions
+    # ------------------------------------------------------------
+    # The strict PostgreSQL full-text query may return zero results
+    # when a natural-language question contains too many words.
+    # In that case, search meaningful words across article title,
+    # body, and tags before giving the final no-results response.
+    if not relevant_articles:
+        stop_words = {
+            "a", "an", "and", "are", "can", "could", "do", "does",
+            "for", "how", "i", "in", "is", "it", "me", "my", "of",
+            "on", "please", "the", "to", "what", "where", "which",
+            "who", "with", "would", "you", "your"
+        }
+
+        raw_words = (
+            search_text
+            .replace("?", " ")
+            .replace(",", " ")
+            .replace(".", " ")
+            .replace(":", " ")
+            .replace(";", " ")
+            .split()
+        )
+
+        keywords = []
+        for word in raw_words:
+            clean = word.strip().lower()
+            if len(clean) >= 3 and clean not in stop_words:
+                if clean not in keywords:
+                    keywords.append(clean)
+
+        fallback_candidates = []
+
+        if keywords:
+            for article in (
+                db.query(Article)
+                .filter(Article.status == ArticleStatus.published)
+                .all()
+            ):
+                title_text = (article.title or "").lower()
+                body_text = (article.body_markdown or "").lower()
+
+                tag_text = " ".join(
+                    tag.name.lower()
+                    for link in article.tags
+                    if getattr(link, "tag", None) is not None
+                    for tag in [link.tag]
+                )
+
+                searchable = " ".join([
+                    title_text,
+                    body_text,
+                    tag_text,
+                ])
+
+                matched = [
+                    keyword
+                    for keyword in keywords
+                    if keyword in searchable
+                ]
+
+                if matched:
+                    score = (
+                        len(matched) * 10
+                        + sum(
+                            25
+                            for keyword in matched
+                            if keyword in title_text
+                        )
+                    )
+
+                    fallback_candidates.append(
+                        (score, article)
+                    )
+
+            fallback_candidates.sort(
+                key=lambda item: (
+                    item[0],
+                    item[1].view_count or 0
+                ),
+                reverse=True
+            )
+
+            relevant_articles = [
+                article
+                for _, article in fallback_candidates[:3]
+            ]
+
+    if not relevant_articles:
+        return {
+            "message_id": None,
+            "session_token": payload.session_token,
+            "question": payload.message,
+            "answer": (
+                "I couldn't find an approved knowledge-base article that answers "
+                "that question yet. Please try another search or contact your "
+                "system administrator for assistance."
+            ),
+            "sources_used": 0,
+            "articles_found": []
+        }
+
+    context = "\n\n".join([
+        f"Article: {a.title}\n{a.body_markdown}"
+        for a in relevant_articles
+    ])
+
+    context_note = (
+        "Use ONLY the following published knowledge-base articles to answer. "
+        "Do not use outside knowledge. If the articles do not contain enough "
+        "information to answer the question, say that the approved knowledge "
+        "base does not contain the answer.\n\n"
+        f"{context}"
+    )
 
     prompt = f"""You are a concise support assistant for healthcare workers using the Taifa Care HMIS system.
-    
-    STRICT RULES:
-    - Answer in 3 to 5 sentences MAXIMUM
-    - Use ONLY information from the knowledge base articles provided below
-    - If the answer is not in the articles, respond with exactly: "I don't have information about that in the knowledge base yet. Please contact your system administrator."
-    - Never add extra information from your own knowledge
-    - Use simple, clear language suitable for clinical staff
-    - If steps are needed, give maximum 4 bullet points
-    
-    {context_note}
-    
-    User question: {payload.message}
-    
-    Respond in 3 to 5 sentences maximum:"""
+
+STRICT RULES:
+- Answer using ONLY the published knowledge-base articles provided below.
+- Never add information from your own general knowledge.
+- Never invent clinical, administrative, or technical guidance.
+- If the provided articles do not contain enough information, say that the approved knowledge base does not contain the answer.
+- Use simple, clear language suitable for clinical staff.
+- If steps are needed, give a maximum of 4 bullet points.
+- Keep the response concise.
+
+{context_note}
+
+User question: {payload.message}
+
+Respond using only the approved knowledge-base content:"""
 
     conversation_messages = prior_messages + [{"role": "user", "content": prompt}]
 
     response = groq_client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model=os.getenv("GROQ_MODEL", "openai/gpt-oss-20b"),
         messages=conversation_messages
     )
 
     session = None
     if payload.session_token:
-        session = db.query(ChatSession).filter(
-            ChatSession.session_token == payload.session_token,
-            ChatSession.is_active == True
+        existing_session = db.query(ChatSession).filter(
+            ChatSession.session_token == payload.session_token
         ).first()
+
+        if existing_session:
+            if (
+                existing_session.user_id is not None
+                and user is not None
+                and str(existing_session.user_id) != str(user["user_id"])
+            ):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Chat session does not belong to the authenticated user"
+                )
+
+            if existing_session.user_id is None and user is not None:
+                existing_session.user_id = user["user_id"]
+                db.commit()
+            
+            session = existing_session
 
     if not session:
         session = ChatSession(
             id=uuid.uuid4(),
+            user_id=user["user_id"] if user else None,
             session_token=str(uuid.uuid4()),
             source_url="widget"
         )
@@ -1268,18 +1612,60 @@ class ChatFeedbackRequest(BaseModel):
     helpful: bool
 
 @app.post("/api/v1/chat/{message_id}/feedback")
-def submit_chat_feedback(message_id: str, payload: ChatFeedbackRequest, db: Session = Depends(get_db)):
-    from models import ChatMessage
-    import json
+def submit_chat_feedback(
+    message_id: str,
+    payload: ChatFeedbackRequest,
+    db: Session = Depends(get_db),
+    user: Optional[dict] = Depends(get_optional_user),
+):
+    message = (
+        db.query(ChatMessage)
+        .filter(ChatMessage.id == message_id)
+        .first()
+    )
 
-    message = db.query(ChatMessage).filter(ChatMessage.id == message_id).first()
     if not message:
-        raise HTTPException(status_code=404, detail="Message not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Message not found"
+        )
 
-    message.metadata = {"helpful": payload.helpful}
+    if message.role != MessageRole.assistant:
+        raise HTTPException(
+            status_code=400,
+            detail="Feedback can only be submitted for assistant responses"
+        )
+
+    user_id = user["user_id"] if user else None
+
+    existing = (
+        db.query(ChatFeedback)
+        .filter(
+            ChatFeedback.message_id == message.id,
+            ChatFeedback.user_id == user_id
+        )
+        .first()
+    )
+
+    if existing:
+        existing.helpful = payload.helpful
+    else:
+        db.add(
+            ChatFeedback(
+                id=uuid.uuid4(),
+                message_id=message.id,
+                user_id=user_id,
+                helpful=payload.helpful,
+            )
+        )
+
     db.commit()
 
-    return {"message": "Feedback recorded"}
+    return {
+        "message": "Feedback recorded",
+        "message_id": message_id,
+        "helpful": payload.helpful,
+    }
 
 @app.post("/api/v1/admin/users", status_code=201)
 def create_admin_user(
@@ -1518,7 +1904,6 @@ def get_unanswered_questions(db: Session = Depends(get_db), user: dict = Depends
     return results
 
 
-# ================= PASSWORD RESET OTP ROUTES =================
 
 import os
 import secrets
@@ -1531,6 +1916,7 @@ from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from sqlalchemy import text as _sql_text
 from passlib.context import CryptContext as _ResetCryptContext
+import re
 
 _password_reset_pwd_context = _ResetCryptContext(
     schemes=["bcrypt"],
@@ -1594,8 +1980,6 @@ def _send_password_reset_otp(email: str, otp: str):
         == "true"
     )
 
-    # Development fallback.
-    # Never return the OTP through the API.
     if not smtp_host or not smtp_username or not smtp_password:
         if dev_mode:
             print(
@@ -1664,8 +2048,6 @@ def forgot_password(
 
     email = payload.email.strip().lower()
 
-    # Always return the same external response to avoid
-    # revealing whether an account exists.
     generic_response = {
         "message":
             "If an account exists for this email, "
@@ -1679,7 +2061,6 @@ def forgot_password(
     if not user or not user.is_active:
         return generic_response
 
-    # Prevent rapid OTP spam.
     latest = db.execute(
         _sql_text(
             """
@@ -1709,7 +2090,6 @@ def forgot_password(
         if elapsed < 60:
             return generic_response
 
-    # Invalidate earlier active codes.
     db.execute(
         _sql_text(
             """
