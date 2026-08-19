@@ -65,13 +65,12 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 ALLOWED_ORIGINS = [
-    "http://localhost:5173",    "http://localhost:5174",
-    "http://localhost:3000",
-    "http://localhost:5500",
-    "http://127.0.0.1:5500",
-    "https://healthtech-kb-frontend.onrender.com",
-    "https://healthtech-kb-widget.onrender.com",
-    "http://0.0.0.0:8000"
+    origin.strip()
+    for origin in os.getenv(
+        "ALLOWED_ORIGINS",
+        "http://localhost:5173,http://localhost:5174,http://localhost:3000,http://localhost:5500,http://127.0.0.1:5500"
+    ).split(",")
+    if origin.strip()
 ]
 
 app.add_middleware(
@@ -106,12 +105,18 @@ def health_check():
 @app.middleware("http")
 async def add_security_headers(request, call_next):
     response = await call_next(request)
+    production_origin = os.getenv("FRONTEND_ORIGIN", "").strip()
+
+    connect_sources = "'self'"
+    if production_origin:
+        connect_sources += f" {production_origin}"
+
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
-        "img-src 'self' data: https://fastapi.tiangolo.com; "
-        "connect-src 'self' http://127.0.0.1:8000 http://localhost:8000 https://healthtech-kb-backend-2uo3.onrender.com;"
+        "img-src 'self' data: https://res.cloudinary.com; "
+        f"connect-src {connect_sources};"
     )
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
