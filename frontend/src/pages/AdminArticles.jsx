@@ -2,7 +2,8 @@ import { useState, useEffect } from "react"
 import { getAllArticlesAdmin, deleteArticle, approveArticle, rejectArticle } from "../services/api"
 
 export default function AdminArticles({ onEdit, onCreate, userRole }) {
-  const canManage = userRole === "editor" || userRole === "admin"
+  const canManage = userRole === "admin"
+  const canReview = userRole === "editor" || userRole === "admin"
   const [articles, setArticles] = useState([])
   const [loading, setLoading]   = useState(true)
   const [deleting, setDeleting] = useState(null)
@@ -111,17 +112,19 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">
-            {userRole === "editor" || userRole === "admin"
+            {userRole === "editor" 
               ? "Content Review"
               : "Manage Articles"}
           </h2>
 
           <p className="text-gray-500 text-sm">
-            Review, approve, reject, and manage knowledge base articles.
+            {userRole === "editor"
+              ? "Review submitted articles, approve or request changes before publishing."
+              : "Create, edit, archive, and manage knowledge base articles."}
           </p>
         </div>
 
-        {canManage && (
+        {canReview && (
           <button
             onClick={onCreate}
             className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition"
@@ -140,7 +143,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white border border-gray-300 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
           />
-          
+
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -163,16 +166,17 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
             </button>
           )}
         </div>
-            <button
-              onClick={() => setShowPendingOnly(!showPendingOnly)}
-              className={`text-sm font-medium px-3 py-1.5 rounded-lg border transition ${
-                showPendingOnly
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white text-gray-600 border-gray-300 hover:border-blue-400"
-              }`}
-            >
-              {showPendingOnly ? "Show All" : "Pending Only"}
-            </button>
+
+        <button
+          onClick={() => setShowPendingOnly(!showPendingOnly)}
+          className={`text-sm font-medium px-3 py-1.5 rounded-lg border transition ${
+            showPendingOnly
+              ? "bg-blue-600 text-white border-blue-600"
+              : "bg-white text-gray-600 border-gray-300 hover:border-blue-400"
+          }`}
+        >
+          {showPendingOnly ? "Show All" : "Pending Only"}
+        </button>
       </div>
 
       <div className="grid gap-3 pb-20">
@@ -196,10 +200,10 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
                   article.status === "published"
                     ? "bg-teal-50 text-teal-700 border-teal-200"
                     : article.status === "pending_review"
-                    ? "bg-blue-50 text-blue-700 border-blue-200"
-                    : article.status === "archived"
-                    ? "bg-gray-100 text-gray-600 border-gray-300"
-                    : "bg-amber-50 text-amber-700 border-amber-200"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : article.status === "archived"
+                        ? "bg-gray-100 text-gray-600 border-gray-300"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
                 }`}>
                   {article.status}
                 </span>
@@ -207,7 +211,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
             </div>
 
             <div className="flex gap-2 shrink-0">
-              {article.status === "pending_review" && canManage && (
+              {article.status === "pending_review" && canReview && (
                 <>
                   <button
                     onClick={() => handleApprove(article.slug)}
@@ -216,6 +220,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
                   >
                     {approving === article.slug ? "Approving..." : "Approve"}
                   </button>
+
                   <button
                     onClick={() => handleReject(article.slug)}
                     disabled={approving === article.slug || rejecting === article.slug}

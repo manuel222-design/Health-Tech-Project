@@ -1046,7 +1046,7 @@ def revert_article(slug: str, db: Session = Depends(get_db), user: dict = Depend
     return {"message": f"Article '{slug}' reverted to previous version"}
 
 @app.post("/api/v1/articles/{slug}/approve")
-def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_reviewer)):
+def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
 
     print("APPROVE USER:", user)
     article = db.query(Article).filter(Article.slug == slug).first()
@@ -1077,7 +1077,7 @@ class RejectRequest(BaseModel):
     reason: Optional[str] = None
 
 @app.post("/api/v1/articles/{slug}/reject")
-def reject_article(slug: str, payload: RejectRequest, db: Session = Depends(get_db), user: dict = Depends(require_reviewer)):
+def reject_article(slug: str, payload: RejectRequest, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
     article = db.query(Article).filter(Article.slug == slug).first()
 
     if not article:
