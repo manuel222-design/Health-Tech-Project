@@ -63,7 +63,7 @@ export default function AdminUsers() {
               <p className="text-xs text-gray-400">{u.email}</p>
               <span className={`text-xs rounded-full px-2 py-0.5 border mt-1 inline-block ${
                 u.is_active
-                  ? "bg-teal-50 text-teal-700 border-teal-200"
+                  ? "bg-indigo-50 text-indigo-700 border-indigo-200"
                   : "bg-red-50 text-red-700 border-red-200"
               }`}>
                 {u.is_active ? "Active" : "Deactivated"}
@@ -75,7 +75,7 @@ export default function AdminUsers() {
                 value={u.role}
                 onChange={e => handleRoleChange(u.id, e.target.value)}
                 disabled={updating === u.id}
-                className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="viewer">Viewer</option>
                 <option value="editor">Editor</option>
@@ -89,7 +89,7 @@ export default function AdminUsers() {
                 className={`text-sm font-medium px-3 py-1.5 rounded-lg border transition disabled:opacity-50 ${
                   u.is_active
                     ? "text-red-600 border-red-200 hover:bg-red-50"
-                    : "text-teal-600 border-teal-200 hover:bg-teal-50"
+                    : "text-indigo-600 border-indigo-200 hover:bg-indigo-50"
                 }`}
               >
                 {u.is_active ? "Deactivate" : "Reactivate"}

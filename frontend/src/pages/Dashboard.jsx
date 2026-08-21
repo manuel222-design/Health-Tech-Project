@@ -40,15 +40,15 @@ export default function Dashboard({ user, onSelectArticle, onGoToArticles }) {
       {/* Quick stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
         <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-2xl font-bold text-teal-600">{totalCount}</p>
+          <p className="text-2xl font-bold text-indigo-600">{totalCount}</p>
           <p className="text-sm text-gray-500">Articles available</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-2xl font-bold text-teal-600">{categories.length}</p>
+          <p className="text-2xl font-bold text-indigo-600">{categories.length}</p>
           <p className="text-sm text-gray-500">Categories</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl p-5 col-span-2 sm:col-span-1">
-          <p className="text-2xl font-bold text-teal-600">24/7</p>
+          <p className="text-2xl font-bold text-indigo-600">24/7</p>
           <p className="text-sm text-gray-500">AI assistant available</p>
         </div>
       </div>
@@ -80,7 +80,7 @@ export default function Dashboard({ user, onSelectArticle, onGoToArticles }) {
           <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
             Recently Added
           </h2>
-          <button onClick={onGoToArticles} className="text-sm text-teal-600 hover:text-teal-700 font-medium">
+          <button onClick={onGoToArticles} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
             View all →
           </button>
         </div>
@@ -92,7 +92,7 @@ export default function Dashboard({ user, onSelectArticle, onGoToArticles }) {
               className="bg-white border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-teal-400 transition flex items-center justify-between"
             >
               <span className="text-sm text-gray-800 font-medium">{a.title}</span>
-              <span className="text-xs text-teal-600 bg-teal-50 border border-teal-200 rounded-full px-2.5 py-0.5 shrink-0 ml-3">
+              <span className="text-xs text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-full px-2.5 py-0.5 shrink-0 ml-3">
                 {a.content_type?.replace("_", " ")}
               </span>
             </div>

@@ -81,9 +81,16 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization", "X-Session-Token"],
 )
 
-SECRET_KEY  = os.getenv("JWT_SECRET_KEY", "changethisinproduction")
-ALGORITHM   = "HS256"
-TOKEN_TTL   = 8
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+if not JWT_SECRET_KEY:
+    raise RuntimeError(
+        "JWT_SECRET_KEY must be configured before starting the application."
+    )
+
+SECRET_KEY = JWT_SECRET_KEY
+ALGORITHM = "HS256"
+TOKEN_TTL = 8
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -438,6 +445,7 @@ def search_articles(
     content_type: str = None,
     tag_id: str = None,
     product_id: str = None,
+    log_search: bool = True,
     db: Session = Depends(get_db)
 ):
     if not q or len(q.strip()) < 2:
@@ -445,7 +453,7 @@ def search_articles(
 
     # Normalize common product-name variants so that user queries
     # such as "TaifaCare" and "Taifa Care" retrieve the same content.
-    q = re.sub(r"\\btaifacare\\b", "Taifa Care", q, flags=re.IGNORECASE)
+    q = re.sub(r"\btaifacare\b", "Taifa Care", q, flags=re.IGNORECASE)
 
     filters = ["status = 'published'"]
     params = {"q": q}
@@ -590,13 +598,14 @@ def search_articles(
 
     rows = db.execute(search_query, params).fetchall()
 
-    log = SearchLog(
-        id=uuid.uuid4(),
-        query=q,
-        results_count=len(rows)
-    )
-    db.add(log)
-    db.commit()
+    if log_search:
+        log = SearchLog(
+            id=uuid.uuid4(),
+            query=q,
+            results_count=len(rows)
+        )
+        db.add(log)
+        db.commit()
 
     return {
         "query":        q,
@@ -726,6 +735,17 @@ def get_feedback_summary(
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
 
+@app.get("/api/v1/admin/feedback")
+def get_admin_feedback(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    repository = FeedbackRepository(db)
+    service = FeedbackService(repository)
+
+    return service.list_feedback()
+
+
 @app.get("/api/v1/my-notifications")
 def get_my_notifications(
     db: Session = Depends(get_db),
@@ -829,7 +849,7 @@ def export_article_pdf(slug: str, db: Session = Depends(get_db)):
     )
 
 @app.post("/api/v1/auth/login", status_code=200)
-@limiter.limit("10/minute")
+@limiter.limit("5/10minute")
 def login(
     request: Request,
     payload: LoginRequest,
@@ -1164,7 +1184,7 @@ def chat(
     # This keeps "TaifaCare" consistent with articles written as
     # "Taifa Care".
     search_text = re.sub(
-        r"\\btaifacare\\b",
+        r"\btaifacare\b",
         "Taifa Care",
         search_text,
         flags=re.IGNORECASE
@@ -1172,6 +1192,28 @@ def chat(
 
     relevant_articles = []
     prior_messages = []
+
+    # --------------------------------------------------------
+    # Determine product context.
+    # The current embedded assistant is Taifa Care-first.
+    # Explicit KenyaEMR questions are routed to KenyaEMR.
+    # --------------------------------------------------------
+    product_slug = "taifa-care"
+
+    if re.search(
+        r"\bkenya\s*emr\b|\bkenyaemr\b",
+        search_text,
+        flags=re.IGNORECASE
+    ):
+        product_slug = "kenyaemr"
+
+    if payload.screen_context:
+        context_lower = payload.screen_context.lower()
+
+        if "kenyaemr" in context_lower or "kenya emr" in context_lower:
+            product_slug = "kenyaemr"
+        elif "taifa" in context_lower:
+            product_slug = "taifa-care"
 
     if payload.session_token:
         existing_session = db.query(ChatSession).filter(
@@ -1223,11 +1265,14 @@ def chat(
                 plainto_tsquery('english', :q)
             ) AS rank
         FROM articles a
+        JOIN products p
+            ON p.id = a.product_id
         LEFT JOIN article_tags at
             ON at.article_id = a.id
         LEFT JOIN tags t
             ON t.id = at.tag_id
         WHERE a.status = 'published'
+          AND p.slug = :product_slug
         GROUP BY
             a.id,
             a.title,
@@ -1259,7 +1304,10 @@ def chat(
 
     chat_rows = db.execute(
         chat_search,
-        {"q": search_text}
+        {
+            "q": search_text,
+            "product_slug": product_slug,
+        }
     ).fetchall()
 
     relevant_articles = [
@@ -1311,7 +1359,11 @@ def chat(
         if keywords:
             for article in (
                 db.query(Article)
-                .filter(Article.status == ArticleStatus.published)
+                .join(Product, Product.id == Article.product_id)
+                .filter(
+                    Article.status == ArticleStatus.published,
+                    Product.slug == product_slug,
+                )
                 .all()
             ):
                 title_text = (article.title or "").lower()
@@ -1337,18 +1389,41 @@ def chat(
                 ]
 
                 if matched:
-                    score = (
-                        len(matched) * 10
-                        + sum(
-                            25
-                            for keyword in matched
-                            if keyword in title_text
-                        )
+                    title_matches = sum(
+                        1
+                        for keyword in matched
+                        if keyword in title_text
                     )
 
-                    fallback_candidates.append(
-                        (score, article)
+                    body_matches = sum(
+                        1
+                        for keyword in matched
+                        if keyword in body_text
                     )
+
+                    tag_matches = sum(
+                        1
+                        for keyword in matched
+                        if keyword in tag_text
+                    )
+
+                    score = (
+                        title_matches * 40
+                        + tag_matches * 20
+                        + body_matches * 10
+                        + len(matched) * 5
+                    )
+
+                    # Do not treat a single weak body match as
+                    # sufficient evidence for a grounded answer.
+                    if (
+                        len(matched) >= 2
+                        or title_matches >= 1
+                        or tag_matches >= 1
+                    ):
+                        fallback_candidates.append(
+                            (score, article)
+                        )
 
             fallback_candidates.sort(
                 key=lambda item: (
@@ -1370,7 +1445,8 @@ def chat(
             "question": payload.message,
             "answer": (
                 "I couldn't find an approved knowledge-base article that answers "
-                "that question yet. Please try another search or contact your "
+                "that question yet. I don't want to guess or provide unverified "
+                "guidance. Please try a more specific question or contact your "
                 "system administrator for assistance."
             ),
             "sources_used": 0,
@@ -1390,22 +1466,33 @@ def chat(
         f"{context}"
     )
 
-    prompt = f"""You are a concise support assistant for healthcare workers using the Taifa Care HMIS system.
+    prompt = f"""You are the Taifa Care Knowledge Base Assistant.
 
-STRICT RULES:
-- Answer using ONLY the published knowledge-base articles provided below.
-- Never add information from your own general knowledge.
-- Never invent clinical, administrative, or technical guidance.
-- If the provided articles do not contain enough information, say that the approved knowledge base does not contain the answer.
-- Use simple, clear language suitable for clinical staff.
-- If steps are needed, give a maximum of 4 bullet points.
-- Keep the response concise.
+You must operate as a STRICT DOCUMENTATION RETRIEVAL ASSISTANT.
 
-{context_note}
+CRITICAL RULES:
+- Use ONLY the supplied published knowledge-base articles.
+- Do NOT use general knowledge, memory, assumptions, common practice, or information from the question itself as facts.
+- Do NOT invent button names, modules, fields, notifications, identifiers, SMS behaviour, clinical instructions, or workflow steps.
+- Do NOT infer a missing step.
+- Do NOT paraphrase a step into a more specific instruction than the source provides.
+- Prefer copying the wording of the supplied article when describing workflow steps.
+- You may shorten or reorder supported sentences for clarity, but every factual statement must be traceable to the supplied text.
+- If the supplied articles do not directly answer the question, respond exactly:
+  "The approved knowledge base does not contain enough information to answer that question."
+- Never provide an answer from outside the supplied knowledge base.
+- Keep answers concise.
 
-User question: {payload.message}
+PRODUCT CONTEXT:
+{product_slug}
 
-Respond using only the approved knowledge-base content:"""
+SOURCE ARTICLES:
+{context}
+
+USER QUESTION:
+{payload.message}
+
+Return only an answer grounded in the source articles."""
 
     conversation_messages = prior_messages + [{"role": "user", "content": prompt}]
 
@@ -1694,6 +1781,31 @@ def get_analytics(db: Session = Depends(get_db), user: dict = Depends(require_ad
     total_users = db.query(User).count()
     total_searches = db.query(SearchLog).count()
 
+    search_trend_rows = db.execute(
+        text("""
+            SELECT
+                days.day::date AS search_date,
+                COUNT(sl.id)::int AS searches
+            FROM generate_series(
+                CURRENT_DATE - INTERVAL '29 days',
+                CURRENT_DATE,
+                INTERVAL '1 day'
+            ) AS days(day)
+            LEFT JOIN search_logs sl
+                ON DATE(sl.searched_at) = days.day::date
+            GROUP BY days.day
+            ORDER BY days.day
+        """)
+    ).fetchall()
+
+    search_trend = [
+        {
+            "date": str(row.search_date),
+            "searches": row.searches,
+        }
+        for row in search_trend_rows
+    ]
+
     from datetime import datetime, timedelta, timezone
     cutoff = datetime.now(timezone.utc) - timedelta(days=180)
 
@@ -1724,6 +1836,7 @@ def get_analytics(db: Session = Depends(get_db), user: dict = Depends(require_ad
         "zero_result_searches": [
             {"query": q, "count": c} for q, c in zero_results
         ],
+        "search_trend": search_trend,
         "stale_articles": [
             {"title": t, "slug": s, "created_at": str(c)} for t, s, c in stale_articles
         ],
@@ -1748,32 +1861,127 @@ def get_audit_logs(db: Session = Depends(get_db), user: dict = Depends(require_a
 
     return result
 
+
 @app.get("/api/v1/admin/unanswered-questions")
-def get_unanswered_questions(db: Session = Depends(get_db), user: dict = Depends(require_admin)):
-    FALLBACK_TEXT = "I don't have information about that in the knowledge base yet"
+def get_unanswered_questions(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin),
+):
+    """
+    Return genuine chatbot knowledge gaps.
 
-    unanswered = db.query(ChatMessage).filter(
-        ChatMessage.role == MessageRole.assistant,
-        ChatMessage.content.ilike(f"%{FALLBACK_TEXT}%")
-    ).order_by(ChatMessage.created_at.desc()).limit(50).all()
+    A question is considered an unanswered knowledge gap only when the
+    corresponding assistant response is the application's explicit
+    no-approved-content response.
 
-    results = []
-    for msg in unanswered:
-        prev_user_msg = db.query(ChatMessage).filter(
-            ChatMessage.session_id == msg.session_id,
-            ChatMessage.role == MessageRole.user,
-            ChatMessage.created_at <= msg.created_at,
-            ChatMessage.id != msg.id
-        ).order_by(ChatMessage.created_at.desc()).first()
+    Generic greetings and conversational prompts are excluded.
+    Repeated identical questions are grouped together.
+    """
 
-        results.append({
-            "question": prev_user_msg.content if prev_user_msg else "(unknown)",
-            "asked_at": str(msg.created_at),
-        })
+    generic_phrases = {
+        "hi",
+        "hello",
+        "hey",
+        "hallo",
+        "how are you",
+        "who are you",
+        "what can you do",
+        "what can you help me with",
+        "help",
+        "thanks",
+        "thank you",
+        "good morning",
+        "good afternoon",
+        "good evening",
+    }
 
-    return results
+    no_answer_markers = (
+        "i couldn't find an approved knowledge-base article",
+        "the approved knowledge base does not contain",
+        "the approved knowledge base does not contain enough information",
+        "i couldn't find an approved knowledge-base article that answers",
+    )
 
+    user_messages = (
+        db.query(ChatMessage)
+        .filter(ChatMessage.role == MessageRole.user)
+        .order_by(ChatMessage.created_at.asc())
+        .all()
+    )
 
+    grouped = {}
+
+    for user_message in user_messages:
+        question = (user_message.content or "").strip()
+
+        if not question:
+            continue
+
+        normalized = re.sub(r"\s+", " ", question.lower()).strip()
+        normalized = normalized.strip(" ?!.,")
+
+        # Ignore ordinary conversation/greetings.
+        if normalized in generic_phrases:
+            continue
+
+        # Avoid treating tiny fragments as documentation gaps.
+        if len(normalized) < 5:
+            continue
+
+        session_messages = (
+            db.query(ChatMessage)
+            .filter(ChatMessage.session_id == user_message.session_id)
+            .filter(ChatMessage.created_at >= user_message.created_at)
+            .order_by(ChatMessage.created_at.asc())
+            .limit(2)
+            .all()
+        )
+
+        assistant_response = None
+
+        for message in session_messages:
+            if message.id != user_message.id and message.role == MessageRole.assistant:
+                assistant_response = message
+                break
+
+        if not assistant_response:
+            continue
+
+        answer = (assistant_response.content or "").strip().lower()
+
+        if not any(marker in answer for marker in no_answer_markers):
+            continue
+
+        key = normalized
+
+        if key not in grouped:
+            grouped[key] = {
+                "question": question,
+                "count": 0,
+                "asked_count": 0,
+                "created_at": user_message.created_at,
+                "latest_at": user_message.created_at,
+            }
+
+        grouped[key]["count"] += 1
+        grouped[key]["asked_count"] = grouped[key]["count"]
+
+        if user_message.created_at > grouped[key]["latest_at"]:
+            grouped[key]["latest_at"] = user_message.created_at
+
+    results = sorted(
+        grouped.values(),
+        key=lambda item: (
+            item["count"],
+            item["latest_at"],
+        ),
+        reverse=True,
+    )[:20]
+
+    return {
+        "results": results,
+        "total": len(results),
+    }
 
 import os
 import secrets
@@ -1905,6 +2113,7 @@ Taifa Care HMIS
         )
 
         server.send_message(message)
+
 
 
 @app.post("/api/v1/auth/forgot-password")

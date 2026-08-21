@@ -92,6 +92,7 @@ export default api
 export const submitFeedback = (slug, rating, comment) =>
   api.post(`/articles/${slug}/feedback`, { rating, comment })
 export const getFeedbackSummary = (slug) => api.get(`/articles/${slug}/feedback/summary`)
+export const getAdminFeedback = () => api.get("/admin/feedback")
 
 export const submitChatFeedback = (messageId, helpful) =>
   api.post(`/chat/${messageId}/feedback`, { helpful })

@@ -22,7 +22,7 @@ export default function AdminAnalytics() {
 
     getUnansweredQuestions()
       .then(res =>
-        setUnanswered(res.data || [])
+        setUnanswered(res.data?.results || [])
       )
       .catch(error =>
         console.error(
@@ -36,7 +36,7 @@ export default function AdminAnalytics() {
     return (
       <div className="flex items-center justify-center py-24">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
 
           <p className="text-sm text-slate-500">
             Loading analytics...
@@ -104,9 +104,9 @@ export default function AdminAnalytics() {
 
           <div>
             <div className="inline-flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-teal-500" />
+              <span className="w-2 h-2 rounded-full bg-indigo-500" />
 
-              <span className="text-[10px] uppercase tracking-wider font-semibold text-teal-700">
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-indigo-700">
                 System Insights
               </span>
             </div>
@@ -148,7 +148,7 @@ export default function AdminAnalytics() {
               <path d="M8 16h5" />
             </svg>
           }
-          iconClass="bg-teal-50 text-teal-700"
+          iconClass="bg-indigo-50 text-indigo-700"
         />
 
         <MetricCard
@@ -217,7 +217,7 @@ export default function AdminAnalytics() {
               <circle cx="12" cy="12" r="2.5" />
             </svg>
           }
-          iconClass="bg-teal-50 text-teal-700"
+          iconClass="bg-indigo-50 text-indigo-700"
         >
           {topViewed.length === 0 ? (
             <EmptyState message="No article views have been recorded yet." />
@@ -236,7 +236,7 @@ export default function AdminAnalytics() {
                     {article.title}
                   </span>
 
-                  <span className="text-sm text-teal-600 font-semibold shrink-0">
+                  <span className="text-sm text-indigo-600 font-semibold shrink-0">
                     {article.views} views
                   </span>
                 </div>
@@ -495,7 +495,7 @@ function MetricCard({
             {label}
           </p>
 
-          <p className="text-3xl font-bold text-teal-600 mt-2">
+          <p className="text-3xl font-bold text-indigo-600 mt-2">
             {value}
           </p>
 

@@ -1,11 +1,14 @@
-export default function Landing({ onLogin, onRegister }) {
+export default function Landing({
+  onLogin,
+  onRegister,
+  onOpenAssistant,
+}) {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
 
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 text-white">
 
-        {/* restrained accent glow */}
         <div className="absolute -top-44 -right-44 w-[520px] h-[520px] rounded-full bg-teal-400/10 blur-3xl" />
         <div className="absolute bottom-0 -left-48 w-[420px] h-[420px] rounded-full bg-cyan-400/5 blur-3xl" />
 
@@ -13,7 +16,8 @@ export default function Landing({ onLogin, onRegister }) {
         <nav className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 py-6 flex items-center justify-between">
 
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/15">
+
+            <div className="w-11 h-11 bg-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/15">
               <span className="font-bold text-lg text-slate-950">
                 TC
               </span>
@@ -25,21 +29,22 @@ export default function Landing({ onLogin, onRegister }) {
               </div>
 
               <div className="text-xs text-slate-400">
-                HMIS Knowledge System
+                Knowledge Centre
               </div>
             </div>
+
           </div>
 
           <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400">
             <span className="w-2 h-2 rounded-full bg-teal-400" />
-            Secure Healthcare Information
+            Healthcare knowledge &amp; assistance
           </div>
 
         </nav>
 
 
-        {/* Hero content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 pt-8 pb-16 lg:pt-12 lg:pb-20">
+        {/* HERO CONTENT */}
+        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 pt-8 pb-16 lg:pt-14 lg:pb-20">
 
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
@@ -47,8 +52,8 @@ export default function Landing({ onLogin, onRegister }) {
             <div>
 
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-teal-400/20 bg-teal-400/10 text-teal-300 text-xs font-semibold mb-6">
-                <span>♡</span>
-                HEALTHCARE INFORMATION MANAGEMENT
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                TAIFA CARE KNOWLEDGE CENTRE
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.07]">
@@ -59,17 +64,17 @@ export default function Landing({ onLogin, onRegister }) {
               </h1>
 
               <p className="mt-6 max-w-xl text-base sm:text-lg text-slate-300 leading-relaxed">
-                Taifa Care brings healthcare knowledge, digital workflows,
-                intelligent assistance and secure access together in one
-                centralized platform.
+                Access trusted healthcare knowledge, practical workflows,
+                and AI assistance in one place.
               </p>
 
-              {/* Main actions */}
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+
+              {/* ACTIONS */}
+              <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap gap-3">
 
                 <button
                   onClick={onRegister}
-                  className="px-6 py-3.5 bg-teal-500 hover:bg-teal-400 text-slate-950 rounded-xl font-bold transition shadow-lg shadow-teal-500/15"
+                  className="px-6 py-3.5 bg-indigo-500 hover:bg-teal-400 text-slate-950 rounded-xl font-bold transition shadow-lg shadow-indigo-500/15"
                 >
                   Get Started →
                 </button>
@@ -78,27 +83,28 @@ export default function Landing({ onLogin, onRegister }) {
                   onClick={onLogin}
                   className="px-6 py-3.5 border border-slate-600 hover:border-teal-400 hover:bg-white/5 text-white rounded-xl font-semibold transition"
                 >
-                  Sign in to Taifa Care
+                  Sign in
                 </button>
 
               </div>
 
-              {/* Supporting trust indicators */}
+
+              {/* TRUST */}
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-slate-400">
 
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
-                  Secure access
+                  Trusted knowledge
                 </div>
 
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
-                  Centralized knowledge
+                  Practical workflows
                 </div>
 
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
-                  Healthcare focused
+                  AI assistance
                 </div>
 
               </div>
@@ -113,51 +119,42 @@ export default function Landing({ onLogin, onRegister }) {
 
               <div className="relative bg-white rounded-3xl border border-slate-200 shadow-2xl p-7 sm:p-8">
 
-                {/* Card header */}
                 <div className="flex items-center justify-between">
 
                   <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-teal-600 font-bold">
+                    <p className="text-xs uppercase tracking-[0.2em] text-indigo-600 font-bold">
                       Taifa Care
                     </p>
 
                     <p className="text-sm text-slate-400 mt-1">
-                      Healthcare Information System
+                      Knowledge Centre
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                    <span className="w-2 h-2 rounded-full bg-teal-500" />
-                    Secure
+                    <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                    Ready
                   </div>
 
                 </div>
 
 
-                {/* Main message */}
                 <div className="mt-10">
 
-                  <p className="text-sm font-semibold text-teal-600 mb-3">
-                    Connected healthcare information
+                  <p className="text-sm font-semibold text-indigo-600 mb-3">
+                    One trusted place
                   </p>
 
                   <h3 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 leading-tight">
                     Everything connected.
-                    <span className="block text-teal-600">
+                    <span className="block text-indigo-600">
                       One trusted place.
                     </span>
                   </h3>
 
-                  <p className="text-sm text-slate-500 leading-relaxed mt-5 max-w-md">
-                    Bring healthcare knowledge, digital workflows and
-                    intelligent assistance together through one secure
-                    platform.
-                  </p>
-
                 </div>
 
 
-                {/* Three subtle capabilities */}
                 <div className="grid grid-cols-3 gap-3 mt-8">
 
                   <HeroCapability
@@ -171,23 +168,20 @@ export default function Landing({ onLogin, onRegister }) {
                   />
 
                   <HeroCapability
-                    title="AI Support"
+                    title="AI"
                     text="Smart assistance"
                   />
 
                 </div>
 
 
-                {/* Bottom indicator */}
-                <div className="mt-7 rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 flex items-center gap-3">
-
-                  <span className="w-2.5 h-2.5 rounded-full bg-teal-500" />
-
-                  <span className="text-xs text-slate-500">
-                    Built for modern healthcare teams
-                  </span>
-
-                </div>
+                <button
+                  onClick={onOpenAssistant}
+                  className="w-full mt-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-4 py-3.5 text-sm font-semibold transition flex items-center justify-center gap-2"
+                >
+                  <span className="text-teal-400">✦</span>
+                  Ask the Taifa Care Assistant
+                </button>
 
               </div>
 
@@ -206,47 +200,46 @@ export default function Landing({ onLogin, onRegister }) {
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16">
 
           <div className="text-center mb-10">
-            <p className="text-xs uppercase tracking-widest text-teal-600 font-bold">
-              Powerful features
+
+            <p className="text-xs uppercase tracking-widest text-indigo-600 font-bold">
+              What you can do
             </p>
 
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
-              Everything your team needs
+              Knowledge, workflows and AI in one place
             </h2>
 
-            <p className="text-slate-500 mt-3 max-w-xl mx-auto text-sm">
-              Explore Taifa Care's healthcare information and management capabilities.
-              Select a feature to sign in and continue.
-            </p>
           </div>
+
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
             <Feature
-              icon="🏥"
-              title="HMIS Workflows"
-              text="Access and manage healthcare workflows and operational processes."
+              icon="📚"
+              title="Knowledge Base"
+              text="Find trusted guides, procedures and reference material."
               onClick={onLogin}
             />
 
             <Feature
-              icon="📚"
-              title="Knowledge Base"
-              text="Find trusted healthcare guides, procedures and reference materials."
+              icon="🏥"
+              title="HMIS Workflows"
+              text="Access practical guidance for everyday healthcare operations."
               onClick={onLogin}
             />
 
             <Feature
               icon="🤖"
               title="AI Assistance"
-              text="Get intelligent support to help you navigate healthcare information."
-              onClick={onLogin}
+              text="Ask questions and explore knowledge instantly."
+              onClick={onOpenAssistant}
+              action="Try Assistant →"
             />
 
             <Feature
               icon="🔐"
               title="Secure Access"
-              text="Role-based access protects information and provides appropriate tools."
+              text="Role-based access gives teams the right tools."
               onClick={onLogin}
             />
 
@@ -264,37 +257,38 @@ export default function Landing({ onLogin, onRegister }) {
 
           <div className="text-center">
 
-            <p className="text-xs uppercase tracking-widest text-teal-600 font-bold">
-              Getting started
+            <p className="text-xs uppercase tracking-widest text-indigo-600 font-bold">
+              Explore Taifa Care
             </p>
 
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
-              A simple journey to better information
+              Start where you need it
             </h2>
 
           </div>
+
 
           <div className="grid md:grid-cols-3 gap-5 mt-10">
 
             <Step
               number="01"
-              title="Create an account"
-              text="Register and access Taifa Care according to your role and permissions."
-              onClick={onRegister}
+              title="Ask the Assistant"
+              text="Get immediate answers from the Taifa Care knowledge base."
+              onClick={onOpenAssistant}
             />
 
             <Step
               number="02"
-              title="Explore resources"
-              text="Discover knowledge, workflows and tools available to your account."
+              title="Explore Knowledge"
+              text="Browse guides, procedures and practical workflows."
               onClick={onLogin}
             />
 
             <Step
               number="03"
-              title="Work smarter"
-              text="Use centralized information and AI assistance to improve your daily work."
-              onClick={onLogin}
+              title="Sign in when needed"
+              text="Create an account when you need personalized access and tools."
+              onClick={onRegister}
             />
 
           </div>
@@ -305,26 +299,25 @@ export default function Landing({ onLogin, onRegister }) {
 
 
       {/* CTA */}
-      <section className="bg-teal-900">
+      <section className="bg-indigo-900">
 
         <div className="max-w-5xl mx-auto px-5 sm:px-8 py-14 text-center">
 
-          <div className="inline-flex w-12 h-12 rounded-xl bg-teal-500/20 border border-teal-400/20 items-center justify-center text-teal-300 text-xl mb-5">
-            ♡
+          <div className="inline-flex w-12 h-12 rounded-xl bg-indigo-500/20 border border-teal-400/20 items-center justify-center text-teal-300 text-xl mb-5">
+            ✦
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-bold text-white">
-            Ready to access Taifa Care?
+            Ready to go further with Taifa Care?
           </h2>
 
-          <p className="mt-3 text-teal-100 max-w-xl mx-auto text-sm">
-            Join healthcare professionals using centralized knowledge,
-            digital workflows and intelligent assistance.
+          <p className="mt-3 text-indigo-100 max-w-xl mx-auto text-sm">
+            Sign in to access the full knowledge centre, workflows and role-based tools.
           </p>
 
           <button
             onClick={onRegister}
-            className="mt-7 px-7 py-3.5 bg-white text-teal-800 rounded-xl font-bold hover:bg-teal-50 transition"
+            className="mt-7 px-7 py-3.5 bg-white text-indigo-800 rounded-xl font-bold hover:bg-indigo-50 transition"
           >
             Create Your Account →
           </button>
@@ -341,18 +334,18 @@ export default function Landing({ onLogin, onRegister }) {
 
           <div className="flex items-center gap-2">
 
-            <div className="w-7 h-7 bg-teal-500 rounded-lg flex items-center justify-center text-xs font-bold text-slate-950">
+            <div className="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center text-xs font-bold text-slate-950">
               TC
             </div>
 
             <span>
-              © {new Date().getFullYear()} Taifa Care · HMIS Knowledge System
+              © {new Date().getFullYear()} Taifa Care · Knowledge Centre
             </span>
 
           </div>
 
           <span>
-            Healthcare Management & Knowledge System
+            Healthcare knowledge &amp; assistance
           </span>
 
         </div>
@@ -368,7 +361,7 @@ function HeroCapability({ title, text }) {
   return (
     <div className="rounded-xl bg-slate-50 border border-slate-200 px-3 py-3">
       <div className="flex items-center gap-2">
-        <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
         <span className="text-xs font-semibold text-slate-700">
           {title}
         </span>
@@ -382,13 +375,20 @@ function HeroCapability({ title, text }) {
 }
 
 
-function Feature({ icon, title, text, onClick }) {
+function Feature({
+  icon,
+  title,
+  text,
+  onClick,
+  action = "Explore →",
+}) {
   return (
     <button
       onClick={onClick}
       className="group bg-white border border-slate-200 rounded-xl p-5 text-left hover:border-teal-300 hover:shadow-md transition-all"
     >
-      <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center text-lg mb-4 group-hover:bg-teal-600 group-hover:text-white transition">
+
+      <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center text-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">
         {icon}
       </div>
 
@@ -400,28 +400,37 @@ function Feature({ icon, title, text, onClick }) {
         {text}
       </p>
 
-      <div className="mt-4 text-xs font-semibold text-teal-600">
-        Explore →
+      <div className="mt-4 text-xs font-semibold text-indigo-600">
+        {action}
       </div>
+
     </button>
   )
 }
 
 
-function Step({ number, title, text, onClick }) {
+function Step({
+  number,
+  title,
+  text,
+  onClick,
+}) {
   return (
     <button
       onClick={onClick}
       className="group bg-white border border-slate-200 rounded-xl p-6 text-left hover:border-teal-300 hover:shadow-md transition-all"
     >
+
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold tracking-widest text-teal-600">
+
+        <span className="text-xs font-bold tracking-widest text-indigo-600">
           {number}
         </span>
 
-        <span className="text-slate-300 group-hover:text-teal-500 transition">
+        <span className="text-slate-300 group-hover:text-indigo-500 transition">
           →
         </span>
+
       </div>
 
       <h3 className="text-base font-bold text-slate-800 mt-6">
@@ -431,6 +440,7 @@ function Step({ number, title, text, onClick }) {
       <p className="text-sm text-slate-500 leading-relaxed mt-2">
         {text}
       </p>
+
     </button>
   )
 }

@@ -20,10 +20,10 @@ export default function Home({
     return (
       <div className="flex items-center justify-center py-24">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
 
           <p className="text-sm text-slate-500">
-            Loading TaifaCare Knowledge Centre...
+            Loading Knowledge Centre...
           </p>
         </div>
       </div>
@@ -80,71 +80,36 @@ export default function Home({
       {/* =====================================================
           HERO
       ===================================================== */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-800 via-teal-700 to-cyan-700 text-white shadow-lg">
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-950 via-indigo-800 to-emerald-700 text-white shadow-lg">
 
-        <div className="absolute -right-16 -top-20 w-72 h-72 rounded-full bg-white/5" />
-        <div className="absolute right-24 -bottom-20 w-48 h-48 rounded-full bg-cyan-300/10" />
-        <div className="absolute left-1/2 top-0 w-32 h-32 rounded-full bg-white/5 blur-2xl" />
+        <div className="absolute -right-28 -top-24 w-96 h-96 rounded-full bg-indigo-500/18 blur-3xl" />
+        <div className="absolute right-20 -bottom-24 w-64 h-64 rounded-full bg-slate-900/15 blur-3xl" />
+        <div className="absolute -left-20 -bottom-24 w-64 h-64 rounded-full bg-teal-300/10 blur-3xl" />
+        <div className="absolute left-1/2 -top-20 w-48 h-48 rounded-full bg-white/5 blur-3xl" />
 
-        <div className="relative px-6 py-8 sm:px-9 sm:py-10">
+        <div className="relative px-6 py-8 sm:px-9 sm:py-9">
 
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-7">
 
             <div className="max-w-3xl">
 
-              <div className="inline-flex items-center gap-2 mb-4">
+              <div className="inline-flex items-center gap-2 mb-3">
 
-                <span className="w-2 h-2 rounded-full bg-teal-200" />
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-200" />
 
-                <span className="text-[11px] uppercase tracking-[0.16em] text-teal-100 font-semibold">
-                  TaifaCare Clinical Knowledge Centre
+                <span className="text-[10px] uppercase tracking-[0.16em] text-indigo-100 font-semibold">
+                  Taifa Care Knowledge Centre
                 </span>
 
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-
-                <span className="inline-flex items-center gap-2 bg-white/10 border border-white/15 px-3 py-1.5 rounded-full text-xs font-medium text-white">
-
-                  <span className="w-5 h-5 rounded-md bg-white/15 flex items-center justify-center">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="w-3.5 h-3.5"
-                    >
-                      <rect
-                        x="5"
-                        y="5"
-                        width="14"
-                        height="14"
-                        rx="2.5"
-                      />
-                      <path d="M12 8v8" />
-                      <path d="M8 12h8" />
-                    </svg>
-                  </span>
-
-                  TaifaCare
-                </span>
-
-                <span className="text-[11px] font-semibold text-teal-100 bg-white/10 border border-white/10 px-2.5 py-1.5 rounded-full">
-                  v1.0
-                </span>
-
-              </div>
-
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight tracking-tight">
                 Welcome back, {username}
               </h1>
 
-              <p className="text-sm sm:text-base text-teal-50 mt-3 max-w-2xl leading-relaxed">
-                Trusted HMIS workflows, clinical guidance and
-                operational knowledge for healthcare teams working
-                with TaifaCare.
+              <p className="text-sm sm:text-base text-indigo-50 mt-3 max-w-2xl leading-relaxed">
+                Find trusted healthcare knowledge, practical workflows,
+                and the assistance you need to work confidently.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 mt-6">
@@ -158,7 +123,7 @@ export default function Home({
                         behavior: "smooth",
                       })
                   }
-                  className="inline-flex items-center justify-center gap-2 bg-white text-teal-800 font-semibold px-5 py-3 rounded-xl shadow-sm hover:bg-teal-50 transition"
+                  className="inline-flex items-center justify-center gap-2 bg-white text-indigo-800 font-semibold px-5 py-3 rounded-xl shadow-sm hover:bg-indigo-50 transition"
                 >
                   Explore Knowledge Base
                   <span>→</span>
@@ -181,67 +146,33 @@ export default function Home({
 
             </div>
 
-            <div className="w-full lg:w-auto">
 
-              <div className="bg-white/10 border border-white/15 rounded-2xl p-5 backdrop-blur-sm min-w-[250px]">
+            <div className="flex items-center gap-3 shrink-0">
 
-                <p className="text-[10px] uppercase tracking-[0.16em] text-teal-100 font-semibold">
-                  Knowledge System
-                </p>
+              <div className="px-4 py-3 rounded-xl bg-white/10 border border-white/15 backdrop-blur-sm min-w-[110px]">
 
-                <div className="mt-4 flex items-center gap-3">
-
-                  <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="w-5 h-5 text-teal-100"
-                    >
-                      <path d="M5 4h14v16H5z" />
-                      <path d="M8 8h8" />
-                      <path d="M8 12h8" />
-                      <path d="M8 16h5" />
-                    </svg>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold text-white">
-                      Verified HMIS guidance
-                    </p>
-
-                    <p className="text-xs text-teal-100 mt-0.5">
-                      Structured by category and module
-                    </p>
-                  </div>
-
+                <div className="text-xl font-bold text-white">
+                  {totalArticles}
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mt-5">
+                <div className="text-[10px] uppercase tracking-wide text-indigo-100 mt-0.5">
+                  Guides
+                </div>
 
-                  <div className="bg-white/10 rounded-xl px-3 py-3">
-                    <p className="text-lg font-bold text-white">
-                      {totalArticles}
-                    </p>
+              </div>
 
-                    <p className="text-[10px] text-teal-100 uppercase tracking-wide mt-0.5">
-                      Published guides
-                    </p>
-                  </div>
 
-                  <div className="bg-white/10 rounded-xl px-3 py-3">
-                    <p className="text-lg font-bold text-white">
-                      {categories.length}
-                    </p>
+              <div className="w-px h-10 bg-white/15" />
 
-                    <p className="text-[10px] text-teal-100 uppercase tracking-wide mt-0.5">
-                      Categories
-                    </p>
-                  </div>
 
+              <div className="px-4 py-3 rounded-xl bg-white/10 border border-white/15 backdrop-blur-sm min-w-[110px]">
+
+                <div className="text-xl font-bold text-white">
+                  {categories.length}
+                </div>
+
+                <div className="text-[10px] uppercase tracking-wide text-indigo-100 mt-0.5">
+                  Areas
                 </div>
 
               </div>
@@ -258,103 +189,190 @@ export default function Home({
       {/* =====================================================
           SUMMARY
       ===================================================== */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <section className="grid grid-cols-1 lg:grid-cols-4 gap-4">
 
-        <SummaryCard
-          label="Published Guides"
-          value={totalArticles}
-          description="Available knowledge resources"
-          iconClass="bg-teal-50 text-teal-700"
-          accentClass="border-t-teal-500"
-          icon={
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-5 h-5"
-            >
-              <path d="M5 4h14v16H5z" />
-              <path d="M8 8h8" />
-              <path d="M8 12h8" />
-              <path d="M8 16h5" />
-            </svg>
-          }
-        />
+        {/* PRIMARY METRIC */}
+        <div className="lg:col-span-2">
 
-        <SummaryCard
-          label="Knowledge Areas"
-          value={categories.length}
-          description="Structured documentation areas"
-          iconClass="bg-blue-50 text-blue-600"
-          accentClass="border-t-blue-500"
-          icon={
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-5 h-5"
-            >
-              <rect x="4" y="4" width="6" height="6" rx="1" />
-              <rect x="14" y="4" width="6" height="6" rx="1" />
-              <rect x="4" y="14" width="6" height="6" rx="1" />
-              <rect x="14" y="14" width="6" height="6" rx="1" />
-            </svg>
-          }
-        />
+          <div className="relative overflow-hidden h-full min-h-[190px] rounded-2xl bg-gradient-to-br from-indigo-700 via-indigo-600 to-cyan-600 text-white p-6 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
 
-        <SummaryCard
-          label="Covered Areas"
-          value={coveredCategories}
-          description="Categories with published guidance"
-          iconClass="bg-emerald-50 text-emerald-600"
-          accentClass="border-t-emerald-500"
-          icon={
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-5 h-5"
-            >
-              <path d="m5 12 4 4L19 6" />
-            </svg>
-          }
-        />
+            <div className="absolute -right-10 -top-10 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
 
-        <SummaryCard
-          label="TaifaCare Version"
-          value="1.0"
-          description={
-            emptyCategories > 0
-              ? `${emptyCategories} areas still being expanded`
-              : "Current knowledge product"
-          }
-          iconClass="bg-cyan-50 text-cyan-700"
-          accentClass="border-t-cyan-500"
-          icon={
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-5 h-5"
-            >
-              <rect x="5" y="5" width="14" height="14" rx="3" />
-              <path d="M12 8v8" />
-              <path d="M8 12h8" />
-            </svg>
-          }
-        />
+            <div className="relative h-full flex flex-col justify-between">
+
+              <div>
+
+                <div className="flex items-center gap-2">
+
+                  <span className="w-2 h-2 rounded-full bg-indigo-200" />
+
+                  <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-indigo-50">
+                    Published Guides
+                  </span>
+
+                </div>
+
+                <div className="text-5xl font-bold mt-6 tracking-tight">
+                  {totalArticles}
+                </div>
+
+                <p className="text-sm text-indigo-50 mt-1">
+                  Ready to explore
+                </p>
+
+              </div>
+
+
+              <button
+                type="button"
+                onClick={() =>
+                  document
+                    .querySelector("[data-knowledge-centre]")
+                    ?.scrollIntoView({
+                      behavior: "smooth",
+                    })
+                }
+                className="self-start mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-indigo-100 transition"
+              >
+                Explore guides
+                <span className="transition-transform group-hover:translate-x-1">
+                  →
+                </span>
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* KNOWLEDGE AREAS */}
+        <div>
+
+          <div className="relative overflow-hidden h-full min-h-[190px] rounded-2xl bg-gradient-to-br from-slate-50 via-white to-white border border-slate-200 border-t-2 border-t-slate-500 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
+
+            <div className="flex items-center gap-2">
+
+              <span className="w-2 h-2 rounded-full bg-slate-500" />
+
+              <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500 font-bold">
+                Knowledge Areas
+              </span>
+
+            </div>
+
+            <div className="text-3xl font-bold text-slate-700 mt-7">
+              {categories.length}
+            </div>
+
+            <p className="text-xs text-slate-500 mt-1.5">
+              Available topics
+            </p>
+
+            <div className="absolute bottom-5 right-5 text-slate-300 text-lg">
+              →
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* COVERED AREAS */}
+        <div>
+
+          <div className="relative overflow-hidden h-full min-h-[190px] rounded-2xl bg-white border border-slate-200 border-t-2 border-t-emerald-500 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
+
+            <div className="flex items-center gap-2">
+
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+
+              <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500 font-bold">
+                Covered Areas
+              </span>
+
+            </div>
+
+            <div className="flex items-end gap-1.5 mt-7">
+
+              <span className="text-3xl font-bold text-emerald-700">
+                {coveredCategories}
+              </span>
+
+              <span className="text-sm text-slate-400 mb-1">
+                / {categories.length}
+              </span>
+
+            </div>
+
+            <p className="text-xs text-slate-500 mt-1.5">
+              Areas with published content
+            </p>
+
+            <div className="absolute bottom-5 right-5 text-slate-300 text-lg">
+              →
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* PRODUCT VERSION */}
+        <div className="lg:col-span-2">
+
+          <div className="relative overflow-hidden min-h-[150px] rounded-2xl bg-gradient-to-br from-indigo-50/80 via-white to-white border border-indigo-100 border-t-2 border-t-indigo-500 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+
+              <div>
+
+                <div className="flex items-center gap-2">
+
+                  <span className="w-2 h-2 rounded-full bg-indigo-500" />
+
+                  <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500 font-bold">
+                    Product Version
+                  </span>
+
+                </div>
+
+                <div className="text-3xl font-bold text-indigo-700 mt-5">
+                  v1.0
+                </div>
+
+                <p className="text-xs text-slate-500 mt-1.5">
+                  Current release
+                </p>
+
+              </div>
+
+
+              <div className="sm:text-right">
+
+                <p className="text-xs text-slate-400">
+                  Taifa Care
+                </p>
+
+                <p className="text-sm font-semibold text-slate-700 mt-1">
+                  Knowledge Centre
+                </p>
+
+                {emptyCategories > 0 && (
+                  <p className="text-[11px] text-indigo-700 mt-2">
+                    {emptyCategories} area{emptyCategories !== 1 ? "s" : ""} expanding
+                  </p>
+                )}
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
 
       </section>
 
@@ -369,9 +387,9 @@ export default function Home({
           <div>
 
             <div className="inline-flex items-center gap-2 mb-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
 
-              <span className="text-[10px] uppercase tracking-wider text-teal-700 font-semibold">
+              <span className="text-[10px] uppercase tracking-wider text-indigo-700 font-semibold">
                 Activity
               </span>
             </div>
@@ -424,7 +442,7 @@ export default function Home({
               data?.today_activity?.published_guides || 0
             }
             description="Guides published today"
-            iconClass="bg-teal-50 text-teal-700"
+            iconClass="bg-indigo-50 text-indigo-700"
             icon={
               <svg
                 viewBox="0 0 24 24"
@@ -484,9 +502,9 @@ export default function Home({
           <div>
 
             <div className="inline-flex items-center gap-2 mb-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
 
-              <span className="text-[10px] uppercase tracking-wider text-teal-700 font-semibold">
+              <span className="text-[10px] uppercase tracking-wider text-indigo-700 font-semibold">
                 Knowledge
               </span>
             </div>
@@ -549,20 +567,20 @@ export default function Home({
                   featuredArticles[0].slug
                 )
               }
-              className="group text-left p-6 sm:p-7 bg-gradient-to-br from-teal-50 via-white to-white hover:from-teal-100/70 transition border-b lg:border-b-0 lg:border-r border-slate-200"
+              className="group text-left p-6 sm:p-7 bg-gradient-to-br from-indigo-50 via-white to-white hover:from-indigo-100/70 transition border-b lg:border-b-0 lg:border-r border-slate-200"
             >
 
               <div className="flex items-center justify-between gap-3">
 
-                <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-wider font-semibold text-teal-700 bg-white/80 border border-teal-100 px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-wider font-semibold text-indigo-700 bg-white/80 border border-indigo-100 px-2.5 py-1 rounded-full">
 
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
 
                   Featured Guide
 
                 </span>
 
-                <span className="text-slate-300 group-hover:text-teal-600 transition">
+                <span className="text-slate-300 group-hover:text-indigo-600 transition">
                   →
                 </span>
 
@@ -570,7 +588,7 @@ export default function Home({
 
               <div className="mt-8">
 
-                <div className="w-11 h-11 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center mb-4 group-hover:bg-teal-600 group-hover:text-white transition">
+                <div className="w-11 h-11 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">
 
                   <svg
                     viewBox="0 0 24 24"
@@ -589,7 +607,7 @@ export default function Home({
 
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-800 leading-tight group-hover:text-teal-700 transition">
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-800 leading-tight group-hover:text-indigo-700 transition">
                   {featuredArticles[0].title}
                 </h3>
 
@@ -603,7 +621,7 @@ export default function Home({
 
                   {featuredArticles[0].category_name && (
                     <>
-                      <span className="text-xs bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full border border-teal-100">
+                      <span className="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full border border-indigo-100">
                         {featuredArticles[0].category_name}
                       </span>
 
@@ -636,7 +654,7 @@ export default function Home({
                     •
                   </span>
 
-                  <span className="text-xs font-semibold text-teal-700">
+                  <span className="text-xs font-semibold text-indigo-700">
                     Read guide →
                   </span>
 
@@ -676,7 +694,7 @@ export default function Home({
                     className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-slate-50 transition group"
                   >
 
-                    <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 group-hover:bg-teal-50 group-hover:text-teal-700 transition">
+                    <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-700 transition">
 
                       <svg
                         viewBox="0 0 24 24"
@@ -697,7 +715,7 @@ export default function Home({
 
                     <div className="min-w-0 flex-1">
 
-                      <p className="text-sm font-medium text-slate-700 truncate group-hover:text-teal-700 transition">
+                      <p className="text-sm font-medium text-slate-700 truncate group-hover:text-indigo-700 transition">
                         {article.title}
                       </p>
 
@@ -705,7 +723,7 @@ export default function Home({
 
                         {article.category_name && (
                           <>
-                            <span className="text-[10px] text-teal-600">
+                            <span className="text-[10px] text-indigo-600">
                               {article.category_name}
                             </span>
 
@@ -733,7 +751,7 @@ export default function Home({
 
                     </div>
 
-                    <span className="text-slate-300 group-hover:text-teal-600 group-hover:translate-x-0.5 transition">
+                    <span className="text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition">
                       →
                     </span>
 
@@ -769,9 +787,9 @@ export default function Home({
           <div>
 
             <div className="inline-flex items-center gap-2 mb-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
 
-              <span className="text-[10px] uppercase tracking-wider text-teal-700 font-semibold">
+              <span className="text-[10px] uppercase tracking-wider text-indigo-700 font-semibold">
                 Taxonomy
               </span>
             </div>
@@ -811,7 +829,7 @@ export default function Home({
                 }
                 className={`group relative overflow-hidden bg-white border rounded-xl p-5 text-left shadow-sm transition-all ${
                   hasContent
-                    ? "border-slate-200 border-l-2 border-l-teal-100 hover:border-teal-200 hover:border-l-teal-500 hover:shadow-md hover:-translate-y-0.5"
+                    ? "border-slate-200 border-l-2 border-l-indigo-100 hover:border-indigo-200 hover:border-l-indigo-500 hover:shadow-md hover:-translate-y-0.5"
                     : "border-slate-200 border-l-2 border-l-slate-100 hover:border-slate-300 hover:shadow-sm"
                 }`}
               >
@@ -821,7 +839,7 @@ export default function Home({
                   <div
                     className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 transition ${
                       hasContent
-                        ? "bg-teal-50 text-teal-700 group-hover:bg-teal-600 group-hover:text-white"
+                        ? "bg-indigo-50 text-indigo-700 group-hover:bg-indigo-600 group-hover:text-white"
                         : "bg-slate-100 text-slate-400"
                     }`}
                   >
@@ -831,7 +849,7 @@ export default function Home({
                   <span
                     className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${
                       hasContent
-                        ? "bg-teal-50 border-teal-100 text-teal-700"
+                        ? "bg-indigo-50 border-indigo-100 text-indigo-700"
                         : "bg-slate-50 border-slate-200 text-slate-400"
                     }`}
                   >
@@ -843,7 +861,7 @@ export default function Home({
                 <h3
                   className={`font-semibold mt-4 transition ${
                     hasContent
-                      ? "text-slate-800 group-hover:text-teal-700"
+                      ? "text-slate-800 group-hover:text-indigo-700"
                       : "text-slate-600"
                   }`}
                 >
@@ -866,7 +884,7 @@ export default function Home({
                   <span
                     className={`text-xs font-semibold ${
                       hasContent
-                        ? "text-teal-600"
+                        ? "text-indigo-600"
                         : "text-slate-400"
                     }`}
                   >
@@ -889,14 +907,14 @@ export default function Home({
       ===================================================== */}
       <section className="relative overflow-hidden rounded-xl bg-slate-900 border border-slate-800 px-6 py-7 sm:px-8">
 
-        <div className="absolute -right-8 -top-10 w-32 h-32 rounded-full bg-teal-500/10" />
+        <div className="absolute -right-8 -top-10 w-32 h-32 rounded-full bg-indigo-500/10" />
         <div className="absolute -right-3 -bottom-12 w-24 h-24 rounded-full bg-cyan-400/10" />
 
         <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
           <div className="flex items-start gap-4 max-w-3xl">
 
-            <div className="w-11 h-11 rounded-xl bg-teal-500/15 text-teal-300 border border-teal-400/20 flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-xl bg-indigo-500/15 text-teal-300 border border-teal-400/20 flex items-center justify-center shrink-0">
 
               <svg
                 viewBox="0 0 24 24"
@@ -945,7 +963,7 @@ export default function Home({
                 window.openTaifaCareAssistant()
               }
             }}
-            className="shrink-0 inline-flex items-center justify-center gap-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition"
+            className="shrink-0 inline-flex items-center justify-center gap-2 bg-indigo-500 hover:bg-teal-400 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition"
           >
             Ask the AI Assistant
             <span>→</span>
@@ -1155,40 +1173,72 @@ function ActivityCard({
    ============================================================ */
 
 function SummaryCard({
-  icon,
-  iconClass,
-  accentClass = "border-t-slate-200",
+  accentClass = "border-t-slate-300",
   label,
   value,
   description,
 }) {
+  const accentMap = {
+    "border-t-indigo-500": {
+      dot: "bg-indigo-500",
+      surface: "from-indigo-50/80",
+      number: "text-indigo-700",
+    },
+
+    "border-t-blue-500": {
+      dot: "bg-blue-500",
+      surface: "from-blue-50/80",
+      number: "text-blue-700",
+    },
+
+    "border-t-emerald-500": {
+      dot: "bg-emerald-500",
+      surface: "from-emerald-50/80",
+      number: "text-emerald-700",
+    },
+
+    "border-t-cyan-500": {
+      dot: "bg-cyan-500",
+      surface: "from-cyan-50/80",
+      number: "text-cyan-700",
+    },
+  }
+
+  const tone =
+    accentMap[accentClass] || {
+      dot: "bg-slate-400",
+      surface: "from-slate-50",
+      number: "text-slate-700",
+    }
+
   return (
     <div
-      className={`relative overflow-hidden bg-white border border-slate-200 border-t-2 ${accentClass} rounded-xl p-5 shadow-sm hover:shadow-md transition`}
+      className={`relative overflow-hidden bg-gradient-to-br ${tone.surface} via-white to-white border border-slate-200 border-t-2 ${accentClass} rounded-2xl p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200`}
     >
 
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-2">
 
-        <span className="text-xs uppercase tracking-wide text-slate-400 font-semibold">
+        <span
+          className={`w-2 h-2 rounded-full ${tone.dot}`}
+        />
+
+        <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500 font-bold">
           {label}
         </span>
 
-        <div
-          className={`w-10 h-10 rounded-xl flex items-center justify-center ring-1 ring-black/5 ${iconClass}`}
-        >
-          {icon}
-        </div>
-
       </div>
 
-      <div className="text-2xl font-bold text-slate-800">
+
+      <div className={`text-3xl font-bold mt-4 ${tone.number}`}>
         {value}
       </div>
 
-      <p className="text-xs text-slate-400 mt-1">
+
+      <p className="text-xs text-slate-500 mt-1.5">
         {description}
       </p>
 
     </div>
   )
 }
+
