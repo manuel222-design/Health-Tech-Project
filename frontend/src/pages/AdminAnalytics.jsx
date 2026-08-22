@@ -219,17 +219,128 @@ export default function AdminAnalytics() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <h3 className="font-semibold text-gray-800 mb-3">Search Activity (30 days)</h3>
-          <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={trend}>
-              <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
-              <Tooltip />
-              <Line type="monotone" dataKey="count" stroke="#6D28D9" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <AnalyticsCard
+          title="Search Activity"
+          description="Knowledge-base searches recorded over the last 30 days"
+          className="lg:col-span-2"
+          icon={
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-4 h-4"
+            >
+              <path d="M4 19V5" />
+              <path d="M4 19h16" />
+              <path d="m7 15 4-4 3 2 5-6" />
+            </svg>
+          }
+          iconClass="bg-violet-50 text-violet-700"
+        >
+          {trend.length === 0 ? (
+            <EmptyState message="No search activity has been recorded yet." />
+          ) : (
+            <div className="space-y-3">
+
+              <div className="h-56 w-full">
+
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={trend}
+                    margin={{
+                      top: 8,
+                      right: 8,
+                      left: -18,
+                      bottom: 4
+                    }}
+                  >
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 10 }}
+                      tickLine={false}
+                      axisLine={false}
+                      interval="preserveStartEnd"
+                    />
+
+                    <YAxis
+                      allowDecimals={false}
+                      tick={{ fontSize: 10 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+
+                    <Tooltip
+                      formatter={(value) => [
+                        value,
+                        value === 1 ? "search" : "searches"
+                      ]}
+                      labelFormatter={(label) =>
+                        new Date(
+                          `${label}T00:00:00`
+                        ).toLocaleDateString(
+                          undefined,
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric"
+                          }
+                        )
+                      }
+                    />
+
+                    <Line
+                      type="monotone"
+                      dataKey="searches"
+                      stroke="#6D28D9"
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <span>
+                  {trend[0]?.date
+                    ? new Date(
+                        `${trend[0].date}T00:00:00`
+                      ).toLocaleDateString(
+                        undefined,
+                        {
+                          month: "short",
+                          day: "numeric"
+                        }
+                      )
+                    : ""}
+                </span>
+
+                <span>
+                  Last 30 days
+                </span>
+
+                <span>
+                  {trend[trend.length - 1]?.date
+                    ? new Date(
+                        `${trend[trend.length - 1].date}T00:00:00`
+                      ).toLocaleDateString(
+                        undefined,
+                        {
+                          month: "short",
+                          day: "numeric"
+                        }
+                      )
+                    : ""}
+                </span>
+              </div>
+
+            </div>
+          )}
+        </AnalyticsCard>
 
         <AnalyticsCard
           title="Top Viewed Articles"
@@ -432,7 +543,7 @@ export default function AdminAnalytics() {
           iconClass="bg-orange-50 text-orange-700"
         >
           {staleArticles.length === 0 ? (
-            <EmptyState message="No articles currently require an age-based review." />
+            <EmptyState message="All published articles are within their 180-day review period." />
           ) : (
             <div className="space-y-1">
               {staleArticles.map((article, index) => (
@@ -445,9 +556,11 @@ export default function AdminAnalytics() {
                   </span>
 
                   <span className="text-xs text-orange-600 font-medium shrink-0">
-                    {new Date(
-                      article.created_at
-                    ).toLocaleDateString()}
+                    {article.last_reviewed_at
+                      ? `Reviewed ${new Date(
+                          article.last_reviewed_at
+                        ).toLocaleDateString()}`
+                      : "Review date unavailable"}
                   </span>
                 </div>
               ))}
@@ -457,8 +570,8 @@ export default function AdminAnalytics() {
 
 
         <AnalyticsCard
-          title="Unanswered Chatbot Questions"
-          description="Questions the AI assistant could not resolve"
+          title="Chatbot Knowledge Gaps"
+          description="Questions for which approved KB content was not available"
           icon={
             <svg
               viewBox="0 0 24 24"
@@ -477,7 +590,7 @@ export default function AdminAnalytics() {
           iconClass="bg-purple-50 text-purple-700"
         >
           {unanswered.length === 0 ? (
-            <EmptyState message="No unanswered chatbot questions have been recorded." />
+            <EmptyState message="No current knowledge gaps have been identified." />
           ) : (
             <div className="space-y-3">
               {unanswered.map((item, index) => (
@@ -489,13 +602,21 @@ export default function AdminAnalytics() {
                     "{item.question}"
                   </p>
 
-                  <p className="text-[11px] text-slate-400 mt-1.5">
-                    {item.asked_at
-                      ? new Date(
-                          item.asked_at
-                        ).toLocaleString()
-                      : "Unknown time"}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                    <span className="text-[11px] text-purple-600 font-medium">
+                      Asked {item.count || 1}{" "}
+                      {item.count === 1 ? "time" : "times"}
+                    </span>
+
+                    {item.latest_at && (
+                      <span className="text-[11px] text-slate-400">
+                        Last asked{" "}
+                        {new Date(
+                          item.latest_at
+                        ).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -554,9 +675,12 @@ function AnalyticsCard({
   icon,
   iconClass,
   children,
+  className = "",
 }) {
   return (
-    <section className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+    <section
+      className={`bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden ${className}`}
+    >
 
       <div className="px-5 py-4 border-b border-slate-100">
 
