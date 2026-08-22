@@ -3,12 +3,12 @@ import { sendMessage, submitChatFeedback } from "../services/api"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
-export default function ChatWidget() {
+export default function ChatWidget({ onOpenArticle }) {
   const [open, setOpen]       = useState(false)
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Hi, I'm your HMIS assistant. Ask me anything about using Taifa Care HMIS."
+      content: "Hi, I'm your Taifa Care AI assistant. Ask me anything about using Taifa Care HMIS."
     }
   ])
   const [input, setInput]     = useState("")
@@ -19,14 +19,23 @@ export default function ChatWidget() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
+  
+  useEffect(() => {
+  window.openTaifaCareAssistant = () => {
+    setOpen(true)
+  }
 
+  return () => {
+    delete window.openTaifaCareAssistant
+  }
+}, [])
   async function handleFeedback(index, messageId, helpful) {
     setMessages(prev => prev.map((m, i) =>
       i === index ? { ...m, feedbackGiven: helpful } : m
     ))
     try {
       await submitChatFeedback(messageId, helpful)
-    } catch (err) {
+    } catch {
     }
   }
 
@@ -70,7 +79,7 @@ export default function ChatWidget() {
         messageId: res.data.message_id,
         feedbackGiven: null
       }])
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, {
         role: "assistant",
         content: "Sorry, I couldn't connect to the server. Please try again."
@@ -88,8 +97,10 @@ export default function ChatWidget() {
           <div className="bg-teal-600 text-white px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div>
-                <p className="font-semibold text-sm">HMIS Assistant</p>
-                <p className="text-xs text-teal-100">Powered by knowledge base</p>
+                <p className="font-semibold text-sm">Taifa Care AI Assistant</p>
+<p className="text-xs text-teal-100">
+  Your HMIS knowledge-base assistant
+</p>
               </div>
               <button
                 onClick={handleExportTranscript}
@@ -141,13 +152,7 @@ export default function ChatWidget() {
                           {msg.sources.map((src, idx) => (
                             <a
                               key={idx}
-                              href="#"
-                              onClick={(e) => {
-                                e.preventDefault()
-                                if (window.openHealthtechArticle) {
-                                  window.openHealthtechArticle(src.slug)
-                                }
-                              }}
+                              href={`/article/${src.slug}`}
                               className="text-xs bg-white text-teal-700 border border-teal-200 rounded-full px-2 py-0.5 hover:bg-teal-50 transition"
                             >
                               📄 {src.title}
@@ -211,9 +216,40 @@ export default function ChatWidget() {
 
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-lg flex items-center justify-center text-2xl transition z-50"
+        aria-label={open ? "Close Taifa Care AI Assistant" : "Open Taifa Care AI Assistant"}
+        title={open ? "Close AI Assistant" : "Ask Taifa Care AI Assistant"}
+        className="fixed bottom-6 right-6 w-14 h-14 bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-lg flex items-center justify-center transition z-50"
       >
-        {open ? "✕" : "💬"}
+        {open ? (
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-5 h-5"
+            aria-hidden="true"
+          >
+            <path d="M6 6l12 12" />
+            <path d="M18 6L6 18" />
+          </svg>
+        ) : (
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-5 h-5"
+            aria-hidden="true"
+          >
+            <path d="M4 5h16v11H8l-4 4V5Z" />
+            <path d="M8 9h8" />
+            <path d="M8 12h5" />
+          </svg>
+        )}
       </button>
     </>
   )

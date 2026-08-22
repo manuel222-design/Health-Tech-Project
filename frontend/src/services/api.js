@@ -1,9 +1,9 @@
 import axios from 'axios'
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api/v1'
+const API_BASE = import.meta.env.VITE_API_BASE || "/api/v1"
 
 const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: `${API_BASE}`,
   headers: { 'Content-Type': 'application/json' }
 })
 
@@ -13,14 +13,45 @@ api.interceptors.request.use(config => {
   return config
 })
 
+api.interceptors.response.use(
+  response => response,
+  async error => {
+    const originalRequest = error.config
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true
+      const refreshToken = localStorage.getItem('refresh_token')
+      if (refreshToken) {
+        try {
+          const res = await axios.post(`${API_BASE}/auth/refresh`, { refresh_token: refreshToken })
+          localStorage.setItem('token', res.data.access_token)
+          originalRequest.headers.Authorization = `Bearer ${res.data.access_token}`
+          return api(originalRequest)
+        } catch (refreshError) {
+          localStorage.clear()
+          window.location.reload()
+        }
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
 export const login = (email, password) =>
   api.post('/auth/login', { email, password })
 
-export const register = (username, email, password, role) =>
-  api.post('/auth/register', { username, email, password, role })
+export const register = (username, email, password, department) =>
+  api.post('/auth/register', {
+    username,
+    email,
+    password,
+    department
+  })
 
 export const approveArticle = (slug) => api.post(`/articles/${slug}/approve`)
-export const getArticles   = ()     => api.get('/articles')
+export const getArticles = (filters = {}) => {
+  const params = new URLSearchParams(filters)
+  return api.get(`/articles?${params.toString()}`)
+}
 export const getAllArticlesAdmin = () => api.get('/articles/admin/all')
 export const getArticleAdmin = (slug) => api.get(`/articles/admin/${slug}`)
 export const getArticle    = (slug) => api.get(`/articles/${slug}`)
@@ -28,8 +59,15 @@ export const searchArticles = (q, filters = {}) => {
   const params = new URLSearchParams({ q, ...filters })
   return api.get(`/articles/search?${params.toString()}`)
 }
-
+export const getHomepage = () => api.get('/homepage')
 export const getCategories = () => api.get('/categories')
+export const getProducts = () => api.get('/products')
+export const getProductDetails = (slug) =>
+api.get(`/products/${slug}`)
+
+export const createProduct = (data) =>
+  api.post('/products', data)
+
 export const createCategory = (name, description) =>
   api.post('/categories', { name, description })
 export const getTags = () => api.get('/tags')
@@ -73,3 +111,19 @@ export const revertArticle = (slug) => api.post(`/articles/${slug}/revert`)
 export const getMyNotifications = () => api.get('/my-notifications')
 
 export const getUnansweredQuestions = () => api.get('/admin/unanswered-questions')
+
+export const getContentNotifications = () =>
+  api.get('/content-notifications')
+
+
+export const forgotPassword = (email) =>
+  api.post('/auth/forgot-password', {
+    email
+  })
+
+export const resetPassword = (email, otp, newPassword) =>
+  api.post('/auth/reset-password', {
+    email,
+    otp,
+    new_password: newPassword
+})

@@ -14,11 +14,24 @@ def test_root_endpoint():
     assert "running" in response.json()["message"].lower()
 
 def test_get_all_articles():
-    """Should return list of published articles"""
+    """Should return paginated published articles."""
     response = client.get("/api/v1/articles")
+
     assert response.status_code == 200
-    assert isinstance(response.json(), list)
-    assert len(response.json()) > 0
+
+    data = response.json()
+
+    assert "results" in data
+    assert "pagination" in data
+    assert isinstance(data["results"], list)
+    assert len(data["results"]) > 0
+
+    pagination = data["pagination"]
+
+    assert pagination["page"] == 1
+    assert pagination["page_size"] == 20
+    assert pagination["total_count"] > 0
+    assert pagination["total_pages"] >= 1
 
 def test_get_article_by_slug():
     """Should return one article by slug"""
@@ -43,6 +56,56 @@ def test_search_too_short():
     """Should return 400 for search query less than 2 characters"""
     response = client.get("/api/v1/articles/search?q=a")
     assert response.status_code == 400
+def test_submit_feedback():
+    """Should successfully submit article feedback"""
+    response = client.post(
+        "/api/v1/articles/how-to-register-a-patient/feedback",
+        json={
+            "rating": 5,
+            "comment": "Very helpful article"
+        }
+    )
+
+    assert response.status_code == 201
+    assert response.json()["message"] == "Feedback submitted successfully"
+
+
+def test_submit_feedback_invalid_rating():
+    """Should reject ratings outside the 1-5 range"""
+    response = client.post(
+        "/api/v1/articles/how-to-register-a-patient/feedback",
+        json={
+            "rating": 6,
+            "comment": "Invalid rating"
+        }
+    )
+
+    assert response.status_code == 400
+    assert "Rating must be between 1 and 5" in response.json()["detail"]
+
+
+def test_submit_feedback_article_not_found():
+    """Should return 404 for a non-existent article"""
+    response = client.post(
+        "/api/v1/articles/this-article-does-not-exist/feedback",
+        json={
+            "rating": 5,
+            "comment": "Test"
+        }
+    )
+
+    assert response.status_code == 404
+
+
+def test_get_feedback_summary():
+    """Should return article feedback summary"""
+    response = client.get(
+        "/api/v1/articles/how-to-register-a-patient/feedback/summary"
+    )
+
+    assert response.status_code == 200
+    assert "average_rating" in response.json()
+    assert "total_ratings" in response.json()
 
 def test_get_categories():
     """Should return list of categories"""
@@ -143,3 +206,139 @@ def test_login_then_delete_article():
     )
     assert delete_res.status_code == 200
     assert "archived" in delete_res.json()["message"].lower()
+def test_migrated_editor_login_success():
+    """Migrated former SME account should now authenticate as Editor."""
+    response = client.post("/api/v1/auth/login", json={
+        "email": "sme@healthtech.co.ke",
+        "password": "SME@1234"
+    })
+
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+    assert response.json()["role"] == "editor"
+
+
+def test_editor_can_approve_pending_article():
+    """Editor should be able to approve an article pending review."""
+
+    # Login as admin to create the test article
+    admin_login = client.post("/api/v1/auth/login", json={
+        "email": "admin@healthtech.co.ke",
+        "password": "Admin@1234"
+    })
+
+    assert admin_login.status_code == 200
+    admin_token = admin_login.json()["access_token"]
+
+    slug = f"test-editor-approve-{uuid.uuid4().hex[:8]}"
+
+    create_response = client.post(
+        "/api/v1/articles",
+        json={
+            "title": "Test Editor Approval Article",
+            "slug": slug,
+            "body_markdown": "## Editor Approval Test",
+            "status": "pending_review"
+        },
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+
+    assert create_response.status_code == 201
+    assert create_response.json()["status"] == "pending_review"
+
+    # Login as Editor
+    editor_login = client.post("/api/v1/auth/login", json={
+        "email": "sme@healthtech.co.ke",
+        "password": "SME@1234"
+    })
+
+    assert editor_login.status_code == 200
+    editor_token = editor_login.json()["access_token"]
+
+    # Editor approves the article
+    approve_response = client.post(
+        f"/api/v1/articles/{slug}/approve",
+        headers={"Authorization": f"Bearer {editor_token}"}
+    )
+
+    assert approve_response.status_code == 200
+    assert "approved" in approve_response.json()["message"].lower()
+
+
+def test_editor_can_reject_pending_article():
+    """Editor should be able to reject an article pending review."""
+
+    admin_login = client.post("/api/v1/auth/login", json={
+        "email": "admin@healthtech.co.ke",
+        "password": "Admin@1234"
+    })
+
+    assert admin_login.status_code == 200
+    admin_token = admin_login.json()["access_token"]
+
+    slug = f"test-editor-reject-{uuid.uuid4().hex[:8]}"
+
+    create_response = client.post(
+        "/api/v1/articles",
+        json={
+            "title": "Test Editor Rejection Article",
+            "slug": slug,
+            "body_markdown": "## Editor Rejection Test",
+            "status": "pending_review"
+        },
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+
+    assert create_response.status_code == 201
+    assert create_response.json()["status"] == "pending_review"
+
+    # Login as Editor
+    editor_login = client.post("/api/v1/auth/login", json={
+        "email": "sme@healthtech.co.ke",
+        "password": "SME@1234"
+    })
+
+    assert editor_login.status_code == 200
+    editor_token = editor_login.json()["access_token"]
+
+    reject_response = client.post(
+        f"/api/v1/articles/{slug}/reject",
+        json={
+            "reason": "Please verify the clinical information."
+        },
+        headers={"Authorization": f"Bearer {editor_token}"}
+    )
+
+    assert reject_response.status_code == 200
+    assert "draft" in reject_response.json()["message"].lower()
+
+
+def test_viewer_cannot_approve_article():
+    """Viewer should not be allowed to approve an article."""
+
+    admin_login = client.post("/api/v1/auth/login", json={
+        "email": "admin@healthtech.co.ke",
+        "password": "Admin@1234"
+    })
+
+    assert admin_login.status_code == 200
+    admin_token = admin_login.json()["access_token"]
+
+    slug = f"test-editor-denied-{uuid.uuid4().hex[:8]}"
+
+    create_response = client.post(
+        "/api/v1/articles",
+        json={
+            "title": "Test Editor Permission",
+            "slug": slug,
+            "body_markdown": "## Permission Test",
+            "status": "pending_review"
+        },
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+
+    assert create_response.status_code == 201
+
+    # We don't have an editor account guaranteed by the seed,
+    # so this test verifies the endpoint rejects a viewer/admin mismatch
+    # through the role-protected dependency using an existing viewer token.

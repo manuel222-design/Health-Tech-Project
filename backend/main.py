@@ -9,7 +9,7 @@ from passlib.context import CryptContext               # type: ignore
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel                         # type: ignore 
 from database import get_db
-from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, ChatSession, ChatMessage, MessageRole, UserRole, AuditLog, Media
+from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, Product, ChatSession, ChatMessage, ChatFeedback, MessageRole, UserRole, AuditLog, Media, ArticleSMEReview
 import os, uuid
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
 from groq import Groq # type: ignore
@@ -20,7 +20,22 @@ from fastapi.exceptions import RequestValidationError # type: ignore
 from slowapi import Limiter, _rate_limit_exceeded_handler # type: ignore
 from slowapi.util import get_remote_address # type: ignore
 from slowapi.errors import RateLimitExceeded # type: ignore
-
+from repositories.category_repository import CategoryRepository
+from repositories.tag_repository import TagRepository
+from services.category_service import CategoryService
+from services.tag_service import TagService
+from repositories.feedback_repository import FeedbackRepository
+from services.feedback_service import FeedbackService
+from repositories.notification_repository import NotificationRepository
+from services.notification_service import NotificationService
+from repositories.user_repository import UserRepository
+from services.auth_service import AuthService
+from repositories.dashboard_repository import DashboardRepository
+from services.dashboard_service import DashboardService
+from repositories.homepage_repository import HomepageRepository
+from services.homepage_service import HomepageService
+from repositories.product_repository import ProductRepository
+from services.product_service import ProductService
 
 def log_audit(db: Session, user_id: str, action: str, target_type: str, target_id: str = None, details: str = None):
     from models import AuditLog
@@ -41,19 +56,22 @@ app = FastAPI(
     version="1.0.0"
 )
 
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(
+    key_func=get_remote_address,
+    enabled=os.getenv("TESTING") != "1"
+)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:5174",
+    "http://localhost:5173",    "http://localhost:5174",
     "http://localhost:3000",
     "http://localhost:5500",
     "http://127.0.0.1:5500",
     "https://healthtech-kb-frontend.onrender.com",
     "https://healthtech-kb-widget.onrender.com",
+    "http://0.0.0.0:8000"
 ]
 
 app.add_middleware(
@@ -78,6 +96,13 @@ cloudinary.config(
 )
 logger = logging.getLogger("healthtech")
 
+@app.get("/health")
+def health_check():
+    return {
+        "status": "healthy",
+        "service": "Health-Tech Knowledge Base API"
+    }
+
 @app.middleware("http")
 async def add_security_headers(request, call_next):
     response = await call_next(request)
@@ -86,7 +111,7 @@ async def add_security_headers(request, call_next):
         "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         "img-src 'self' data: https://fastapi.tiangolo.com; "
-        "connect-src 'self' https://healthtech-kb-backend-2uo3.onrender.com;"
+        "connect-src 'self' http://127.0.0.1:8000 http://localhost:8000 https://healthtech-kb-backend-2uo3.onrender.com;"
     )
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
@@ -126,7 +151,14 @@ def create_token(user_id: str, role: str) -> str:
         algorithm=ALGORITHM
     )
 
+REFRESH_TOKEN_TTL_DAYS = 30
 
+def create_refresh_token(user_id: str) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_TTL_DAYS)
+    return jwt.encode(
+        {"sub": user_id, "type": "refresh", "exp": expire},
+        SECRET_KEY, algorithm=ALGORITHM
+    )
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
@@ -149,6 +181,38 @@ def get_current_user(
     except JWTError:
         raise HTTPException(status_code=401, detail="Token invalid or expired")
 
+optional_bearer_scheme = HTTPBearer(auto_error=False)
+
+def get_optional_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_bearer_scheme),
+):
+    if credentials is None:
+        return None
+
+    try:
+        payload = jwt.decode(
+            credentials.credentials,
+            SECRET_KEY,
+            algorithms=[ALGORITHM]
+        )
+
+        user_id = payload.get("sub")
+        role = payload.get("role")
+
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        return {
+            "user_id": user_id,
+            "role": role,
+        }
+
+    except JWTError:
+        raise HTTPException(
+            status_code=401,
+            detail="Token invalid or expired"
+        )
+
 def require_editor(user: dict = Depends(get_current_user)):
     if user["role"] not in ["editor", "admin"]:
         raise HTTPException(
@@ -165,15 +229,30 @@ def require_admin(user: dict = Depends(get_current_user)):
         )
     return user
 
+def require_reviewer(user: dict = Depends(get_current_user)):
+    if user["role"] not in ["editor", "admin"]:
+        raise HTTPException(
+            status_code=403,
+            detail="You need Editor or Admin role to review articles"
+        )
+    return user
+
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+class AdminCreateUserRequest(BaseModel):
+    username: str
+    email: str
+    password: str
+    role: str
+    department: Optional[str] = None
 
 class RegisterRequest(BaseModel):
     username: str
     email: str
     password: str
-    role: str = "viewer"
+    department: Optional[str] = None
 
 class TagCreateRequest(BaseModel):
     name: str
@@ -186,24 +265,93 @@ class FeedbackRequest(BaseModel):
 def root():
     return {"message": "Healthtech KB API is running"}
 
+@app.get("/api/v1/homepage")
+def get_homepage(db: Session = Depends(get_db)):
+    repository = HomepageRepository(db)
+    service = HomepageService(repository)
+    return service.get_homepage()
+
+
+@app.get("/api/v1/categories")
+def get_categories(db: Session = Depends(get_db)):
+    categories = db.query(Category).all()
+
+    results = []
+
+    for category in categories:
+        article_count = (
+            db.query(Article)
+            .filter(
+                Article.category_id == category.id,
+                Article.status == ArticleStatus.published
+            )
+            .count()
+        )
+
+        results.append({
+            "id": str(category.id),
+            "name": category.name,
+            "description": category.description,
+            "article_count": article_count
+        })
+
+    return results
+
+
 @app.get("/api/v1/articles")
-def get_articles(db: Session = Depends(get_db)):
-    articles = db.query(Article).filter(
-        Article.status == ArticleStatus.published
-    ).all()
-    return [
-        {
-            "id":           str(a.id),
-            "title":        a.title,
-            "slug":         a.slug,
-            "status":       a.status.value,
-            "category_id":  str(a.category_id) if a.category_id else None,
-            "view_count":   a.view_count,
-            "published_at": str(a.published_at) if a.published_at else None,
-            "created_at":   str(a.created_at),
+def get_articles(
+    page: int = 1,
+    page_size: int = 20,
+    category_id: Optional[str] = None,
+    content_type: Optional[str] = None,
+    tag_id: Optional[str] = None,
+    product_id: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(Article).filter(Article.status == ArticleStatus.published)
+
+    if category_id:
+        query = query.filter(Article.category_id == category_id)
+    if content_type:
+        query = query.filter(Article.content_type == ContentType(content_type))
+    if tag_id:
+        from models import ArticleTag
+        query = query.join(ArticleTag, ArticleTag.article_id == Article.id) \
+                      .filter(ArticleTag.tag_id == tag_id)
+    
+    if product_id:
+        query = query.filter(Article.product_id == product_id)
+
+    total_count = query.count()
+
+    offset = (page - 1) * page_size
+    articles = query.order_by(Article.created_at.desc()) \
+                     .offset(offset).limit(page_size).all()
+    return {
+        "results": [
+            {
+                "id":           str(a.id),
+                "title":        a.title,
+                "slug":         a.slug,
+                "status":       a.status.value,
+                "category_id":  str(a.category_id) if a.category_id else None,
+                "category_name": a.category.name if a.category else None,
+                "content_type": a.content_type.value if a.content_type else "how_to",
+                "view_count":   a.view_count,
+                "product_id":   str(a.product_id) if a.product_id else None,
+                "product_name": a.product.name if a.product else None,
+                "published_at": str(a.published_at) if a.published_at else None,
+                "created_at":   str(a.created_at),
+            }
+            for a in articles
+        ],
+        "pagination": {
+            "page": page,
+            "page_size": page_size,
+            "total_count": total_count,
+            "total_pages": (total_count + page_size - 1) // page_size,
         }
-        for a in articles
-    ]
+    }
 
 @app.get("/api/v1/articles/admin/all")
 def get_all_articles_admin(db: Session = Depends(get_db), user: dict = Depends(require_editor)):
@@ -215,6 +363,7 @@ def get_all_articles_admin(db: Session = Depends(get_db), user: dict = Depends(r
             "slug":         a.slug,
             "status":       a.status.value,
             "category_id":  str(a.category_id) if a.category_id else None,
+            "category_name": a.category.name if a.category else None,
             "view_count":   a.view_count,
             "created_at":   str(a.created_at),
         }
@@ -283,10 +432,15 @@ def search_articles(
     category_id: str = None,
     content_type: str = None,
     tag_id: str = None,
+    product_id: str = None,
     db: Session = Depends(get_db)
 ):
     if not q or len(q.strip()) < 2:
         raise HTTPException(status_code=400, detail="Search query too short")
+
+    # Normalize common product-name variants so that user queries
+    # such as "TaifaCare" and "Taifa Care" retrieve the same content.
+    q = re.sub(r"\\btaifacare\\b", "Taifa Care", q, flags=re.IGNORECASE)
 
     filters = ["status = 'published'"]
     params = {"q": q}
@@ -299,6 +453,10 @@ def search_articles(
         filters.append("content_type = :content_type")
         params["content_type"] = content_type
 
+    if product_id:
+        filters.append("product_id = :product_id")
+        params["product_id"] = product_id
+
     tag_join = ""
     if tag_id:
         tag_join = "JOIN article_tags at ON at.article_id = articles.id AND at.tag_id = :tag_id"
@@ -307,20 +465,120 @@ def search_articles(
     filter_clause = " AND ".join(filters)
 
     search_query = text(f"""
-        SELECT DISTINCT articles.id, articles.title, articles.slug, articles.status,
-               articles.category_id, articles.content_type,
-               ts_rank(
-                   setweight(to_tsvector('english', articles.title), 'A') ||
-                   setweight(to_tsvector('english', articles.body_markdown), 'B'),
-                   plainto_tsquery('english', :q)
-               ) AS rank
+        SELECT
+            articles.id,
+            articles.title,
+            articles.slug,
+            articles.status,
+            articles.category_id,
+            categories.name AS category_name,
+            articles.content_type,
+            articles.product_id,
+            products.name AS product_name,
+            articles.product_version,
+            (
+                CASE
+                    WHEN lower(articles.title) = lower(:q)
+                        THEN 1000
+
+                    WHEN articles.title ILIKE '%' || :q || '%'
+                        THEN 500
+
+                    WHEN coalesce(
+                        string_agg(DISTINCT tags.name, ' '),
+                        ''
+                    ) ILIKE '%' || :q || '%'
+                        THEN 250
+
+                    ELSE 0
+                END
+                +
+                (
+                    ts_rank(
+                        setweight(
+                            to_tsvector(
+                                'english',
+                                coalesce(articles.title, '')
+                            ),
+                            'A'
+                        )
+                        ||
+                        setweight(
+                            to_tsvector(
+                                'english',
+                                coalesce(
+                                    string_agg(
+                                        DISTINCT tags.name,
+                                        ' '
+                                    ),
+                                    ''
+                                )
+                            ),
+                            'B'
+                        )
+                        ||
+                        setweight(
+                            to_tsvector(
+                                'english',
+                                coalesce(
+                                    articles.body_markdown,
+                                    ''
+                                )
+                            ),
+                            'C'
+                        ),
+                        plainto_tsquery('english', :q)
+                    ) * 100
+                )
+            ) AS rank
         FROM articles
         {tag_join}
+        LEFT JOIN categories
+            ON categories.id = articles.category_id
+        LEFT JOIN products
+            ON products.id = articles.product_id
+        LEFT JOIN article_tags article_tag_search
+            ON article_tag_search.article_id = articles.id
+        LEFT JOIN tags
+            ON tags.id = article_tag_search.tag_id
         WHERE {filter_clause}
-          AND (
-                setweight(to_tsvector('english', articles.title), 'A') ||
-                setweight(to_tsvector('english', articles.body_markdown), 'B')
-              ) @@ plainto_tsquery('english', :q)
+        GROUP BY
+            articles.id,
+            articles.title,
+            articles.slug,
+            articles.status,
+            articles.category_id,
+            categories.name,
+            articles.content_type,
+            articles.product_id,
+            products.name,
+            articles.product_version,
+            articles.body_markdown
+        HAVING (
+            setweight(
+                to_tsvector(
+                    'english',
+                    coalesce(articles.title, '')
+                ),
+                'A'
+            )
+            ||
+            setweight(
+                to_tsvector(
+                    'english',
+                    coalesce(string_agg(DISTINCT tags.name, ' '), '')
+                ),
+                'B'
+            )
+            ||
+            setweight(
+                to_tsvector(
+                    'english',
+                    coalesce(articles.body_markdown, '')
+                ),
+                'C'
+            )
+        ) @@ plainto_tsquery('english', :q)
         ORDER BY rank DESC
         LIMIT 20
     """)
@@ -344,235 +602,175 @@ def search_articles(
                 "title":        row.title,
                 "slug":         row.slug,
                 "category_id":  str(row.category_id) if row.category_id else None,
+                "category_name": row.category_name,
                 "content_type": row.content_type,
+                "product_id": str(row.product_id) if row.product_id else None,
+                "product_name": row.product_name,
+                "product_version": row.product_version,
             }
             for row in rows
         ]
     }
 
-    log = SearchLog(
-        id=uuid.uuid4(),
-        query=q,
-        results_count=len(rows)
-    )
-    db.add(log)
-    db.commit()
+@app.get("/api/v1/products")
+def get_products(db: Session = Depends(get_db)):
+    repository = ProductRepository(db)
+    service = ProductService(repository)
 
-    return {
-        "query":        q,
-        "total_results": len(rows),
-        "results": [
-            {
-                "id":    str(row.id),
-                "title": row.title,
-                "slug":  row.slug,
-            }
-            for row in rows
-        ]
-    }
+    return service.get_products()
 
 
-@app.get("/api/v1/categories")
-def get_categories(db: Session = Depends(get_db)):
-    categories = db.query(Category).order_by(Category.sort_order).all()
-    return [
-        {
-            "id":          str(c.id),
-            "name":        c.name,
-            "slug":        c.slug,
-            "description": c.description,
-        }
-        for c in categories
-    ]
-
-class CategoryCreateRequest(BaseModel):
+class ProductCreateRequest(BaseModel):
     name: str
     description: Optional[str] = None
+    version: Optional[str] = None
+    icon: Optional[str] = None
 
-@app.post("/api/v1/categories", status_code=201)
-def create_category(payload: CategoryCreateRequest, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
-    name = payload.name.strip()
-    if not name:
-        raise HTTPException(status_code=400, detail="Category name cannot be empty")
+@app.get("/api/v1/products/{slug}")
+def get_product_details(
+    slug: str,
+    db: Session = Depends(get_db)
+):
+    repository = ProductRepository(db)
+    service = ProductService(repository)
 
-    slug = name.lower().replace(" ", "-")
+    result = service.get_product_details(slug)
 
-    existing = db.query(Category).filter(Category.slug == slug).first()
-    if existing:
-        return {
-            "id":          str(existing.id),
-            "name":        existing.name,
-            "slug":        existing.slug,
-            "description": existing.description,
-        }
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail="Product not found"
+        )
 
-    category = Category(
-        id=uuid.uuid4(),
-        name=name,
-        slug=slug,
-        description=payload.description,
-        sort_order=0
-    )
-    db.add(category)
-    db.commit()
-    db.refresh(category)
+    return result
 
-    return {
-        "id":          str(category.id),
-        "name":        category.name,
-        "slug":        category.slug,
-        "description": category.description,
-    }
+@app.post("/api/v1/products", status_code=201)
+def create_product(
+    payload: ProductCreateRequest,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_editor)
+):
+    repository = ProductRepository(db)
+    service = ProductService(repository)
+
+    try:
+        return service.create_product(
+            payload.name,
+            payload.description,
+            payload.version,
+            payload.icon
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
 
 @app.get("/api/v1/tags")
 def get_tags(db: Session = Depends(get_db)):
-    from models import Tag
-    tags = db.query(Tag).order_by(Tag.name).all()
-    return [
-        {
-            "id":        str(t.id),
-            "name":      t.name,
-            "slug":      t.slug,
-            "color_hex": t.color_hex,
-        }
-        for t in tags
-    ]
+    repository = TagRepository(db)
+    service = TagService(repository)
+
+    return service.get_tags()
+
 
 @app.post("/api/v1/tags", status_code=201)
-def create_tag(payload: TagCreateRequest, db: Session = Depends(get_db), user: dict = Depends(require_editor)):
-    from models import Tag
+def create_tag(
+    payload: TagCreateRequest,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_editor)
+):
+    repository = TagRepository(db)
+    service = TagService(repository)
 
-    name = payload.name.strip()
-    if not name:
-        raise HTTPException(status_code=400, detail="Tag name cannot be empty")
+    try:
+        return service.create_tag(payload.name)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
-    slug = name.lower().replace(" ", "-")
-
-    existing = db.query(Tag).filter(Tag.slug == slug).first()
-    if existing:
-        return {
-            "id":        str(existing.id),
-            "name":      existing.name,
-            "slug":      existing.slug,
-            "color_hex": existing.color_hex,
-        }
-
-    tag = Tag(
-        id=uuid.uuid4(),
-        name=name,
-        slug=slug,
-        color_hex="#6B7280"
-    )
-    db.add(tag)
-    db.commit()
-    db.refresh(tag)
-
-    return {
-        "id":        str(tag.id),
-        "name":      tag.name,
-        "slug":      tag.slug,
-        "color_hex": tag.color_hex,
-    }
 
 @app.post("/api/v1/articles/{slug}/feedback", status_code=201)
-def submit_feedback(slug: str, payload: FeedbackRequest, db: Session = Depends(get_db)):
-    from models import ArticleFeedback
+def submit_feedback(
+    slug: str,
+    payload: FeedbackRequest,
+    db: Session = Depends(get_db)
+):
+    repository = FeedbackRepository(db)
+    service = FeedbackService(repository)
 
-    if payload.rating < 1 or payload.rating > 5:
-        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+    try:
+        return service.submit_feedback(
+            slug,
+            payload.rating,
+            payload.comment
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
 
-    article = db.query(Article).filter(Article.slug == slug).first()
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
-
-    feedback = ArticleFeedback(
-        id=uuid.uuid4(),
-        article_id=article.id,
-        rating=payload.rating,
-        comment=payload.comment
-    )
-    db.add(feedback)
-    db.commit()
-
-    return {"message": "Feedback submitted successfully"}
 
 @app.get("/api/v1/articles/{slug}/feedback/summary")
-def get_feedback_summary(slug: str, db: Session = Depends(get_db)):
-    from models import ArticleFeedback
-    from sqlalchemy import func
+def get_feedback_summary(
+    slug: str,
+    db: Session = Depends(get_db)
+):
+    repository = FeedbackRepository(db)
+    service = FeedbackService(repository)
 
-    article = db.query(Article).filter(Article.slug == slug).first()
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
-
-    result = db.query(
-        func.avg(ArticleFeedback.rating),
-        func.count(ArticleFeedback.id)
-    ).filter(ArticleFeedback.article_id == article.id).first()
-
-    avg_rating, count = result
-
-    return {
-        "average_rating": round(float(avg_rating), 1) if avg_rating else None,
-        "total_ratings": count
-    }
+    try:
+        return service.get_feedback_summary(slug)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
 
 @app.get("/api/v1/my-notifications")
-def get_my_notifications(db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
-    from models import ArticleFeedback
-    from sqlalchemy import func
+def get_my_notifications(
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
+):
+    repository = NotificationRepository(db)
+    service = NotificationService(repository)
 
-    results = db.query(
-            Article.title, Article.slug,
-            func.avg(ArticleFeedback.rating).label("avg_rating"),
-            func.count(ArticleFeedback.id).label("rating_count")
-        ) \
-        .join(ArticleFeedback, ArticleFeedback.article_id == Article.id) \
-        .filter(Article.author_id == user["user_id"]) \
-        .group_by(Article.id) \
-        .having(func.avg(ArticleFeedback.rating) <= 2) \
+    return service.get_my_notifications(user["user_id"])
+
+@app.get("/api/v1/content-notifications")
+def get_content_notifications(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_reviewer)
+):
+    pending_articles = (
+        db.query(Article)
+        .filter(
+            Article.status == ArticleStatus.pending_review
+        )
+        .order_by(Article.created_at.desc())
         .all()
+    )
 
     return [
         {
-            "title": t,
-            "slug": s,
-            "avg_rating": round(float(r), 1),
-            "rating_count": c
+            "id": f"review-{article.id}",
+            "type": "article_review",
+            "title": "Article awaiting review",
+            "message": article.title,
+            "slug": article.slug,
+            "article_title": article.title,
+            "created_at": str(article.created_at),
         }
-        for t, s, r, c in results
+        for article in pending_articles
     ]
 
 @app.get("/api/v1/articles/{slug}")
-def get_article_by_slug(slug: str, db: Session = Depends(get_db)):
-    article = db.query(Article).filter(
-        Article.slug == slug,
-        Article.status == ArticleStatus.published
-    ).first()
+def get_article_by_slug(
+    slug: str,
+    db: Session = Depends(get_db)
+):
+    from repositories.article_repository import ArticleRepository
+    from services.article_service import ArticleService
 
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
-    
-    article.view_count += 1
-    db.commit()
+    repository = ArticleRepository(db)
+    service = ArticleService(repository)
 
-    from models import ArticleTag
-    tag_links = db.query(ArticleTag).filter(ArticleTag.article_id == article.id).all()
-    tag_ids = [str(link.tag_id) for link in tag_links]
+    return service.get_published_article(slug)
 
-    return {
-        "id":            str(article.id),
-        "title":         article.title,
-        "slug":          article.slug,
-        "body_markdown": article.body_markdown,
-        "status":        article.status.value,
-        "category_id":   str(article.category_id) if article.category_id else None,
-        "content_type":  article.content_type.value if article.content_type else "how_to",
-        "product_version": article.product_version,
-        "tag_ids":       tag_ids,
-        "view_count":    article.view_count,
-        "created_at":    str(article.created_at),
-    }
 
 @app.get("/api/v1/articles/{slug}/pdf")
 def export_article_pdf(slug: str, db: Session = Depends(get_db)):
@@ -626,59 +824,96 @@ def export_article_pdf(slug: str, db: Session = Depends(get_db)):
     )
 
 @app.post("/api/v1/auth/login", status_code=200)
-@limiter.limit("5/10minutes")
-def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == payload.email).first()
-
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-
-    if not user.is_active:
-        raise HTTPException(status_code=403, detail="Account is deactivated")
-
-    if not pwd_context.verify(payload.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-
-    token = create_token(str(user.id), user.role.value)
-
-    return {
-        "access_token": token,
-        "token_type":   "bearer",
-        "expires_in":   TOKEN_TTL * 3600,
-        "role":         user.role.value,
-        "username":     user.username,
-    }
-
-@app.post("/api/v1/auth/register", status_code=201)
-def register(payload: RegisterRequest, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == payload.email).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    allowed_roles = ["viewer", "editor"]
-    role = payload.role if payload.role in allowed_roles else "viewer"
-
-    new_user = User(
-        id=uuid.uuid4(),
-        username=payload.username,
-        email=payload.email,
-        password_hash=pwd_context.hash(payload.password),
-        role=UserRole(role),
-        is_active=True
+@limiter.limit("10/minute")
+def login(
+    request: Request,
+    payload: LoginRequest,
+    db: Session = Depends(get_db)
+):
+    repository = UserRepository(db)
+    service = AuthService(
+        repository,
+        pwd_context,
+        create_token,
+        create_refresh_token,
+        TOKEN_TTL
     )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
 
-    token = create_token(str(new_user.id), new_user.role.value)
+    return service.login(
+        payload.email,
+        payload.password
+    )
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+@app.post("/api/v1/auth/refresh")
+def refresh_access_token(
+    payload: RefreshRequest,
+    db: Session = Depends(get_db)
+):
+    try:
+        decoded = jwt.decode(
+            payload.refresh_token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM]
+        )
+    except JWTError:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired refresh token"
+        )
+
+    if decoded.get("type") != "refresh":
+        raise HTTPException(
+            status_code=401,
+            detail="Not a valid refresh token"
+        )
+
+    user = db.query(User).filter(
+        User.id == decoded.get("sub")
+    ).first()
+
+    if not user or not user.is_active:
+        raise HTTPException(
+            status_code=401,
+            detail="User not found or inactive"
+        )
+
+    new_access_token = create_token(
+        str(user.id),
+        user.role.value
+    )
 
     return {
-        "access_token": token,
+        "access_token": new_access_token,
         "token_type": "bearer",
         "expires_in": TOKEN_TTL * 3600,
-        "role": new_user.role.value,
-        "username": new_user.username,
     }
+
+
+@app.post("/api/v1/auth/register", status_code=201)
+def register(
+    payload: RegisterRequest,
+    db: Session = Depends(get_db)
+):
+    repository = UserRepository(db)
+
+    service = AuthService(
+        repository,
+        pwd_context,
+        create_token,
+        create_refresh_token,
+        TOKEN_TTL
+    )
+
+    return service.register(
+        payload.username,
+        payload.email,
+        payload.password,
+        payload.department
+    )
 
 class ArticleCreateRequest(BaseModel):
     title:         str
@@ -688,6 +923,7 @@ class ArticleCreateRequest(BaseModel):
     tag_ids:       list[str] = []
     status:        str = "draft"
     content_type:  str = "how_to"
+    product_id:    Optional[str] = None
     product_version: Optional[str] = None
 class ArticleUpdateRequest(BaseModel):
     title:         Optional[str] = None
@@ -696,6 +932,7 @@ class ArticleUpdateRequest(BaseModel):
     tag_ids:       Optional[list[str]] = None
     status:        Optional[str] = None
     content_type:  Optional[str] = None
+    product_id:    Optional[str] = None
     product_version: Optional[str] = None
 
 @app.post("/api/v1/articles", status_code=201)
@@ -718,6 +955,7 @@ def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db),
         body_html="",
         status=ArticleStatus(requested_status),
         category_id=payload.category_id if payload.category_id else None,
+        product_id=payload.product_id if payload.product_id else None,
         content_type=ContentType(payload.content_type),
         product_version=payload.product_version,
         author_id=admin.id,
@@ -764,6 +1002,9 @@ def update_article(slug: str, payload: ArticleUpdateRequest, db: Session = Depen
     if payload.category_id is not None:
         article.category_id = payload.category_id if payload.category_id else None
 
+    if payload.product_id is not None:
+        article.product_id = payload.product_id if payload.product_id else None
+
     if payload.content_type is not None:
         article.content_type = ContentType(payload.content_type)
 
@@ -805,7 +1046,9 @@ def revert_article(slug: str, db: Session = Depends(get_db), user: dict = Depend
     return {"message": f"Article '{slug}' reverted to previous version"}
 
 @app.post("/api/v1/articles/{slug}/approve")
-def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depends(require_reviewer)):
+
+    print("APPROVE USER:", user)
     article = db.query(Article).filter(Article.slug == slug).first()
 
     if not article:
@@ -815,6 +1058,16 @@ def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depen
         raise HTTPException(status_code=400, detail="Article is not pending review")
 
     article.status = ArticleStatus.published
+
+    review = ArticleSMEReview(
+        id=uuid.uuid4(),
+        article_id=article.id,
+        reviewer_id=user["user_id"],
+        decision="approved",
+        comments="Article approved for publication"
+    )
+    db.add(review)
+
     db.commit()
     log_audit(db, user["user_id"], "approve_article", "article", str(article.id))
 
@@ -824,7 +1077,7 @@ class RejectRequest(BaseModel):
     reason: Optional[str] = None
 
 @app.post("/api/v1/articles/{slug}/reject")
-def reject_article(slug: str, payload: RejectRequest, db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+def reject_article(slug: str, payload: RejectRequest, db: Session = Depends(get_db), user: dict = Depends(require_reviewer)):
     article = db.query(Article).filter(Article.slug == slug).first()
 
     if not article:
@@ -834,6 +1087,16 @@ def reject_article(slug: str, payload: RejectRequest, db: Session = Depends(get_
         raise HTTPException(status_code=400, detail="Article is not pending review")
 
     article.status = ArticleStatus.draft
+
+    review = ArticleSMEReview(
+        id=uuid.uuid4(),
+        article_id=article.id,
+        reviewer_id=user["user_id"],
+        decision="changes_requested",
+        comments=payload.reason or "Changes requested by reviewer"
+    )
+    db.add(review)
+
     db.commit()
     log_audit(db, user["user_id"], "reject_article", "article", str(article.id), payload.reason or "No reason given")
 
@@ -865,20 +1128,14 @@ class ChatRequest(BaseModel):
     session_token: Optional[str] = None
     screen_context: Optional[str] = None
 
-@app.options("/api/v1/chat")
-def chat_preflight():
-    from fastapi.responses import Response # type: ignore
-    return Response(
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-        }
-    )
-    
 @app.post("/api/v1/chat", status_code=200)
 @limiter.limit("20/minute")
-def chat(request: Request, payload: ChatRequest, db: Session = Depends(get_db)):
+def chat(
+    request: Request,
+    payload: ChatRequest,
+    db: Session = Depends(get_db),
+    user: Optional[dict] = Depends(get_optional_user),
+):
 
     generic_phrases = ["help", "what can you do", "what can you help",
                         "hi", "hello", "hey", "who are you"]
@@ -896,80 +1153,289 @@ def chat(request: Request, payload: ChatRequest, db: Session = Depends(get_db)):
             "articles_found": []
         }
     
-    search_text = payload.message
-    if payload.screen_context:
-        search_text = f"{payload.message} {payload.screen_context}"
+    search_text = payload.message.strip()
 
-    keywords = [word for word in search_text.split() 
-                if len(word) > 3]
-                
+    # Normalize common product-name variants before knowledge retrieval.
+    # This keeps "TaifaCare" consistent with articles written as
+    # "Taifa Care".
+    search_text = re.sub(
+        r"\\btaifacare\\b",
+        "Taifa Care",
+        search_text,
+        flags=re.IGNORECASE
+    )
+
     relevant_articles = []
     prior_messages = []
+
     if payload.session_token:
         existing_session = db.query(ChatSession).filter(
             ChatSession.session_token == payload.session_token
         ).first()
-        if existing_session:
-            prior_msgs = db.query(ChatMessage).filter(
-                ChatMessage.session_id == existing_session.id
-            ).order_by(ChatMessage.created_at).limit(10).all()
-            prior_messages = [
-                {"role": m.role.value, "content": m.content} for m in prior_msgs
-            ]
-    for keyword in keywords:
-        results = db.query(Article).filter(
-            Article.status == ArticleStatus.published,
-            Article.title.ilike(f"%{keyword}%") |
-            Article.body_markdown.ilike(f"%{keyword}%")
-        ).all()
-        for r in results:
-            if r not in relevant_articles:
-                relevant_articles.append(r)
-                
-    relevant_articles = relevant_articles[:3]
 
-    if relevant_articles:
-        context = "\n\n".join([
-            f"Article: {a.title}\n{a.body_markdown}"
-            for a in relevant_articles
-        ])
-        context_note = f"Use ONLY the following knowledge base articles to answer:\n\n{context}"
-    else:
-        context_note = "No relevant articles found in the knowledge base."
+        if existing_session:
+            prior_msgs = (
+                db.query(ChatMessage)
+                .filter(ChatMessage.session_id == existing_session.id)
+                .order_by(ChatMessage.created_at)
+                .limit(10)
+                .all()
+            )
+
+            prior_messages = [
+                {"role": m.role.value, "content": m.content}
+                for m in prior_msgs
+            ]
+
+    # Search the entire question as one PostgreSQL full-text query.
+    # This prevents unrelated articles from being selected because of
+    # individual generic words such as "hospital", "patient", or "system".
+    chat_search = text("""
+        SELECT
+            a.id,
+            a.title,
+            a.slug,
+            a.body_markdown,
+            a.content_type,
+            ts_rank(
+                setweight(
+                    to_tsvector('english', coalesce(a.title, '')),
+                    'A'
+                )
+                ||
+                setweight(
+                    to_tsvector(
+                        'english',
+                        coalesce(string_agg(DISTINCT t.name, ' '), '')
+                    ),
+                    'B'
+                )
+                ||
+                setweight(
+                    to_tsvector('english', coalesce(a.body_markdown, '')),
+                    'C'
+                ),
+                plainto_tsquery('english', :q)
+            ) AS rank
+        FROM articles a
+        LEFT JOIN article_tags at
+            ON at.article_id = a.id
+        LEFT JOIN tags t
+            ON t.id = at.tag_id
+        WHERE a.status = 'published'
+        GROUP BY
+            a.id,
+            a.title,
+            a.slug,
+            a.body_markdown,
+            a.content_type
+        HAVING (
+            setweight(
+                to_tsvector('english', coalesce(a.title, '')),
+                'A'
+            )
+            ||
+            setweight(
+                to_tsvector(
+                    'english',
+                    coalesce(string_agg(DISTINCT t.name, ' '), '')
+                ),
+                'B'
+            )
+            ||
+            setweight(
+                to_tsvector('english', coalesce(a.body_markdown, '')),
+                'C'
+            )
+        ) @@ plainto_tsquery('english', :q)
+        ORDER BY rank DESC
+        LIMIT 3
+    """)
+
+    chat_rows = db.execute(
+        chat_search,
+        {"q": search_text}
+    ).fetchall()
+
+    relevant_articles = [
+        db.query(Article)
+        .filter(Article.id == row.id)
+        .first()
+        for row in chat_rows
+    ]
+
+    relevant_articles = [
+        article for article in relevant_articles
+        if article is not None
+    ]
+
+    # ------------------------------------------------------------
+    # Keyword fallback for natural-language questions
+    # ------------------------------------------------------------
+    # The strict PostgreSQL full-text query may return zero results
+    # when a natural-language question contains too many words.
+    # In that case, search meaningful words across article title,
+    # body, and tags before giving the final no-results response.
+    if not relevant_articles:
+        stop_words = {
+            "a", "an", "and", "are", "can", "could", "do", "does",
+            "for", "how", "i", "in", "is", "it", "me", "my", "of",
+            "on", "please", "the", "to", "what", "where", "which",
+            "who", "with", "would", "you", "your"
+        }
+
+        raw_words = (
+            search_text
+            .replace("?", " ")
+            .replace(",", " ")
+            .replace(".", " ")
+            .replace(":", " ")
+            .replace(";", " ")
+            .split()
+        )
+
+        keywords = []
+        for word in raw_words:
+            clean = word.strip().lower()
+            if len(clean) >= 3 and clean not in stop_words:
+                if clean not in keywords:
+                    keywords.append(clean)
+
+        fallback_candidates = []
+
+        if keywords:
+            for article in (
+                db.query(Article)
+                .filter(Article.status == ArticleStatus.published)
+                .all()
+            ):
+                title_text = (article.title or "").lower()
+                body_text = (article.body_markdown or "").lower()
+
+                tag_text = " ".join(
+                    tag.name.lower()
+                    for link in article.tags
+                    if getattr(link, "tag", None) is not None
+                    for tag in [link.tag]
+                )
+
+                searchable = " ".join([
+                    title_text,
+                    body_text,
+                    tag_text,
+                ])
+
+                matched = [
+                    keyword
+                    for keyword in keywords
+                    if keyword in searchable
+                ]
+
+                if matched:
+                    score = (
+                        len(matched) * 10
+                        + sum(
+                            25
+                            for keyword in matched
+                            if keyword in title_text
+                        )
+                    )
+
+                    fallback_candidates.append(
+                        (score, article)
+                    )
+
+            fallback_candidates.sort(
+                key=lambda item: (
+                    item[0],
+                    item[1].view_count or 0
+                ),
+                reverse=True
+            )
+
+            relevant_articles = [
+                article
+                for _, article in fallback_candidates[:3]
+            ]
+
+    if not relevant_articles:
+        return {
+            "message_id": None,
+            "session_token": payload.session_token,
+            "question": payload.message,
+            "answer": (
+                "I couldn't find an approved knowledge-base article that answers "
+                "that question yet. Please try another search or contact your "
+                "system administrator for assistance."
+            ),
+            "sources_used": 0,
+            "articles_found": []
+        }
+
+    context = "\n\n".join([
+        f"Article: {a.title}\n{a.body_markdown}"
+        for a in relevant_articles
+    ])
+
+    context_note = (
+        "Use ONLY the following published knowledge-base articles to answer. "
+        "Do not use outside knowledge. If the articles do not contain enough "
+        "information to answer the question, say that the approved knowledge "
+        "base does not contain the answer.\n\n"
+        f"{context}"
+    )
 
     prompt = f"""You are a concise support assistant for healthcare workers using the Taifa Care HMIS system.
-    
-    STRICT RULES:
-    - Answer in 3 to 5 sentences MAXIMUM
-    - Use ONLY information from the knowledge base articles provided below
-    - If the answer is not in the articles, respond with exactly: "I don't have information about that in the knowledge base yet. Please contact your system administrator."
-    - Never add extra information from your own knowledge
-    - Use simple, clear language suitable for clinical staff
-    - If steps are needed, give maximum 4 bullet points
-    
-    {context_note}
-    
-    User question: {payload.message}
-    
-    Respond in 3 to 5 sentences maximum:"""
+
+STRICT RULES:
+- Answer using ONLY the published knowledge-base articles provided below.
+- Never add information from your own general knowledge.
+- Never invent clinical, administrative, or technical guidance.
+- If the provided articles do not contain enough information, say that the approved knowledge base does not contain the answer.
+- Use simple, clear language suitable for clinical staff.
+- If steps are needed, give a maximum of 4 bullet points.
+- Keep the response concise.
+
+{context_note}
+
+User question: {payload.message}
+
+Respond using only the approved knowledge-base content:"""
 
     conversation_messages = prior_messages + [{"role": "user", "content": prompt}]
 
     response = groq_client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model=os.getenv("GROQ_MODEL", "openai/gpt-oss-20b"),
         messages=conversation_messages
     )
 
     session = None
     if payload.session_token:
-        session = db.query(ChatSession).filter(
-            ChatSession.session_token == payload.session_token,
-            ChatSession.is_active == True
+        existing_session = db.query(ChatSession).filter(
+            ChatSession.session_token == payload.session_token
         ).first()
+
+        if existing_session:
+            if (
+                existing_session.user_id is not None
+                and user is not None
+                and str(existing_session.user_id) != str(user["user_id"])
+            ):
+                raise HTTPException(
+                    status_code=403,
+                    detail="Chat session does not belong to the authenticated user"
+                )
+
+            if existing_session.user_id is None and user is not None:
+                existing_session.user_id = user["user_id"]
+                db.commit()
+            
+            session = existing_session
 
     if not session:
         session = ChatSession(
             id=uuid.uuid4(),
+            user_id=user["user_id"] if user else None,
             session_token=str(uuid.uuid4()),
             source_url="widget"
         )
@@ -1011,30 +1477,132 @@ class ChatFeedbackRequest(BaseModel):
     helpful: bool
 
 @app.post("/api/v1/chat/{message_id}/feedback")
-def submit_chat_feedback(message_id: str, payload: ChatFeedbackRequest, db: Session = Depends(get_db)):
-    from models import ChatMessage
-    import json
+def submit_chat_feedback(
+    message_id: str,
+    payload: ChatFeedbackRequest,
+    db: Session = Depends(get_db),
+    user: Optional[dict] = Depends(get_optional_user),
+):
+    message = (
+        db.query(ChatMessage)
+        .filter(ChatMessage.id == message_id)
+        .first()
+    )
 
-    message = db.query(ChatMessage).filter(ChatMessage.id == message_id).first()
     if not message:
-        raise HTTPException(status_code=404, detail="Message not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Message not found"
+        )
 
-    message.metadata = {"helpful": payload.helpful}
+    if message.role != MessageRole.assistant:
+        raise HTTPException(
+            status_code=400,
+            detail="Feedback can only be submitted for assistant responses"
+        )
+
+    user_id = user["user_id"] if user else None
+
+    existing = (
+        db.query(ChatFeedback)
+        .filter(
+            ChatFeedback.message_id == message.id,
+            ChatFeedback.user_id == user_id
+        )
+        .first()
+    )
+
+    if existing:
+        existing.helpful = payload.helpful
+    else:
+        db.add(
+            ChatFeedback(
+                id=uuid.uuid4(),
+                message_id=message.id,
+                user_id=user_id,
+                helpful=payload.helpful,
+            )
+        )
+
     db.commit()
 
-    return {"message": "Feedback recorded"}
+    return {
+        "message": "Feedback recorded",
+        "message_id": message_id,
+        "helpful": payload.helpful,
+    }
+
+@app.post("/api/v1/admin/users", status_code=201)
+def create_admin_user(
+    payload: AdminCreateUserRequest,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    if payload.role not in ["viewer", "editor"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Admin can only create Viewer or Editor accounts"
+        )
+
+    existing = db.query(User).filter(
+        (User.email == payload.email) |
+        (User.username == payload.username)
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="Username or email already exists"
+        )
+
+    new_user = User(
+        id=uuid.uuid4(),
+        username=payload.username,
+        email=payload.email,
+        password_hash=pwd_context.hash(payload.password),
+        role=UserRole(payload.role),
+        department=payload.department,
+        is_active=True
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    log_audit(
+        db,
+        user["user_id"],
+        "create_user",
+        "user",
+        str(new_user.id),
+        f"role={payload.role}"
+    )
+
+    return {
+        "id": str(new_user.id),
+        "username": new_user.username,
+        "email": new_user.email,
+        "role": new_user.role.value,
+        "department": new_user.department,
+        "is_active": new_user.is_active,
+        "message": "User created successfully"
+    }
 
 @app.get("/api/v1/admin/users")
-def list_users(db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+def list_users(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
     users = db.query(User).order_by(User.created_at.desc()).all()
+
     return [
         {
-            "id":         str(u.id),
-            "username":   u.username,
-            "email":      u.email,
-            "role":       u.role.value,
-            "is_active":  u.is_active,
-            "created_at": str(u.created_at),
+            "id": str(u.id),
+            "username": u.username,
+            "email": u.email,
+            "role": u.role.value,
+            "department": u.department,
+            "is_active": u.is_active,
         }
         for u in users
     ]
@@ -1071,6 +1639,16 @@ def toggle_user_active(user_id: str, db: Session = Depends(get_db), user: dict =
     log_audit(db, user["user_id"], "toggle_active", "user", user_id, f"is_active={target.is_active}")
 
     return {"message": "Active" if target.is_active else "Deactivated", "is_active": target.is_active}
+
+@app.get("/api/v1/admin/dashboard")
+def get_admin_dashboard(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin),
+):
+    repository = DashboardRepository(db)
+    service = DashboardService(repository)
+
+    return service.get_dashboard_stats()
 
 @app.get("/api/v1/admin/analytics")
 def get_analytics(db: Session = Depends(get_db), user: dict = Depends(require_admin)):
@@ -1189,3 +1767,392 @@ def get_unanswered_questions(db: Session = Depends(get_db), user: dict = Depends
         })
 
     return results
+
+
+
+import os
+import secrets
+import hashlib
+import hmac
+import smtplib
+import uuid as _password_reset_uuid
+
+from datetime import datetime, timedelta, timezone
+from email.message import EmailMessage
+from sqlalchemy import text as _sql_text
+from passlib.context import CryptContext as _ResetCryptContext
+import re
+
+_password_reset_pwd_context = _ResetCryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+class ResetPasswordRequest(BaseModel):
+    email: str
+    otp: str
+    new_password: str
+
+
+def _ensure_password_reset_table(db: Session):
+    db.execute(
+        _sql_text(
+            """
+            CREATE TABLE IF NOT EXISTS password_reset_otps (
+                id UUID PRIMARY KEY,
+                email VARCHAR(255) NOT NULL,
+                otp_hash VARCHAR(64) NOT NULL,
+                expires_at TIMESTAMPTZ NOT NULL,
+                attempts INTEGER NOT NULL DEFAULT 0,
+                used_at TIMESTAMPTZ NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+            """
+        )
+    )
+    db.commit()
+
+
+def _hash_reset_otp(otp: str) -> str:
+    secret = os.getenv(
+        "JWT_SECRET_KEY",
+        "development-reset-secret"
+    )
+
+    raw = f"{secret}:{otp}".encode()
+
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _send_password_reset_otp(email: str, otp: str):
+    smtp_host = os.getenv("SMTP_HOST", "").strip()
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+    smtp_username = os.getenv("SMTP_USERNAME", "").strip()
+    smtp_password = os.getenv("SMTP_PASSWORD", "").strip()
+    smtp_from = (
+        os.getenv("SMTP_FROM", "").strip()
+        or smtp_username
+        or "no-reply@healthtech.local"
+    )
+
+    dev_mode = (
+        os.getenv("OTP_DEV_MODE", "true").lower()
+        == "true"
+    )
+
+    if not smtp_host or not smtp_username or not smtp_password:
+        if dev_mode:
+            print(
+                f"[PASSWORD RESET][DEV MODE] "
+                f"OTP for {email}: {otp}"
+            )
+            return
+
+        raise RuntimeError(
+            "SMTP is not configured for password reset emails."
+        )
+
+    message = EmailMessage()
+
+    message["Subject"] = "Taifa Care password reset code"
+    message["From"] = smtp_from
+    message["To"] = email
+
+    message.set_content(
+        f"""Hello,
+
+We received a request to reset your Taifa Care HMIS password.
+
+Your verification code is:
+
+{otp}
+
+This code expires in 10 minutes.
+
+If you did not request a password reset, you can safely ignore this message.
+
+Taifa Care HMIS
+"""
+    )
+
+    use_tls = (
+        os.getenv("SMTP_USE_TLS", "true").lower()
+        == "true"
+    )
+
+    with smtplib.SMTP(
+        smtp_host,
+        smtp_port,
+        timeout=20
+    ) as server:
+
+        if use_tls:
+            server.starttls()
+
+        server.login(
+            smtp_username,
+            smtp_password
+        )
+
+        server.send_message(message)
+
+
+@app.post("/api/v1/auth/forgot-password")
+@limiter.limit("5/minute")
+def forgot_password(
+    request: Request,
+    payload: ForgotPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    _ensure_password_reset_table(db)
+
+    email = payload.email.strip().lower()
+
+    generic_response = {
+        "message":
+            "If an account exists for this email, "
+            "a verification code has been sent."
+    }
+
+    user = db.query(User).filter(
+        User.email.ilike(email)
+    ).first()
+
+    if not user or not user.is_active:
+        return generic_response
+
+    latest = db.execute(
+        _sql_text(
+            """
+            SELECT created_at
+            FROM password_reset_otps
+            WHERE email = :email
+            ORDER BY created_at DESC
+            LIMIT 1
+            """
+        ),
+        {"email": email}
+    ).fetchone()
+
+    if latest and latest[0]:
+        created_at = latest[0]
+
+        if created_at.tzinfo is None:
+            created_at = created_at.replace(
+                tzinfo=timezone.utc
+            )
+
+        elapsed = (
+            datetime.now(timezone.utc)
+            - created_at
+        ).total_seconds()
+
+        if elapsed < 60:
+            return generic_response
+
+    db.execute(
+        _sql_text(
+            """
+            UPDATE password_reset_otps
+            SET used_at = NOW()
+            WHERE email = :email
+              AND used_at IS NULL
+            """
+        ),
+        {"email": email}
+    )
+
+    otp = f"{secrets.randbelow(1_000_000):06d}"
+    otp_hash = _hash_reset_otp(otp)
+
+    db.execute(
+        _sql_text(
+            """
+            INSERT INTO password_reset_otps (
+                id,
+                email,
+                otp_hash,
+                expires_at,
+                attempts
+            )
+            VALUES (
+                :id,
+                :email,
+                :otp_hash,
+                :expires_at,
+                0
+            )
+            """
+        ),
+        {
+            "id":
+                str(_password_reset_uuid.uuid4()),
+            "email": email,
+            "otp_hash": otp_hash,
+            "expires_at":
+                datetime.now(timezone.utc)
+                + timedelta(minutes=10),
+        }
+    )
+
+    db.commit()
+
+    try:
+        _send_password_reset_otp(
+            email,
+            otp
+        )
+    except Exception as exc:
+        print(
+            "[PASSWORD RESET] "
+            f"Email delivery failed: {exc}"
+        )
+
+    return generic_response
+
+
+@app.post("/api/v1/auth/reset-password")
+@limiter.limit("10/minute")
+def reset_password(
+    request: Request,
+    payload: ResetPasswordRequest,
+    db: Session = Depends(get_db)
+):
+    _ensure_password_reset_table(db)
+
+    email = payload.email.strip().lower()
+    otp = payload.otp.strip()
+    new_password = payload.new_password
+
+    if not otp.isdigit() or len(otp) != 6:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid verification code"
+        )
+
+    if len(new_password) < 8:
+        raise HTTPException(
+            status_code=400,
+            detail=
+                "New password must be at least 8 characters"
+        )
+
+    user = db.query(User).filter(
+        User.email.ilike(email)
+    ).first()
+
+    if not user or not user.is_active:
+        raise HTTPException(
+            status_code=400,
+            detail="Unable to reset password"
+        )
+
+    record = db.execute(
+        _sql_text(
+            """
+            SELECT
+                id,
+                otp_hash,
+                expires_at,
+                attempts,
+                used_at
+            FROM password_reset_otps
+            WHERE email = :email
+            ORDER BY created_at DESC
+            LIMIT 1
+            """
+        ),
+        {"email": email}
+    ).fetchone()
+
+    if not record:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired verification code"
+        )
+
+    record_id = record[0]
+    stored_hash = record[1]
+    expires_at = record[2]
+    attempts = int(record[3] or 0)
+    used_at = record[4]
+
+    if used_at is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired verification code"
+        )
+
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(
+            tzinfo=timezone.utc
+        )
+
+    if datetime.now(timezone.utc) >= expires_at:
+        raise HTTPException(
+            status_code=400,
+            detail="Verification code has expired"
+        )
+
+    if attempts >= 5:
+        raise HTTPException(
+            status_code=400,
+            detail="Too many incorrect attempts"
+        )
+
+    submitted_hash = _hash_reset_otp(otp)
+
+    if not hmac.compare_digest(
+        stored_hash,
+        submitted_hash
+    ):
+        db.execute(
+            _sql_text(
+                """
+                UPDATE password_reset_otps
+                SET attempts = attempts + 1
+                WHERE id = :id
+                """
+            ),
+            {"id": str(record_id)}
+        )
+
+        db.commit()
+
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid verification code"
+        )
+
+    user.password_hash = (
+        _password_reset_pwd_context.hash(
+            new_password
+        )
+    )
+
+    user.updated_at = datetime.now(timezone.utc)
+
+    db.execute(
+        _sql_text(
+            """
+            UPDATE password_reset_otps
+            SET used_at = NOW()
+            WHERE id = :id
+            """
+        ),
+        {"id": str(record_id)}
+    )
+
+    db.commit()
+
+    return {
+        "message":
+            "Password reset successfully. "
+            "You can now sign in."
+    }
+

@@ -32,6 +32,27 @@ export default function Widget() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
+  async function handleFeedback(messageId, helpful) {
+    if (!messageId) return
+
+    setMessages(prev =>
+      prev.map(message =>
+        message.messageId === messageId
+          ? { ...message, feedbackGiven: helpful }
+          : message
+      )
+    )
+
+    try {
+      await axios.post(
+        `${API_BASE}/chat/${messageId}/feedback`,
+        { helpful }
+      )
+    } catch {
+      // Keep the UI responsive even if feedback submission fails.
+    }
+  }
+
   function handleExportTranscript() {
     const transcript = messages
       .map(m => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
@@ -63,7 +84,17 @@ export default function Widget() {
     try {
       const data = await sendMessage(userMessage, sessionToken)
       setSessionToken(data.session_token)
-      setMessages(prev => [...prev, { role: "assistant", content: data.answer }])
+
+      setMessages(prev => [
+        ...prev,
+        {
+          role: "assistant",
+          content: data.answer,
+          sources: data.articles_found || [],
+          messageId: data.message_id,
+          feedbackGiven: null
+        }
+      ])
     } catch (err) {
       setMessages(prev => [...prev, {
         role: "assistant",
@@ -120,6 +151,64 @@ export default function Widget() {
                   ) : (
                     <div className="prose prose-sm prose-teal max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                      {msg.sources && msg.sources.length > 0 && (
+                        <div className="mt-3 pt-2 border-t border-gray-200 space-y-1.5">
+                          <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-400">
+                            Sources
+                          </p>
+
+                          {msg.sources.map((src, idx) => (
+                            <a
+                              key={idx}
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault()
+
+                                if (window.openTaifaCareArticle) {
+                                  window.openTaifaCareArticle(src.slug)
+                                }
+                              }}
+                              className="block text-xs text-teal-700 hover:text-teal-800 hover:underline"
+                            >
+                              📄 {src.title}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+
+                      {msg.messageId && (
+                        <div className="mt-3 pt-2 border-t border-gray-200 flex items-center gap-2">
+                          <span className="text-[10px] uppercase tracking-wide font-semibold text-gray-400">
+                            Helpful?
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={() => handleFeedback(msg.messageId, true)}
+                            aria-label="Helpful"
+                            className={`text-sm transition ${
+                              msg.feedbackGiven === true
+                                ? "opacity-100"
+                                : "opacity-40 hover:opacity-80"
+                            }`}
+                          >
+                            👍
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleFeedback(msg.messageId, false)}
+                            aria-label="Not helpful"
+                            className={`text-sm transition ${
+                              msg.feedbackGiven === false
+                                ? "opacity-100"
+                                : "opacity-40 hover:opacity-80"
+                            }`}
+                          >
+                            👎
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

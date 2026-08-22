@@ -39,6 +39,7 @@ class User(Base):
     email         = Column(String(255), nullable=False, unique=True)
     password_hash = Column(Text, nullable=False)
     role          = Column(Enum(UserRole), nullable=False, default=UserRole.viewer)
+    department    = Column(String(100), nullable=True)
     is_active     = Column(Boolean, default=True)
     created_at    = Column(DateTime(timezone=True), server_default=func.now())
     updated_at    = Column(DateTime(timezone=True), onupdate=func.now())
@@ -53,12 +54,27 @@ class Category(Base):
     name        = Column(String(120), nullable=False, unique=True)
     slug        = Column(String(120), nullable=False, unique=True)
     description = Column(Text)
-    icon        = Column(String(50), nullable=True)
     parent_id   = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True)
     sort_order  = Column(Integer, default=0)
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
 
     articles    = relationship("Article", back_populates="category")
+
+class Product(Base):
+    __tablename__ = "products"
+
+    id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name        = Column(String(150), nullable=False, unique=True)
+    slug        = Column(String(150), nullable=False, unique=True)
+    description = Column(Text, nullable=True)
+    version     = Column(String(50), nullable=True)
+    icon        = Column(String(50), nullable=True)
+    is_active   = Column(Boolean, default=True, nullable=False)
+    sort_order  = Column(Integer, default=0)
+    created_at  = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at  = Column(DateTime(timezone=True), onupdate=func.now())
+
+    articles = relationship("Article", back_populates="product")
 
 class Article(Base):
     __tablename__ = "articles"
@@ -72,7 +88,16 @@ class Article(Base):
     content_type  = Column(Enum(ContentType), default=ContentType.how_to)
     previous_body_markdown = Column(Text, nullable=True)
     product_version = Column(String(50), nullable=True)
-    category_id   = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True)
+    product_id      = Column(
+        UUID(as_uuid=True),
+        ForeignKey("products.id"),
+        nullable=True
+    )
+    category_id    = Column(
+        UUID(as_uuid=True),
+        ForeignKey("categories.id"),
+        nullable=True
+    )
     author_id     = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     view_count    = Column(Integer, default=0)
     published_at  = Column(DateTime(timezone=True), nullable=True)
@@ -81,6 +106,7 @@ class Article(Base):
 
     author        = relationship("User", back_populates="articles")
     category      = relationship("Category", back_populates="articles")
+    product       = relationship("Product", back_populates="articles")
     feedback      = relationship("ArticleFeedback", back_populates="article")
     tags          = relationship("ArticleTag", back_populates="article")
 
@@ -95,6 +121,19 @@ class ArticleFeedback(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     article    = relationship("Article", back_populates="feedback")
+
+class ArticleSMEReview(Base):
+    __tablename__ = "article_sme_reviews"
+
+    id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    article_id  = Column(UUID(as_uuid=True), ForeignKey("articles.id"), nullable=False)
+    reviewer_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    decision    = Column(String(30), nullable=False)
+    comments    = Column(Text, nullable=True)
+    reviewed_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    article     = relationship("Article")
+    reviewer    = relationship("User")
 
 class ChatSession(Base):
     __tablename__ = "chat_sessions"
@@ -120,6 +159,30 @@ class ChatMessage(Base):
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
 
     session     = relationship("ChatSession", back_populates="messages")
+
+class ChatFeedback(Base):
+    __tablename__ = "chat_feedback"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    message_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("chat_messages.id"),
+        nullable=False
+    )
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=True
+    )
+    helpful = Column(Boolean, nullable=False)
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+
+    message = relationship("ChatMessage")
+    user = relationship("User")
+
 
 class Tag(Base):
     __tablename__ = "tags"
@@ -171,3 +234,16 @@ class Media(Base):
     type        = Column(String(20), nullable=False)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# PASSWORD RESET OTP MODEL
+class PasswordResetOTP(Base):
+    __tablename__ = "password_reset_otps"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String(255), nullable=False, index=True)
+    otp_hash = Column(String(64), nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    attempts = Column(Integer, nullable=False, default=0)
+    used_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -29,6 +29,22 @@ def seed():
         else:
             print(" Admin user already exists")
 
+        sme = db.query(User).filter(User.email == "sme@healthtech.co.ke").first()
+        if not sme:
+            sme = User(
+                id=uuid.uuid4(),
+                username="Health SME",
+                email="sme@healthtech.co.ke",
+                password_hash=pwd_context.hash("SME@1234"),
+                role=UserRole.editor,
+                is_active=True
+            )
+            db.add(sme)
+            db.flush()
+            print(" SME user created")
+        else:
+            print(" SME user already exists")
+
         def get_or_create_category(name, slug, description, sort_order):
             cat = db.query(Category).filter(Category.slug == slug).first()
             if not cat:
