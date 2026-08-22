@@ -1,13 +1,23 @@
 import { useState, useEffect } from "react"
 import {
   getAnalytics,
+  getSearchTrend,
   getUnansweredQuestions,
 } from "../services/api"
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts"
 
 export default function AdminAnalytics() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [unanswered, setUnanswered] = useState([])
+  const [trend, setTrend] = useState([])
 
   useEffect(() => {
     getAnalytics()
@@ -30,13 +40,22 @@ export default function AdminAnalytics() {
           error
         )
       )
+
+    getSearchTrend()
+      .then(res => setTrend(res.data || []))
+      .catch(error =>
+        console.error(
+          "SEARCH TREND LOAD ERROR:",
+          error
+        )
+      )
   }, [])
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-4 border-violet-100 border-t-violet-600 rounded-full animate-spin mx-auto mb-4" />
 
           <p className="text-sm text-slate-500">
             Loading analytics...
@@ -104,9 +123,9 @@ export default function AdminAnalytics() {
 
           <div>
             <div className="inline-flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-indigo-500" />
+              <span className="w-2 h-2 rounded-full bg-violet-500" />
 
-              <span className="text-[10px] uppercase tracking-wider font-semibold text-indigo-700">
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-violet-700">
                 System Insights
               </span>
             </div>
@@ -148,7 +167,7 @@ export default function AdminAnalytics() {
               <path d="M8 16h5" />
             </svg>
           }
-          iconClass="bg-indigo-50 text-indigo-700"
+          iconClass="bg-violet-50 text-violet-700"
         />
 
         <MetricCard
@@ -200,6 +219,18 @@ export default function AdminAnalytics() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <h3 className="font-semibold text-gray-800 mb-3">Search Activity (30 days)</h3>
+          <ResponsiveContainer width="100%" height={180}>
+            <LineChart data={trend}>
+              <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+              <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+              <Tooltip />
+              <Line type="monotone" dataKey="count" stroke="#6D28D9" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
         <AnalyticsCard
           title="Top Viewed Articles"
           description="Most frequently accessed knowledge resources"
@@ -217,7 +248,7 @@ export default function AdminAnalytics() {
               <circle cx="12" cy="12" r="2.5" />
             </svg>
           }
-          iconClass="bg-indigo-50 text-indigo-700"
+          iconClass="bg-violet-50 text-violet-700"
         >
           {topViewed.length === 0 ? (
             <EmptyState message="No article views have been recorded yet." />
@@ -236,7 +267,7 @@ export default function AdminAnalytics() {
                     {article.title}
                   </span>
 
-                  <span className="text-sm text-indigo-600 font-semibold shrink-0">
+                  <span className="text-sm text-violet-600 font-semibold shrink-0">
                     {article.views} views
                   </span>
                 </div>
@@ -378,8 +409,8 @@ export default function AdminAnalytics() {
 
 
         <AnalyticsCard
-          title="Content Needing Attention"
-          description="Articles flagged because they are more than 180 days old"
+          title="Content Needing Re-certification"
+          description="Not reviewed or updated in over 180 days"
           icon={
             <svg
               viewBox="0 0 24 24"
@@ -495,7 +526,7 @@ function MetricCard({
             {label}
           </p>
 
-          <p className="text-3xl font-bold text-indigo-600 mt-2">
+          <p className="text-3xl font-bold text-violet-600 mt-2">
             {value}
           </p>
 

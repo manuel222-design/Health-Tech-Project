@@ -102,6 +102,7 @@ export const updateUserRole = (userId, role) => api.put(`/admin/users/${userId}/
 export const toggleUserActive = (userId) => api.put(`/admin/users/${userId}/toggle-active`)
 
 export const getAnalytics = () => api.get('/admin/analytics')
+export const getSearchTrend = () => api.get('/admin/search-trend')
 
 export const getAuditLogs = () => api.get('/admin/audit-logs')
 

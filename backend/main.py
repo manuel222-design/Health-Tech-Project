@@ -1082,7 +1082,11 @@ def approve_article(slug: str, db: Session = Depends(get_db), user: dict = Depen
     if article.status != ArticleStatus.pending_review:
         raise HTTPException(status_code=400, detail="Article is not pending review")
 
+    now = datetime.now(timezone.utc)
+
     article.status = ArticleStatus.published
+    article.published_at = now
+    article.last_reviewed_at = now
 
     review = ArticleSMEReview(
         id=uuid.uuid4(),
@@ -1112,6 +1116,7 @@ def reject_article(slug: str, payload: RejectRequest, db: Session = Depends(get_
         raise HTTPException(status_code=400, detail="Article is not pending review")
 
     article.status = ArticleStatus.draft
+    article.last_reviewed_at = datetime.now(timezone.utc)
 
     review = ArticleSMEReview(
         id=uuid.uuid4(),
@@ -1809,13 +1814,17 @@ def get_analytics(db: Session = Depends(get_db), user: dict = Depends(require_ad
     from datetime import datetime, timedelta, timezone
     cutoff = datetime.now(timezone.utc) - timedelta(days=180)
 
-    stale_articles = db.query(Article.title, Article.slug, Article.created_at) \
-        .filter(
-            Article.status == ArticleStatus.published,
-            Article.created_at < cutoff
-        ) \
-        .order_by(Article.created_at) \
-        .limit(20).all()
+    stale_articles = db.query(
+        Article.title,
+        Article.slug,
+        Article.last_reviewed_at
+    ).filter(
+        Article.status == ArticleStatus.published,
+        Article.last_reviewed_at.isnot(None),
+        Article.last_reviewed_at < cutoff
+    ).order_by(
+        Article.last_reviewed_at
+    ).limit(20).all()
 
     return {
         "totals": {
@@ -1838,9 +1847,29 @@ def get_analytics(db: Session = Depends(get_db), user: dict = Depends(require_ad
         ],
         "search_trend": search_trend,
         "stale_articles": [
-            {"title": t, "slug": s, "created_at": str(c)} for t, s, c in stale_articles
+            {
+                "title": t,
+                "slug": s,
+                "last_reviewed_at": str(r)
+            }
+            for t, s, r in stale_articles
         ],
     }
+
+@app.get("/api/v1/admin/search-trend")
+def get_search_trend(db: Session = Depends(get_db), user: dict = Depends(require_admin)):
+    from sqlalchemy import func, cast, Date
+    from datetime import datetime, timedelta, timezone
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+    results = db.query(
+            cast(SearchLog.searched_at, Date).label("day"),
+            func.count(SearchLog.id).label("count")
+        ) \
+        .filter(SearchLog.searched_at >= cutoff) \
+        .group_by("day").order_by("day").all()
+
+    return [{"date": str(day), "count": count} for day, count in results]
 
 @app.get("/api/v1/admin/audit-logs")
 def get_audit_logs(db: Session = Depends(get_db), user: dict = Depends(require_admin)):

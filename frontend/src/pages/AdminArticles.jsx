@@ -127,7 +127,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
         {canReview && (
           <button
             onClick={onCreate}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition"
+            className="bg-violet-600 hover:bg-violet-700 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition"
           >
             + New Article
           </button>
@@ -141,7 +141,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
             placeholder="Search articles by title, slug, category, or status..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white border border-gray-300 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full bg-white border border-gray-300 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
           />
 
           <svg
@@ -198,7 +198,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
 
                 <span className={`text-xs rounded-full px-2 py-0.5 border ${
                   article.status === "published"
-                    ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                    ? "bg-violet-50 text-violet-700 border-violet-200"
                     : article.status === "pending_review"
                       ? "bg-blue-50 text-blue-700 border-blue-200"
                       : article.status === "archived"
@@ -216,7 +216,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
                   <button
                     onClick={() => handleApprove(article.slug)}
                     disabled={approving === article.slug || rejecting === article.slug}
-                    className="text-sm text-white bg-indigo-600 hover:bg-indigo-700 font-medium px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+                    className="text-sm text-white bg-violet-600 hover:bg-violet-700 font-medium px-3 py-1.5 rounded-lg transition disabled:opacity-50"
                   >
                     {approving === article.slug ? "Approving..." : "Approve"}
                   </button>
@@ -235,7 +235,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
                 <>
                   <button
                     onClick={() => onEdit(article.slug)}
-                    className="text-sm text-indigo-600 hover:text-indigo-700 font-medium px-3 py-1.5 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition"
+                    className="text-sm text-violet-600 hover:text-violet-700 font-medium px-3 py-1.5 border border-violet-200 rounded-lg hover:bg-violet-50 transition"
                   >
                     Edit
                   </button>

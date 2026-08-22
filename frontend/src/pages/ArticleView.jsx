@@ -161,7 +161,7 @@ export default function ArticleView({
       <div className="flex items-center justify-center py-24">
         <div className="text-center">
 
-          <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-4 border-violet-100 border-t-violet-600 rounded-full animate-spin mx-auto mb-4" />
 
           <p className="text-sm text-slate-500">
             Loading knowledge article...
@@ -200,7 +200,7 @@ export default function ArticleView({
             <button
               type="button"
               onClick={onBack}
-              className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium"
+              className="px-5 py-2.5 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition font-medium"
             >
               Back to Knowledge Base
             </button>
@@ -291,7 +291,7 @@ export default function ArticleView({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-sm text-indigo-700 hover:text-indigo-800 font-medium"
+          className="inline-flex items-center gap-2 text-sm text-violet-700 hover:text-violet-800 font-medium"
         >
           <span>←</span>
           Back to Knowledge Base
@@ -311,14 +311,14 @@ export default function ArticleView({
 
       <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
 
-        <div className="h-1.5 bg-gradient-to-r from-indigo-500 via-cyan-500 to-blue-500" />
+        <div className="h-1.5 bg-gradient-to-r from-violet-500 via-cyan-500 to-blue-500" />
 
         <div className="p-6 sm:p-8 lg:p-10">
 
           <div className="flex flex-wrap gap-2 mb-5">
 
             {categoryName && (
-              <MetadataBadge className="bg-indigo-50 border-indigo-100 text-indigo-700">
+              <MetadataBadge className="bg-violet-50 border-violet-100 text-violet-700">
                 {categoryName}
               </MetadataBadge>
             )}
@@ -450,8 +450,8 @@ export default function ArticleView({
                         onClick={() => setShowToc(false)}
                         className={`block w-full text-left rounded-lg px-3 py-2 text-xs transition ${
                           heading.level === 3
-                            ? "ml-3 text-slate-500 hover:text-indigo-700"
-                            : "font-medium text-slate-700 hover:text-indigo-700"
+                            ? "ml-3 text-slate-500 hover:text-violet-700"
+                            : "font-medium text-slate-700 hover:text-violet-700"
                         }`}
                       >
                         {heading.text}
@@ -554,14 +554,14 @@ export default function ArticleView({
                           ? "noreferrer"
                           : undefined
                       }
-                      className="text-indigo-700 font-medium hover:text-indigo-800 hover:underline"
+                      className="text-violet-700 font-medium hover:text-violet-800 hover:underline"
                     >
                       {children}
                     </a>
                   ),
 
                   blockquote: ({ children }) => (
-                    <blockquote className="border-l-4 border-teal-400 bg-indigo-50 rounded-r-xl px-5 py-4 my-6 text-sm text-indigo-900">
+                    <blockquote className="border-l-4 border-teal-400 bg-violet-50 rounded-r-xl px-5 py-4 my-6 text-sm text-violet-900">
                       {children}
                     </blockquote>
                   ),
@@ -653,7 +653,7 @@ export default function ArticleView({
 
               <div>
 
-                <div className="text-[10px] uppercase tracking-wider font-semibold text-indigo-700">
+                <div className="text-[10px] uppercase tracking-wider font-semibold text-violet-700">
                   Knowledge quality
                 </div>
 
@@ -690,20 +690,20 @@ export default function ArticleView({
 
             {submitted ? (
 
-              <div className="mt-5 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-4">
+              <div className="mt-5 bg-violet-50 border border-violet-200 rounded-xl px-4 py-4">
 
                 <div className="flex items-start gap-3">
 
-                  <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0">
                     ✓
                   </div>
 
                   <div>
-                    <p className="text-sm font-semibold text-indigo-800">
+                    <p className="text-sm font-semibold text-violet-800">
                       Thanks for your feedback!
                     </p>
 
-                    <p className="text-xs text-indigo-700 mt-1">
+                    <p className="text-xs text-violet-700 mt-1">
                       Your response has been recorded.
                     </p>
                   </div>
@@ -750,14 +750,14 @@ export default function ArticleView({
                   }
                   placeholder="Optional comment about this article..."
                   rows={3}
-                  className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                  className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 resize-none"
                 />
 
                 <button
                   type="button"
                   onClick={handleSubmitFeedback}
                   disabled={rating === 0}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Submit Feedback
                 </button>

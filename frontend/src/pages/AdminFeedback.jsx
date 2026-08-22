@@ -117,7 +117,7 @@ export default function AdminFeedback() {
       <div>
         <div className="flex items-center gap-3">
 
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -223,13 +223,13 @@ export default function AdminFeedback() {
             value={search}
             onChange={event => setSearch(event.target.value)}
             placeholder="Search article or feedback..."
-            className="border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
           />
 
           <select
             value={ratingFilter}
             onChange={event => setRatingFilter(event.target.value)}
-            className="border border-slate-300 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="border border-slate-300 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
           >
             <option value="">All ratings</option>
             <option value="5">5 stars</option>
@@ -244,7 +244,7 @@ export default function AdminFeedback() {
             onClick={() => setCommentsOnly(prev => !prev)}
             className={`px-4 py-2.5 rounded-xl text-sm font-medium transition border ${
               commentsOnly
-                ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                ? "bg-violet-50 text-violet-700 border-violet-200"
                 : "bg-white text-slate-600 border-slate-300 hover:bg-slate-50"
             }`}
           >

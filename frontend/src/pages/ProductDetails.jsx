@@ -30,7 +30,7 @@ export default function ProductDetails({
     return (
       <div className="flex items-center justify-center py-24">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-4 border-violet-100 border-t-violet-600 rounded-full animate-spin mx-auto mb-4" />
           <p className="text-sm text-slate-400">
             Loading product details...
           </p>
@@ -44,7 +44,7 @@ export default function ProductDetails({
       <div className="space-y-5">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+          className="flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700 font-medium"
         >
           ← Back to Products
         </button>
@@ -79,7 +79,7 @@ export default function ProductDetails({
 
       <button
         onClick={onBack}
-        className="flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+        className="flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700 font-medium"
       >
         ← Back to Products
       </button>
@@ -89,13 +89,13 @@ export default function ProductDetails({
 
       <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
 
-        <div className="h-2 bg-gradient-to-r from-indigo-500 to-cyan-500" />
+        <div className="h-2 bg-gradient-to-r from-violet-500 to-cyan-500" />
 
         <div className="p-6 sm:p-8">
 
           <div className="flex flex-col sm:flex-row sm:items-start gap-5">
 
-            <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-3xl shrink-0">
+            <div className="w-16 h-16 rounded-2xl bg-violet-50 text-violet-700 flex items-center justify-center text-3xl shrink-0">
               {product.icon || "📦"}
             </div>
 
@@ -238,7 +238,7 @@ export default function ProductDetails({
 
                 <div className="flex items-start gap-4">
 
-                  <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition">
+                  <div className="w-10 h-10 rounded-lg bg-violet-50 text-violet-700 flex items-center justify-center shrink-0 group-hover:bg-violet-600 group-hover:text-white transition">
 
                     <svg
                       viewBox="0 0 24 24"
@@ -260,13 +260,13 @@ export default function ProductDetails({
 
                   <div className="min-w-0 flex-1">
 
-                    <h3 className="font-semibold text-slate-800 group-hover:text-indigo-700 transition">
+                    <h3 className="font-semibold text-slate-800 group-hover:text-violet-700 transition">
                       {article.title}
                     </h3>
 
                     <div className="flex flex-wrap items-center gap-2 mt-2">
 
-                      <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full">
+                      <span className="text-xs bg-violet-50 text-violet-700 px-2 py-1 rounded-full">
                         {article.content_type
                           ?.replaceAll("_", " ")
                           || "Guide"}
@@ -293,7 +293,7 @@ export default function ProductDetails({
                   </div>
 
 
-                  <span className="text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition text-lg shrink-0">
+                  <span className="text-slate-300 group-hover:text-violet-600 group-hover:translate-x-1 transition text-lg shrink-0">
                     →
                   </span>
 

@@ -179,7 +179,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
     <div>
       <button
         onClick={onCancel}
-        className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-6 text-sm font-medium"
+        className="flex items-center gap-2 text-violet-600 hover:text-violet-700 mb-6 text-sm font-medium"
       >
         ← Back to Article Management
       </button>
@@ -203,7 +203,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
               value={title}
               onChange={e => handleTitleChange(e.target.value)}
               placeholder="How to Reset Your HMIS Password"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
 
@@ -217,7 +217,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
               disabled={isEditing}
               onChange={e => setArticleSlug(generateSlug(e.target.value))}
               placeholder="how-to-reset-hmis-password"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-50 disabled:text-gray-400"
             />
           </div>
           
@@ -231,7 +231,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
               <select
                 value={productId}
                 onChange={e => setProductId(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-violet-500"
              >
               <option value="">No product</option>
               
@@ -259,7 +259,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
       value={productVersion}
       onChange={e => setProductVersion(e.target.value)}
       placeholder="e.g. 1.0"
-      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
     />
 
     <p className="text-xs text-gray-400 mt-1">
@@ -274,7 +274,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
                 Content <span className="text-gray-400">(Markdown supported)</span>
               </label>
               <div className="flex gap-2 items-center">
-                <label className="text-xs text-indigo-700 border border-indigo-200 hover:bg-indigo-50 px-2 py-1 rounded transition cursor-pointer">
+                <label className="text-xs text-violet-700 border border-violet-200 hover:bg-violet-50 px-2 py-1 rounded transition cursor-pointer">
                   {uploading ? "Uploading..." : "Upload Image"}
                   <input
                     type="file"
@@ -301,7 +301,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
               onChange={e => setBody(e.target.value)}
               rows={12}
               placeholder=" Overview&#10;Write your article content here using Markdown..."
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
 
@@ -310,7 +310,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
             <select
               value={categoryId}
               onChange={e => setCategoryId(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-violet-500"
             >
               <option value="">No category</option>
               {categories.map(c => (
@@ -324,7 +324,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
                 onChange={e => setNewCategoryInput(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && (e.preventDefault(), handleCreateCategory())}
                 placeholder="Create a new category..."
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
               <button
                 type="button"
@@ -347,7 +347,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
                   onClick={() => toggleTag(tag.id)}
                   className={`text-xs rounded-full px-3 py-1.5 border transition ${
                     tagIds.includes(tag.id)
-                      ? "bg-indigo-600 text-white border-indigo-600"
+                      ? "bg-violet-600 text-white border-violet-600"
                       : "bg-white text-gray-600 border-gray-300 hover:border-teal-400"
                   }`}
                 >
@@ -362,7 +362,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
                 onChange={e => setNewTagInput(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && (e.preventDefault(), handleCreateTag())}
                 placeholder="Create a new tag..."
-                className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
               <button
                 type="button"
@@ -380,7 +380,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
             <select
               value={contentType}
               onChange={e => setContentType(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             >
               <option value="how_to">How-To Guide</option>
               <option value="sop">SOP</option>
@@ -400,7 +400,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
               value={productVersion}
               onChange={e => setProductVersion(e.target.value)}
               placeholder="e.g. Taifa Care v2.4"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
           
@@ -409,7 +409,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
             <select
               value={status}
               onChange={e => setStatus(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             >
               <option value="draft">Draft</option>
               <option value="published">Published</option>
@@ -422,7 +422,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition disabled:opacity-50"
+              className="bg-violet-600 hover:bg-violet-700 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition disabled:opacity-50"
             >
               {saving ? "Saving..." : isEditing ? "Save Changes" : "Create Article"}
             </button>

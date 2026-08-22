@@ -1040,7 +1040,7 @@ setSelectedCategory(categoryId)
 
         <div className="relative px-5 py-5 border-b border-slate-800/80 overflow-hidden">
 
-          <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
+          <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-violet-500/10 blur-2xl pointer-events-none" />
 
           <div
             className="relative flex items-center gap-3 cursor-pointer group"
@@ -1049,7 +1049,7 @@ setSelectedCategory(categoryId)
             }
           >
 
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shrink-0 shadow-lg shadow-teal-950/40 ring-1 ring-teal-400/20 group-hover:ring-teal-300/40 transition">
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shrink-0 shadow-lg shadow-teal-950/40 ring-1 ring-teal-400/20 group-hover:ring-teal-300/40 transition">
 
               <span className="text-white font-extrabold text-sm tracking-tight">
                 TC
@@ -1062,7 +1062,7 @@ setSelectedCategory(categoryId)
 
             <div className="min-w-0">
 
-              <div className="text-white font-bold text-[15px] tracking-tight group-hover:text-indigo-200 transition">
+              <div className="text-white font-bold text-[15px] tracking-tight group-hover:text-violet-200 transition">
                 Taifa Care
               </div>
 
@@ -1086,7 +1086,7 @@ setSelectedCategory(categoryId)
             }
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
               currentPage === "home"
-                ? "bg-teal-950/60 text-teal-300 border border-indigo-900 shadow-sm"
+                ? "bg-teal-950/60 text-teal-300 border border-violet-900 shadow-sm"
                 : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
             }`}
           >
@@ -1128,7 +1128,7 @@ setSelectedCategory(categoryId)
               className={`flex-1 min-w-0 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
                 currentPage === "articles" ||
                 currentPage === "article"
-                  ? "bg-teal-950/60 text-teal-300 border border-indigo-900 shadow-sm"
+                  ? "bg-teal-950/60 text-teal-300 border border-violet-900 shadow-sm"
                   : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
               }`}
             >
@@ -1230,7 +1230,7 @@ setSelectedCategory(categoryId)
                     className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
                       currentPage === "articles" &&
                       selectedCategory === category.id
-                        ? "bg-indigo-900 text-teal-300"
+                        ? "bg-violet-900 text-teal-300"
                         : "bg-slate-800 text-slate-500 group-hover:text-teal-400"
                     }`}
                   >
@@ -1249,7 +1249,7 @@ setSelectedCategory(categoryId)
                     className={`min-w-[24px] h-5 px-1.5 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0 border ${
                       currentPage === "articles" &&
                       selectedCategory === category.id
-                        ? "bg-indigo-900/70 text-teal-300 border-indigo-800"
+                        ? "bg-violet-900/70 text-teal-300 border-violet-800"
                         : "bg-slate-900 text-slate-500 border-slate-800 group-hover:text-slate-300 group-hover:border-slate-700"
                     }`}
                   >
@@ -1273,7 +1273,7 @@ setSelectedCategory(categoryId)
               }
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                 currentPage === "manage"
-                  ? "bg-slate-800 text-white border-l-2 border-indigo-500"
+                  ? "bg-slate-800 text-white border-l-2 border-violet-500"
                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
             >
@@ -1313,7 +1313,7 @@ setSelectedCategory(categoryId)
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                 currentPage === "products" ||
                 currentPage === "product"
-                  ? "bg-slate-800 text-white border-l-2 border-indigo-500"
+                  ? "bg-slate-800 text-white border-l-2 border-violet-500"
                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
             >
@@ -1361,7 +1361,7 @@ setSelectedCategory(categoryId)
                 }
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                   currentPage === "users"
-                    ? "bg-slate-800 text-white border-l-2 border-indigo-500"
+                    ? "bg-slate-800 text-white border-l-2 border-violet-500"
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
@@ -1396,7 +1396,7 @@ setSelectedCategory(categoryId)
                 }
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                   currentPage === "analytics"
-                    ? "bg-slate-800 text-white border-l-2 border-indigo-500"
+                    ? "bg-slate-800 text-white border-l-2 border-violet-500"
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
@@ -1435,7 +1435,7 @@ setSelectedCategory(categoryId)
                 }
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                   currentPage === "feedback"
-                    ? "bg-slate-800 text-white border-l-2 border-indigo-500"
+                    ? "bg-slate-800 text-white border-l-2 border-violet-500"
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
@@ -1471,7 +1471,7 @@ setSelectedCategory(categoryId)
                 }
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                   currentPage === "audit"
-                    ? "bg-slate-800 text-white border-l-2 border-indigo-500"
+                    ? "bg-slate-800 text-white border-l-2 border-violet-500"
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
@@ -1513,7 +1513,7 @@ setSelectedCategory(categoryId)
             onClick={() => goTo("settings")}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
               currentPage === "settings"
-                ? "bg-teal-950/60 text-teal-300 border border-indigo-900 shadow-sm"
+                ? "bg-teal-950/60 text-teal-300 border border-violet-900 shadow-sm"
                 : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
             }`}
           >
@@ -1554,7 +1554,7 @@ setSelectedCategory(categoryId)
             onClick={() => handleMobileNavigate("home")}
             className="flex items-center gap-2 min-w-0"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center font-extrabold text-xs shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center font-extrabold text-xs shrink-0">
               TC
             </div>
 
@@ -1613,7 +1613,7 @@ setSelectedCategory(categoryId)
 
               <div className="flex items-center gap-3 min-w-0">
 
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-extrabold text-sm shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-white font-extrabold text-sm shrink-0">
                   TC
                 </div>
 
@@ -1651,7 +1651,7 @@ setSelectedCategory(categoryId)
                   onClick={() => handleMobileNavigate("home")}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                     currentPage === "home"
-                      ? "bg-teal-950/70 text-teal-300 border border-indigo-900"
+                      ? "bg-teal-950/70 text-teal-300 border border-violet-900"
                       : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   }`}
                 >
@@ -1665,7 +1665,7 @@ setSelectedCategory(categoryId)
                   onClick={() => handleMobileNavigate("articles")}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                     currentPage === "articles" || currentPage === "article"
-                      ? "bg-teal-950/70 text-teal-300 border border-indigo-900"
+                      ? "bg-teal-950/70 text-teal-300 border border-violet-900"
                       : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   }`}
                 >
@@ -1691,7 +1691,7 @@ setSelectedCategory(categoryId)
                     onClick={() => handleMobileNavigate("manage")}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                       currentPage === "manage"
-                        ? "bg-teal-950/70 text-teal-300 border border-indigo-900"
+                        ? "bg-teal-950/70 text-teal-300 border border-violet-900"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
@@ -1709,7 +1709,7 @@ setSelectedCategory(categoryId)
                     onClick={() => handleMobileNavigate("products")}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                       currentPage === "products" || currentPage === "product"
-                        ? "bg-teal-950/70 text-teal-300 border border-indigo-900"
+                        ? "bg-teal-950/70 text-teal-300 border border-violet-900"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
@@ -1735,7 +1735,7 @@ setSelectedCategory(categoryId)
                       onClick={() => handleMobileNavigate("users")}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                         currentPage === "users"
-                          ? "bg-teal-950/70 text-teal-300 border border-indigo-900"
+                          ? "bg-teal-950/70 text-teal-300 border border-violet-900"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
@@ -1749,7 +1749,7 @@ setSelectedCategory(categoryId)
                       onClick={() => handleMobileNavigate("analytics")}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                         currentPage === "analytics"
-                          ? "bg-teal-950/70 text-teal-300 border border-indigo-900"
+                          ? "bg-teal-950/70 text-teal-300 border border-violet-900"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
@@ -1763,7 +1763,7 @@ setSelectedCategory(categoryId)
                       onClick={() => handleMobileNavigate("feedback")}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                         currentPage === "feedback"
-                          ? "bg-teal-950/70 text-teal-300 border border-indigo-900"
+                          ? "bg-teal-950/70 text-teal-300 border border-violet-900"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
@@ -1777,7 +1777,7 @@ setSelectedCategory(categoryId)
                       onClick={() => handleMobileNavigate("audit")}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                         currentPage === "audit"
-                          ? "bg-teal-950/70 text-teal-300 border border-indigo-900"
+                          ? "bg-teal-950/70 text-teal-300 border border-violet-900"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
@@ -1793,7 +1793,7 @@ setSelectedCategory(categoryId)
                   onClick={() => handleMobileNavigate("settings")}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                     currentPage === "settings"
-                      ? "bg-teal-950/70 text-teal-300 border border-indigo-900"
+                      ? "bg-teal-950/70 text-teal-300 border border-violet-900"
                       : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   }`}
                 >
@@ -1858,7 +1858,7 @@ setSelectedCategory(categoryId)
                 }
                 className={`relative w-9 h-9 flex items-center justify-center rounded-lg transition ${
                   notificationsOpen
-                    ? "bg-slate-100 text-indigo-700"
+                    ? "bg-slate-100 text-violet-700"
                     : "text-slate-500 hover:bg-slate-100"
                 }`}
                 aria-label="Notifications"
@@ -1932,7 +1932,7 @@ setSelectedCategory(categoryId)
 
                       <div className="px-5 py-10 text-center">
 
-                        <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
+                        <div className="w-10 h-10 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center mx-auto mb-3">
 
                           <svg
                             viewBox="0 0 24 24"
@@ -1980,7 +1980,7 @@ setSelectedCategory(categoryId)
 
                             <div className="flex gap-3">
 
-                              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0">
+                              <div className="w-8 h-8 rounded-lg bg-violet-50 text-violet-700 flex items-center justify-center shrink-0">
 
                                 {notification.source === "feedback" ? (
 
@@ -2076,7 +2076,7 @@ setSelectedCategory(categoryId)
                         onClick={() =>
                           goTo("manage")
                         }
-                        className="w-full text-center text-xs font-semibold text-indigo-700 hover:text-indigo-800"
+                        className="w-full text-center text-xs font-semibold text-violet-700 hover:text-violet-800"
                       >
                         View all notifications →
                       </button>
@@ -2118,7 +2118,7 @@ setSelectedCategory(categoryId)
               </div>
 
 
-              <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-semibold">
+              <div className="w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center text-xs font-semibold">
 
                 {displayName(user?.username)
                   .substring(0, 2)
@@ -2329,7 +2329,7 @@ setSelectedCategory(categoryId)
 
                 <div className="flex items-center gap-3">
 
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center">
                     <svg
                       viewBox="0 0 24 24"
                       fill="none"
@@ -2383,7 +2383,7 @@ setSelectedCategory(categoryId)
 
                     <div className="flex items-center gap-4 min-w-0">
 
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center text-lg font-bold shrink-0 shadow-sm">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white flex items-center justify-center text-lg font-bold shrink-0 shadow-sm">
                         {(user?.name || user?.email || "U")
                           .charAt(0)
                           .toUpperCase()}
@@ -2405,9 +2405,9 @@ setSelectedCategory(categoryId)
                     </div>
 
 
-                    <span className="inline-flex items-center gap-2 self-start sm:self-center px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 text-xs font-semibold capitalize">
+                    <span className="inline-flex items-center gap-2 self-start sm:self-center px-3 py-1.5 rounded-full bg-violet-50 text-violet-700 border border-violet-100 text-xs font-semibold capitalize">
 
-                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
 
                       {user?.role || "viewer"}
 
@@ -2647,7 +2647,7 @@ setSelectedCategory(categoryId)
                               key={permission}
                               className="flex items-center gap-3 text-sm text-slate-600"
                             >
-                              <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0">
+                              <span className="w-5 h-5 rounded-full bg-violet-50 text-violet-700 flex items-center justify-center shrink-0">
                                 <svg
                                   viewBox="0 0 24 24"
                                   fill="none"
@@ -2679,7 +2679,7 @@ setSelectedCategory(categoryId)
                               key={permission}
                               className="flex items-center gap-3 text-sm text-slate-600"
                             >
-                              <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0">
+                              <span className="w-5 h-5 rounded-full bg-violet-50 text-violet-700 flex items-center justify-center shrink-0">
                                 <svg
                                   viewBox="0 0 24 24"
                                   fill="none"
@@ -2740,7 +2740,7 @@ setSelectedCategory(categoryId)
                               key={permission}
                               className="flex items-center gap-3 text-sm text-slate-600"
                             >
-                              <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0">
+                              <span className="w-5 h-5 rounded-full bg-violet-50 text-violet-700 flex items-center justify-center shrink-0">
                                 <svg
                                   viewBox="0 0 24 24"
                                   fill="none"

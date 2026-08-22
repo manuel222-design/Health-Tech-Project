@@ -315,7 +315,7 @@ export default function Articles({
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
 
           <div>
-            <div className="text-[10px] uppercase tracking-wider font-semibold text-indigo-700 mb-2">
+            <div className="text-[10px] uppercase tracking-wider font-semibold text-violet-700 mb-2">
               Knowledge Centre
             </div>
 
@@ -360,7 +360,7 @@ export default function Articles({
               }, 150)
             }}
             placeholder="Search registration, vitals, laboratory, pharmacy..."
-            className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
           />
 
           {/* AUTOCOMPLETE */}
@@ -376,7 +376,7 @@ export default function Articles({
                       setShowSuggestions(false)
                       handleSuggestionClick(item.slug)
                     }}
-                    className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-indigo-50 border-b border-slate-100 last:border-0 transition"
+                    className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-violet-50 border-b border-slate-100 last:border-0 transition"
                   >
                     {item.title}
                   </button>
@@ -400,7 +400,7 @@ export default function Articles({
             <select
               value={categoryFilter}
               onChange={handleCategoryChange}
-              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
             >
               <option value="">
                 All categories
@@ -428,7 +428,7 @@ export default function Articles({
             <select
               value={tagFilter}
               onChange={handleModuleChange}
-              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
             >
               <option value="">
                 All HMIS modules
@@ -456,7 +456,7 @@ export default function Articles({
             <select
               value={typeFilter}
               onChange={handleContentTypeChange}
-              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
             >
               <option value="">
                 All content types
@@ -499,7 +499,7 @@ export default function Articles({
             <select
               value={productFilter}
               onChange={handleProductChange}
-              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
             >
               <option value="">
                 All products
@@ -550,13 +550,13 @@ export default function Articles({
                 onSelectArticle(article.slug)
               }
             }}
-            className="w-full text-left bg-white border border-slate-200 rounded-xl p-5 cursor-pointer hover:border-teal-300 hover:shadow-md transition group focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            className="w-full text-left bg-white border border-slate-200 rounded-xl p-5 cursor-pointer hover:border-teal-300 hover:shadow-md transition group focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
           >
 
             <div className="flex items-start gap-4">
 
               {/* ARTICLE ICON */}
-              <div className="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition">
+              <div className="w-11 h-11 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center shrink-0 group-hover:bg-violet-600 group-hover:text-white transition">
 
                 <svg
                   viewBox="0 0 24 24"
@@ -581,11 +581,11 @@ export default function Articles({
 
                 <div className="flex items-start justify-between gap-3">
 
-                  <h3 className="font-semibold text-slate-800 group-hover:text-indigo-700 transition">
+                  <h3 className="font-semibold text-slate-800 group-hover:text-violet-700 transition">
                     {article.title}
                   </h3>
 
-                  <span className="text-slate-300 group-hover:text-indigo-600 text-lg shrink-0 transition-transform group-hover:translate-x-1">
+                  <span className="text-slate-300 group-hover:text-violet-600 text-lg shrink-0 transition-transform group-hover:translate-x-1">
                     →
                   </span>
 
@@ -596,7 +596,7 @@ export default function Articles({
                 <div className="flex flex-wrap gap-2 mt-3">
 
                   {article.category_name && (
-                    <span className="text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-100 px-2.5 py-1 rounded-full">
+                    <span className="text-[11px] bg-violet-50 text-violet-700 border border-violet-100 px-2.5 py-1 rounded-full">
                       {article.category_name}
                     </span>
                   )}

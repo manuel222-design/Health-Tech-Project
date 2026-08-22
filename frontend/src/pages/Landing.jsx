@@ -17,7 +17,7 @@ export default function Landing({
 
           <div className="flex items-center gap-3">
 
-            <div className="w-11 h-11 bg-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/15">
+            <div className="w-11 h-11 bg-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/15">
               <span className="font-bold text-lg text-slate-950">
                 TC
               </span>
@@ -74,7 +74,7 @@ export default function Landing({
 
                 <button
                   onClick={onRegister}
-                  className="px-6 py-3.5 bg-indigo-500 hover:bg-teal-400 text-slate-950 rounded-xl font-bold transition shadow-lg shadow-indigo-500/15"
+                  className="px-6 py-3.5 bg-violet-500 hover:bg-teal-400 text-slate-950 rounded-xl font-bold transition shadow-lg shadow-violet-500/15"
                 >
                   Get Started →
                 </button>
@@ -122,7 +122,7 @@ export default function Landing({
                 <div className="flex items-center justify-between">
 
                   <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-indigo-600 font-bold">
+                    <p className="text-xs uppercase tracking-[0.2em] text-violet-600 font-bold">
                       Taifa Care
                     </p>
 
@@ -132,7 +132,7 @@ export default function Landing({
                   </div>
 
                   <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                    <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                    <span className="w-2 h-2 rounded-full bg-violet-500" />
                     Ready
                   </div>
 
@@ -141,13 +141,13 @@ export default function Landing({
 
                 <div className="mt-10">
 
-                  <p className="text-sm font-semibold text-indigo-600 mb-3">
+                  <p className="text-sm font-semibold text-violet-600 mb-3">
                     One trusted place
                   </p>
 
                   <h3 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 leading-tight">
                     Everything connected.
-                    <span className="block text-indigo-600">
+                    <span className="block text-violet-600">
                       One trusted place.
                     </span>
                   </h3>
@@ -201,7 +201,7 @@ export default function Landing({
 
           <div className="text-center mb-10">
 
-            <p className="text-xs uppercase tracking-widest text-indigo-600 font-bold">
+            <p className="text-xs uppercase tracking-widest text-violet-600 font-bold">
               What you can do
             </p>
 
@@ -257,7 +257,7 @@ export default function Landing({
 
           <div className="text-center">
 
-            <p className="text-xs uppercase tracking-widest text-indigo-600 font-bold">
+            <p className="text-xs uppercase tracking-widest text-violet-600 font-bold">
               Explore Taifa Care
             </p>
 
@@ -299,11 +299,11 @@ export default function Landing({
 
 
       {/* CTA */}
-      <section className="bg-indigo-900">
+      <section className="bg-violet-900">
 
         <div className="max-w-5xl mx-auto px-5 sm:px-8 py-14 text-center">
 
-          <div className="inline-flex w-12 h-12 rounded-xl bg-indigo-500/20 border border-teal-400/20 items-center justify-center text-teal-300 text-xl mb-5">
+          <div className="inline-flex w-12 h-12 rounded-xl bg-violet-500/20 border border-teal-400/20 items-center justify-center text-teal-300 text-xl mb-5">
             ✦
           </div>
 
@@ -311,13 +311,13 @@ export default function Landing({
             Ready to go further with Taifa Care?
           </h2>
 
-          <p className="mt-3 text-indigo-100 max-w-xl mx-auto text-sm">
+          <p className="mt-3 text-violet-100 max-w-xl mx-auto text-sm">
             Sign in to access the full knowledge centre, workflows and role-based tools.
           </p>
 
           <button
             onClick={onRegister}
-            className="mt-7 px-7 py-3.5 bg-white text-indigo-800 rounded-xl font-bold hover:bg-indigo-50 transition"
+            className="mt-7 px-7 py-3.5 bg-white text-violet-800 rounded-xl font-bold hover:bg-violet-50 transition"
           >
             Create Your Account →
           </button>
@@ -334,7 +334,7 @@ export default function Landing({
 
           <div className="flex items-center gap-2">
 
-            <div className="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center text-xs font-bold text-slate-950">
+            <div className="w-7 h-7 bg-violet-500 rounded-lg flex items-center justify-center text-xs font-bold text-slate-950">
               TC
             </div>
 
@@ -361,7 +361,7 @@ function HeroCapability({ title, text }) {
   return (
     <div className="rounded-xl bg-slate-50 border border-slate-200 px-3 py-3">
       <div className="flex items-center gap-2">
-        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+        <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
         <span className="text-xs font-semibold text-slate-700">
           {title}
         </span>
@@ -388,7 +388,7 @@ function Feature({
       className="group bg-white border border-slate-200 rounded-xl p-5 text-left hover:border-teal-300 hover:shadow-md transition-all"
     >
 
-      <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center text-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">
+      <div className="w-10 h-10 rounded-lg bg-violet-50 text-violet-700 flex items-center justify-center text-lg mb-4 group-hover:bg-violet-600 group-hover:text-white transition">
         {icon}
       </div>
 
@@ -400,7 +400,7 @@ function Feature({
         {text}
       </p>
 
-      <div className="mt-4 text-xs font-semibold text-indigo-600">
+      <div className="mt-4 text-xs font-semibold text-violet-600">
         {action}
       </div>
 
@@ -423,11 +423,11 @@ function Step({
 
       <div className="flex items-center justify-between">
 
-        <span className="text-xs font-bold tracking-widest text-indigo-600">
+        <span className="text-xs font-bold tracking-widest text-violet-600">
           {number}
         </span>
 
-        <span className="text-slate-300 group-hover:text-indigo-500 transition">
+        <span className="text-slate-300 group-hover:text-violet-500 transition">
           →
         </span>
 

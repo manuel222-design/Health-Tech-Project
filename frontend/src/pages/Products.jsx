@@ -133,8 +133,8 @@ export default function Products({ onSelectProduct }) {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-indigo-500" />
-              <span className="text-[10px] uppercase tracking-wider font-semibold text-indigo-700">
+              <span className="w-2 h-2 rounded-full bg-violet-500" />
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-violet-700">
                 System Catalogue
               </span>
             </div>
@@ -155,7 +155,7 @@ export default function Products({ onSelectProduct }) {
               setShowForm(prev => !prev)
               setError("")
             }}
-            className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition shadow-sm"
+            className="inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition shadow-sm"
           >
             {showForm ? "Cancel" : "+ Add Product"}
           </button>
@@ -193,7 +193,7 @@ export default function Products({ onSelectProduct }) {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="e.g. TaifaCare"
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
               />
             </div>
 
@@ -207,7 +207,7 @@ export default function Products({ onSelectProduct }) {
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Briefly describe the product..."
                 rows={3}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
               />
             </div>
 
@@ -222,7 +222,7 @@ export default function Products({ onSelectProduct }) {
                   value={version}
                   onChange={e => setVersion(e.target.value)}
                   placeholder="e.g. 1.0"
-                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                 />
               </div>
 
@@ -236,7 +236,7 @@ export default function Products({ onSelectProduct }) {
                   value={icon}
                   onChange={e => setIcon(e.target.value)}
                   placeholder="e.g. health"
-                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                 />
 
                 <p className="text-[11px] text-slate-400 mt-1">
@@ -261,7 +261,7 @@ export default function Products({ onSelectProduct }) {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium disabled:opacity-50 transition"
+                className="px-4 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium disabled:opacity-50 transition"
               >
                 {saving ? "Creating..." : "Create Product"}
               </button>
@@ -293,7 +293,7 @@ export default function Products({ onSelectProduct }) {
         <div>
           {loading ? (
             <div className="py-20 text-center">
-              <div className="w-9 h-9 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-3" />
+              <div className="w-9 h-9 border-4 border-violet-100 border-t-violet-600 rounded-full animate-spin mx-auto mb-3" />
               <p className="text-sm text-slate-400">
                 Loading products...
               </p>
@@ -329,7 +329,7 @@ export default function Products({ onSelectProduct }) {
                     }
                     className={`group relative overflow-hidden text-left rounded-2xl border shadow-sm hover:-translate-y-0.5 hover:shadow-lg transition duration-200 ${
                       isPrimary
-                        ? "bg-gradient-to-br from-indigo-50 via-white to-white border-indigo-100"
+                        ? "bg-gradient-to-br from-violet-50 via-white to-white border-violet-100"
                         : "bg-gradient-to-br from-slate-50 via-white to-white border-slate-200"
                     }`}
                   >
@@ -338,8 +338,8 @@ export default function Products({ onSelectProduct }) {
                     <div
                       className={`absolute top-0 left-0 right-0 h-1 ${
                         isPrimary
-                          ? "bg-indigo-500"
-                          : "bg-indigo-500"
+                          ? "bg-violet-500"
+                          : "bg-violet-500"
                       }`}
                     />
 
@@ -353,8 +353,8 @@ export default function Products({ onSelectProduct }) {
                           <div
                             className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition ${
                               isPrimary
-                                ? "bg-indigo-100 text-indigo-700 group-hover:bg-indigo-600 group-hover:text-white"
-                                : "bg-indigo-50 text-indigo-700 group-hover:bg-indigo-600 group-hover:text-white"
+                                ? "bg-violet-100 text-violet-700 group-hover:bg-violet-600 group-hover:text-white"
+                                : "bg-violet-50 text-violet-700 group-hover:bg-violet-600 group-hover:text-white"
                             }`}
                           >
                             <ProductIcon
@@ -370,8 +370,8 @@ export default function Products({ onSelectProduct }) {
                               <h3
                                 className={`text-lg font-bold transition ${
                                   isPrimary
-                                    ? "text-slate-800 group-hover:text-indigo-700"
-                                    : "text-slate-800 group-hover:text-indigo-700"
+                                    ? "text-slate-800 group-hover:text-violet-700"
+                                    : "text-slate-800 group-hover:text-violet-700"
                                 }`}
                               >
                                 {product.name}
@@ -380,8 +380,8 @@ export default function Products({ onSelectProduct }) {
                               <span
                                 className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${
                                   isPrimary
-                                    ? "bg-indigo-50 text-indigo-700 border-indigo-100"
-                                    : "bg-indigo-50 text-indigo-700 border-indigo-100"
+                                    ? "bg-violet-50 text-violet-700 border-violet-100"
+                                    : "bg-violet-50 text-violet-700 border-violet-100"
                                 }`}
                               >
                                 v{product.version || "N/A"}
@@ -416,8 +416,8 @@ export default function Products({ onSelectProduct }) {
                         <span
                           className={`text-xl shrink-0 transition-transform group-hover:translate-x-1 ${
                             isPrimary
-                              ? "text-teal-300 group-hover:text-indigo-600"
-                              : "text-indigo-200 group-hover:text-indigo-600"
+                              ? "text-teal-300 group-hover:text-violet-600"
+                              : "text-violet-200 group-hover:text-violet-600"
                           }`}
                         >
                           →
@@ -443,8 +443,8 @@ export default function Products({ onSelectProduct }) {
                           <span
                             className={`text-xs font-semibold transition ${
                               isPrimary
-                                ? "text-indigo-700"
-                                : "text-indigo-700"
+                                ? "text-violet-700"
+                                : "text-violet-700"
                             }`}
                           >
                             View product →

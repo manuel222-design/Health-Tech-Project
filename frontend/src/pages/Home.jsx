@@ -20,7 +20,7 @@ export default function Home({
     return (
       <div className="flex items-center justify-center py-24">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-4 border-violet-100 border-t-violet-600 rounded-full animate-spin mx-auto mb-4" />
 
           <p className="text-sm text-slate-500">
             Loading Knowledge Centre...
@@ -80,9 +80,9 @@ export default function Home({
       {/* =====================================================
           HERO
       ===================================================== */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-950 via-indigo-800 to-emerald-700 text-white shadow-lg">
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-950 via-violet-800 to-emerald-700 text-white shadow-lg">
 
-        <div className="absolute -right-28 -top-24 w-96 h-96 rounded-full bg-indigo-500/18 blur-3xl" />
+        <div className="absolute -right-28 -top-24 w-96 h-96 rounded-full bg-violet-500/18 blur-3xl" />
         <div className="absolute right-20 -bottom-24 w-64 h-64 rounded-full bg-slate-900/15 blur-3xl" />
         <div className="absolute -left-20 -bottom-24 w-64 h-64 rounded-full bg-teal-300/10 blur-3xl" />
         <div className="absolute left-1/2 -top-20 w-48 h-48 rounded-full bg-white/5 blur-3xl" />
@@ -95,9 +95,9 @@ export default function Home({
 
               <div className="inline-flex items-center gap-2 mb-3">
 
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-200" />
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-200" />
 
-                <span className="text-[10px] uppercase tracking-[0.16em] text-indigo-100 font-semibold">
+                <span className="text-[10px] uppercase tracking-[0.16em] text-violet-100 font-semibold">
                   Taifa Care Knowledge Centre
                 </span>
 
@@ -107,7 +107,7 @@ export default function Home({
                 Welcome back, {username}
               </h1>
 
-              <p className="text-sm sm:text-base text-indigo-50 mt-3 max-w-2xl leading-relaxed">
+              <p className="text-sm sm:text-base text-violet-50 mt-3 max-w-2xl leading-relaxed">
                 Find trusted healthcare knowledge, practical workflows,
                 and the assistance you need to work confidently.
               </p>
@@ -123,7 +123,7 @@ export default function Home({
                         behavior: "smooth",
                       })
                   }
-                  className="inline-flex items-center justify-center gap-2 bg-white text-indigo-800 font-semibold px-5 py-3 rounded-xl shadow-sm hover:bg-indigo-50 transition"
+                  className="inline-flex items-center justify-center gap-2 bg-white text-violet-800 font-semibold px-5 py-3 rounded-xl shadow-sm hover:bg-violet-50 transition"
                 >
                   Explore Knowledge Base
                   <span>→</span>
@@ -155,7 +155,7 @@ export default function Home({
                   {totalArticles}
                 </div>
 
-                <div className="text-[10px] uppercase tracking-wide text-indigo-100 mt-0.5">
+                <div className="text-[10px] uppercase tracking-wide text-violet-100 mt-0.5">
                   Guides
                 </div>
 
@@ -171,7 +171,7 @@ export default function Home({
                   {categories.length}
                 </div>
 
-                <div className="text-[10px] uppercase tracking-wide text-indigo-100 mt-0.5">
+                <div className="text-[10px] uppercase tracking-wide text-violet-100 mt-0.5">
                   Areas
                 </div>
 
@@ -194,7 +194,7 @@ export default function Home({
         {/* PRIMARY METRIC */}
         <div className="lg:col-span-2">
 
-          <div className="relative overflow-hidden h-full min-h-[190px] rounded-2xl bg-gradient-to-br from-indigo-700 via-indigo-600 to-cyan-600 text-white p-6 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
+          <div className="relative overflow-hidden h-full min-h-[190px] rounded-2xl bg-gradient-to-br from-violet-700 via-violet-600 to-cyan-600 text-white p-6 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
 
             <div className="absolute -right-10 -top-10 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
 
@@ -204,9 +204,9 @@ export default function Home({
 
                 <div className="flex items-center gap-2">
 
-                  <span className="w-2 h-2 rounded-full bg-indigo-200" />
+                  <span className="w-2 h-2 rounded-full bg-violet-200" />
 
-                  <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-indigo-50">
+                  <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-violet-50">
                     Published Guides
                   </span>
 
@@ -216,7 +216,7 @@ export default function Home({
                   {totalArticles}
                 </div>
 
-                <p className="text-sm text-indigo-50 mt-1">
+                <p className="text-sm text-violet-50 mt-1">
                   Ready to explore
                 </p>
 
@@ -232,7 +232,7 @@ export default function Home({
                       behavior: "smooth",
                     })
                 }
-                className="self-start mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-indigo-100 transition"
+                className="self-start mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-violet-100 transition"
               >
                 Explore guides
                 <span className="transition-transform group-hover:translate-x-1">
@@ -322,7 +322,7 @@ export default function Home({
         {/* PRODUCT VERSION */}
         <div className="lg:col-span-2">
 
-          <div className="relative overflow-hidden min-h-[150px] rounded-2xl bg-gradient-to-br from-indigo-50/80 via-white to-white border border-indigo-100 border-t-2 border-t-indigo-500 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
+          <div className="relative overflow-hidden min-h-[150px] rounded-2xl bg-gradient-to-br from-violet-50/80 via-white to-white border border-violet-100 border-t-2 border-t-violet-500 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
 
@@ -330,7 +330,7 @@ export default function Home({
 
                 <div className="flex items-center gap-2">
 
-                  <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                  <span className="w-2 h-2 rounded-full bg-violet-500" />
 
                   <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500 font-bold">
                     Product Version
@@ -338,7 +338,7 @@ export default function Home({
 
                 </div>
 
-                <div className="text-3xl font-bold text-indigo-700 mt-5">
+                <div className="text-3xl font-bold text-violet-700 mt-5">
                   v1.0
                 </div>
 
@@ -360,7 +360,7 @@ export default function Home({
                 </p>
 
                 {emptyCategories > 0 && (
-                  <p className="text-[11px] text-indigo-700 mt-2">
+                  <p className="text-[11px] text-violet-700 mt-2">
                     {emptyCategories} area{emptyCategories !== 1 ? "s" : ""} expanding
                   </p>
                 )}
@@ -387,9 +387,9 @@ export default function Home({
           <div>
 
             <div className="inline-flex items-center gap-2 mb-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
 
-              <span className="text-[10px] uppercase tracking-wider text-indigo-700 font-semibold">
+              <span className="text-[10px] uppercase tracking-wider text-violet-700 font-semibold">
                 Activity
               </span>
             </div>
@@ -442,7 +442,7 @@ export default function Home({
               data?.today_activity?.published_guides || 0
             }
             description="Guides published today"
-            iconClass="bg-indigo-50 text-indigo-700"
+            iconClass="bg-violet-50 text-violet-700"
             icon={
               <svg
                 viewBox="0 0 24 24"
@@ -502,9 +502,9 @@ export default function Home({
           <div>
 
             <div className="inline-flex items-center gap-2 mb-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
 
-              <span className="text-[10px] uppercase tracking-wider text-indigo-700 font-semibold">
+              <span className="text-[10px] uppercase tracking-wider text-violet-700 font-semibold">
                 Knowledge
               </span>
             </div>
@@ -567,20 +567,20 @@ export default function Home({
                   featuredArticles[0].slug
                 )
               }
-              className="group text-left p-6 sm:p-7 bg-gradient-to-br from-indigo-50 via-white to-white hover:from-indigo-100/70 transition border-b lg:border-b-0 lg:border-r border-slate-200"
+              className="group text-left p-6 sm:p-7 bg-gradient-to-br from-violet-50 via-white to-white hover:from-violet-100/70 transition border-b lg:border-b-0 lg:border-r border-slate-200"
             >
 
               <div className="flex items-center justify-between gap-3">
 
-                <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-wider font-semibold text-indigo-700 bg-white/80 border border-indigo-100 px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-wider font-semibold text-violet-700 bg-white/80 border border-violet-100 px-2.5 py-1 rounded-full">
 
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
 
                   Featured Guide
 
                 </span>
 
-                <span className="text-slate-300 group-hover:text-indigo-600 transition">
+                <span className="text-slate-300 group-hover:text-violet-600 transition">
                   →
                 </span>
 
@@ -588,7 +588,7 @@ export default function Home({
 
               <div className="mt-8">
 
-                <div className="w-11 h-11 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">
+                <div className="w-11 h-11 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center mb-4 group-hover:bg-violet-600 group-hover:text-white transition">
 
                   <svg
                     viewBox="0 0 24 24"
@@ -607,7 +607,7 @@ export default function Home({
 
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-800 leading-tight group-hover:text-indigo-700 transition">
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-800 leading-tight group-hover:text-violet-700 transition">
                   {featuredArticles[0].title}
                 </h3>
 
@@ -621,7 +621,7 @@ export default function Home({
 
                   {featuredArticles[0].category_name && (
                     <>
-                      <span className="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full border border-indigo-100">
+                      <span className="text-xs bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full border border-violet-100">
                         {featuredArticles[0].category_name}
                       </span>
 
@@ -654,7 +654,7 @@ export default function Home({
                     •
                   </span>
 
-                  <span className="text-xs font-semibold text-indigo-700">
+                  <span className="text-xs font-semibold text-violet-700">
                     Read guide →
                   </span>
 
@@ -694,7 +694,7 @@ export default function Home({
                     className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-slate-50 transition group"
                   >
 
-                    <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-700 transition">
+                    <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0 group-hover:bg-violet-50 group-hover:text-violet-700 transition">
 
                       <svg
                         viewBox="0 0 24 24"
@@ -715,7 +715,7 @@ export default function Home({
 
                     <div className="min-w-0 flex-1">
 
-                      <p className="text-sm font-medium text-slate-700 truncate group-hover:text-indigo-700 transition">
+                      <p className="text-sm font-medium text-slate-700 truncate group-hover:text-violet-700 transition">
                         {article.title}
                       </p>
 
@@ -723,7 +723,7 @@ export default function Home({
 
                         {article.category_name && (
                           <>
-                            <span className="text-[10px] text-indigo-600">
+                            <span className="text-[10px] text-violet-600">
                               {article.category_name}
                             </span>
 
@@ -751,7 +751,7 @@ export default function Home({
 
                     </div>
 
-                    <span className="text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition">
+                    <span className="text-slate-300 group-hover:text-violet-600 group-hover:translate-x-0.5 transition">
                       →
                     </span>
 
@@ -787,9 +787,9 @@ export default function Home({
           <div>
 
             <div className="inline-flex items-center gap-2 mb-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
 
-              <span className="text-[10px] uppercase tracking-wider text-indigo-700 font-semibold">
+              <span className="text-[10px] uppercase tracking-wider text-violet-700 font-semibold">
                 Taxonomy
               </span>
             </div>
@@ -829,7 +829,7 @@ export default function Home({
                 }
                 className={`group relative overflow-hidden bg-white border rounded-xl p-5 text-left shadow-sm transition-all ${
                   hasContent
-                    ? "border-slate-200 border-l-2 border-l-indigo-100 hover:border-indigo-200 hover:border-l-indigo-500 hover:shadow-md hover:-translate-y-0.5"
+                    ? "border-slate-200 border-l-2 border-l-violet-100 hover:border-violet-200 hover:border-l-violet-500 hover:shadow-md hover:-translate-y-0.5"
                     : "border-slate-200 border-l-2 border-l-slate-100 hover:border-slate-300 hover:shadow-sm"
                 }`}
               >
@@ -839,7 +839,7 @@ export default function Home({
                   <div
                     className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 transition ${
                       hasContent
-                        ? "bg-indigo-50 text-indigo-700 group-hover:bg-indigo-600 group-hover:text-white"
+                        ? "bg-violet-50 text-violet-700 group-hover:bg-violet-600 group-hover:text-white"
                         : "bg-slate-100 text-slate-400"
                     }`}
                   >
@@ -849,7 +849,7 @@ export default function Home({
                   <span
                     className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${
                       hasContent
-                        ? "bg-indigo-50 border-indigo-100 text-indigo-700"
+                        ? "bg-violet-50 border-violet-100 text-violet-700"
                         : "bg-slate-50 border-slate-200 text-slate-400"
                     }`}
                   >
@@ -861,7 +861,7 @@ export default function Home({
                 <h3
                   className={`font-semibold mt-4 transition ${
                     hasContent
-                      ? "text-slate-800 group-hover:text-indigo-700"
+                      ? "text-slate-800 group-hover:text-violet-700"
                       : "text-slate-600"
                   }`}
                 >
@@ -884,7 +884,7 @@ export default function Home({
                   <span
                     className={`text-xs font-semibold ${
                       hasContent
-                        ? "text-indigo-600"
+                        ? "text-violet-600"
                         : "text-slate-400"
                     }`}
                   >
@@ -907,14 +907,14 @@ export default function Home({
       ===================================================== */}
       <section className="relative overflow-hidden rounded-xl bg-slate-900 border border-slate-800 px-6 py-7 sm:px-8">
 
-        <div className="absolute -right-8 -top-10 w-32 h-32 rounded-full bg-indigo-500/10" />
+        <div className="absolute -right-8 -top-10 w-32 h-32 rounded-full bg-violet-500/10" />
         <div className="absolute -right-3 -bottom-12 w-24 h-24 rounded-full bg-cyan-400/10" />
 
         <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
           <div className="flex items-start gap-4 max-w-3xl">
 
-            <div className="w-11 h-11 rounded-xl bg-indigo-500/15 text-teal-300 border border-teal-400/20 flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-xl bg-violet-500/15 text-teal-300 border border-teal-400/20 flex items-center justify-center shrink-0">
 
               <svg
                 viewBox="0 0 24 24"
@@ -963,7 +963,7 @@ export default function Home({
                 window.openTaifaCareAssistant()
               }
             }}
-            className="shrink-0 inline-flex items-center justify-center gap-2 bg-indigo-500 hover:bg-teal-400 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition"
+            className="shrink-0 inline-flex items-center justify-center gap-2 bg-violet-500 hover:bg-teal-400 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition"
           >
             Ask the AI Assistant
             <span>→</span>
@@ -1179,10 +1179,10 @@ function SummaryCard({
   description,
 }) {
   const accentMap = {
-    "border-t-indigo-500": {
-      dot: "bg-indigo-500",
-      surface: "from-indigo-50/80",
-      number: "text-indigo-700",
+    "border-t-violet-500": {
+      dot: "bg-violet-500",
+      surface: "from-violet-50/80",
+      number: "text-violet-700",
     },
 
     "border-t-blue-500": {

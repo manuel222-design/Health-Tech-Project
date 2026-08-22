@@ -244,13 +244,13 @@ export default function Login({ onLogin, onShowRegister }) {
 
   if (view === "forgot") {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-indigo-700 to-blue-800 flex items-center justify-center p-4">
+      <main className="min-h-screen bg-gradient-to-br from-violet-700 to-blue-800 flex items-center justify-center p-4">
 
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
 
           <div className="text-center mb-8">
 
-            <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <span className="text-white text-2xl font-bold">
                 TC
               </span>
@@ -273,7 +273,7 @@ export default function Login({ onLogin, onShowRegister }) {
           )}
 
           {message && (
-            <div className="bg-indigo-50 border border-indigo-200 text-indigo-800 px-4 py-3 rounded-lg mb-5 text-sm">
+            <div className="bg-violet-50 border border-violet-200 text-violet-800 px-4 py-3 rounded-lg mb-5 text-sm">
               {message}
             </div>
           )}
@@ -298,7 +298,7 @@ export default function Login({ onLogin, onShowRegister }) {
                   }
                   placeholder="you@example.com"
                   autoComplete="email"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                   required
                 />
 
@@ -307,7 +307,7 @@ export default function Login({ onLogin, onShowRegister }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+                className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
               >
                 {loading
                   ? "Sending..."
@@ -340,7 +340,7 @@ export default function Login({ onLogin, onShowRegister }) {
                     )
                   }
                   placeholder="Enter 6-digit code"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm tracking-[0.35em] text-center focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm tracking-[0.35em] text-center focus:outline-none focus:ring-2 focus:ring-violet-500"
                   required
                 />
 
@@ -370,7 +370,7 @@ export default function Login({ onLogin, onShowRegister }) {
                     }
                     placeholder="At least 8 characters"
                     autoComplete="new-password"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                     required
                   />
 
@@ -381,7 +381,7 @@ export default function Login({ onLogin, onShowRegister }) {
                         prev => !prev
                       )
                     }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 transition"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-violet-600 transition"
                     aria-label={
                       showNewPassword
                         ? "Hide password"
@@ -411,7 +411,7 @@ export default function Login({ onLogin, onShowRegister }) {
                   }
                   placeholder="Repeat your new password"
                   autoComplete="new-password"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                   required
                 />
 
@@ -420,7 +420,7 @@ export default function Login({ onLogin, onShowRegister }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+                className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
               >
                 {loading
                   ? "Resetting..."
@@ -433,7 +433,7 @@ export default function Login({ onLogin, onShowRegister }) {
           <button
             type="button"
             onClick={backToLogin}
-            className="w-full text-indigo-700 hover:text-indigo-800 text-sm font-medium py-2 mt-4"
+            className="w-full text-violet-700 hover:text-violet-800 text-sm font-medium py-2 mt-4"
           >
             ← Back to sign in
           </button>
@@ -449,13 +449,13 @@ export default function Login({ onLogin, onShowRegister }) {
      ========================= */
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-700 to-blue-800 flex items-center justify-center p-4">
+    <main className="min-h-screen bg-gradient-to-br from-violet-700 to-blue-800 flex items-center justify-center p-4">
 
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
 
         <div className="text-center mb-8">
 
-          <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white text-2xl font-bold">
               TC
             </span>
@@ -478,7 +478,7 @@ export default function Login({ onLogin, onShowRegister }) {
         )}
 
         {message && (
-          <div className="bg-indigo-50 border border-indigo-200 text-indigo-800 px-4 py-3 rounded-lg mb-5 text-sm">
+          <div className="bg-violet-50 border border-violet-200 text-violet-800 px-4 py-3 rounded-lg mb-5 text-sm">
             {message}
           </div>
         )}
@@ -502,7 +502,7 @@ export default function Login({ onLogin, onShowRegister }) {
               }
               placeholder="Email address"
               autoComplete="email"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               required
             />
 
@@ -529,7 +529,7 @@ export default function Login({ onLogin, onShowRegister }) {
                 }
                 placeholder="Password"
                 autoComplete="current-password"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                 required
               />
 
@@ -538,7 +538,7 @@ export default function Login({ onLogin, onShowRegister }) {
                 onClick={() =>
                   setShowPassword(prev => !prev)
                 }
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 transition"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-violet-600 transition"
                 aria-label={
                   showPassword
                     ? "Hide password"
@@ -558,7 +558,7 @@ export default function Login({ onLogin, onShowRegister }) {
               <button
                 type="button"
                 onClick={openForgotPassword}
-                className="text-xs font-semibold text-indigo-700 hover:text-indigo-800 transition"
+                className="text-xs font-semibold text-violet-700 hover:text-violet-800 transition"
               >
                 Forgot password?
               </button>
@@ -571,7 +571,7 @@ export default function Login({ onLogin, onShowRegister }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading
               ? "Signing in..."
@@ -584,7 +584,7 @@ export default function Login({ onLogin, onShowRegister }) {
         <button
           type="button"
           onClick={onShowRegister}
-          className="w-full mt-4 text-indigo-700 hover:text-indigo-800 text-sm font-medium py-2"
+          className="w-full mt-4 text-violet-700 hover:text-violet-800 text-sm font-medium py-2"
         >
           Don't have an account? Create one
         </button>

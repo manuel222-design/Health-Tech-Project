@@ -89,7 +89,7 @@ export default function ChatEmbed() {
   return (
     <main className="h-screen bg-white flex flex-col">
 
-      <header className="bg-indigo-700 text-white px-4 py-3 shrink-0">
+      <header className="bg-violet-700 text-white px-4 py-3 shrink-0">
 
         <div className="flex items-center gap-3">
 
@@ -102,7 +102,7 @@ export default function ChatEmbed() {
               Taifa Care Knowledge Assistant
             </h1>
 
-            <p className="text-[11px] text-indigo-100 mt-0.5">
+            <p className="text-[11px] text-violet-100 mt-0.5">
               HMIS knowledge-base support
             </p>
           </div>
@@ -127,7 +127,7 @@ export default function ChatEmbed() {
             <div
               className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
                 message.role === "user"
-                  ? "bg-indigo-600 text-white rounded-br-md"
+                  ? "bg-violet-600 text-white rounded-br-md"
                   : "bg-slate-100 text-slate-800 rounded-bl-md"
               }`}
             >
@@ -159,7 +159,7 @@ export default function ChatEmbed() {
                           href={`/article/${source.slug}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="block text-xs text-indigo-700 hover:text-indigo-800 hover:underline"
+                          className="block text-xs text-violet-700 hover:text-violet-800 hover:underline"
                         >
                           📄 {source.title}
                         </a>
@@ -248,13 +248,13 @@ export default function ChatEmbed() {
               }
             }}
             placeholder="Ask about Taifa Care..."
-            className="flex-1 min-w-0 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="flex-1 min-w-0 border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
           />
 
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50 transition"
+            className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50 transition"
           >
             Send
           </button>
