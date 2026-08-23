@@ -84,7 +84,7 @@ export default function Home({
 
         <div className="absolute -right-28 -top-24 w-96 h-96 rounded-full bg-violet-500/18 blur-3xl" />
         <div className="absolute right-20 -bottom-24 w-64 h-64 rounded-full bg-slate-900/15 blur-3xl" />
-        <div className="absolute -left-20 -bottom-24 w-64 h-64 rounded-full bg-teal-300/10 blur-3xl" />
+        <div className="absolute -left-20 -bottom-24 w-64 h-64 rounded-full bg-violet-300/10 blur-3xl" />
         <div className="absolute left-1/2 -top-20 w-48 h-48 rounded-full bg-white/5 blur-3xl" />
 
         <div className="relative px-6 py-8 sm:px-9 sm:py-9">
@@ -914,7 +914,7 @@ export default function Home({
 
           <div className="flex items-start gap-4 max-w-3xl">
 
-            <div className="w-11 h-11 rounded-xl bg-violet-500/15 text-teal-300 border border-teal-400/20 flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-xl bg-violet-500/15 text-violet-300 border border-violet-400/20 flex items-center justify-center shrink-0">
 
               <svg
                 viewBox="0 0 24 24"
@@ -936,7 +936,7 @@ export default function Home({
 
               <div className="inline-flex items-center gap-2 mb-1.5">
 
-                <span className="text-[10px] uppercase tracking-[0.14em] text-teal-300 font-semibold">
+                <span className="text-[10px] uppercase tracking-[0.14em] text-violet-300 font-semibold">
                   TaifaCare AI Assistant
                 </span>
 
@@ -963,7 +963,7 @@ export default function Home({
                 window.openTaifaCareAssistant()
               }
             }}
-            className="shrink-0 inline-flex items-center justify-center gap-2 bg-violet-500 hover:bg-teal-400 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition"
+            className="shrink-0 inline-flex items-center justify-center gap-2 bg-violet-500 hover:bg-violet-400 text-slate-950 font-semibold px-4 py-2.5 rounded-lg shadow-sm transition"
           >
             Ask the AI Assistant
             <span>→</span>
@@ -977,10 +977,6 @@ export default function Home({
   )
 }
 
-
-/* ============================================================
-   CATEGORY ICONS
-   ============================================================ */
 
 function CategoryIcon({ name }) {
   const value = (name || "").toLowerCase()
@@ -1127,10 +1123,6 @@ function CategoryIcon({ name }) {
 }
 
 
-/* ============================================================
-   ACTIVITY CARD
-   ============================================================ */
-
 function ActivityCard({
   label,
   value,
@@ -1167,10 +1159,6 @@ function ActivityCard({
   )
 }
 
-
-/* ============================================================
-   SUMMARY CARD
-   ============================================================ */
 
 function SummaryCard({
   accentClass = "border-t-slate-300",

@@ -221,7 +221,6 @@ def test_migrated_editor_login_success():
 def test_editor_cannot_approve_pending_article():
     """Editor must not be allowed to approve an article pending review."""
 
-    # Login as admin to create the test article
     admin_login = client.post("/api/v1/auth/login", json={
         "email": "admin@healthtech.co.ke",
         "password": "Admin@1234"
@@ -246,7 +245,6 @@ def test_editor_cannot_approve_pending_article():
     assert create_response.status_code == 201
     assert create_response.json()["status"] == "pending_review"
 
-    # Login as Editor
     editor_login = client.post("/api/v1/auth/login", json={
         "email": "sme@healthtech.co.ke",
         "password": "SME@1234"
@@ -255,7 +253,6 @@ def test_editor_cannot_approve_pending_article():
     assert editor_login.status_code == 200
     editor_token = editor_login.json()["access_token"]
 
-    # Editor approves the article
     approve_response = client.post(
         f"/api/v1/articles/{slug}/approve",
         headers={"Authorization": f"Bearer {editor_token}"}
@@ -292,7 +289,6 @@ def test_editor_cannot_reject_pending_article():
     assert create_response.status_code == 201
     assert create_response.json()["status"] == "pending_review"
 
-    # Login as Editor
     editor_login = client.post("/api/v1/auth/login", json={
         "email": "sme@healthtech.co.ke",
         "password": "SME@1234"
@@ -339,6 +335,3 @@ def test_viewer_cannot_approve_article():
 
     assert create_response.status_code == 201
 
-    # We don't have an editor account guaranteed by the seed,
-    # so this test verifies the endpoint rejects a viewer/admin mismatch
-    # through the role-protected dependency using an existing viewer token.

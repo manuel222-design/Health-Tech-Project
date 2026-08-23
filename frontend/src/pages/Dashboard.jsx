@@ -63,7 +63,7 @@ export default function Dashboard({ user, onSelectArticle, onGoToArticles }) {
             <button
               key={c.id}
               onClick={onGoToArticles}
-              className="bg-white border border-gray-200 hover:border-teal-400 rounded-xl p-4 text-left transition"
+              className="bg-white border border-gray-200 hover:border-violet-400 rounded-xl p-4 text-left transition"
             >
               <p className="font-medium text-gray-800 text-sm">{c.name}</p>
               {c.description && (
@@ -89,7 +89,7 @@ export default function Dashboard({ user, onSelectArticle, onGoToArticles }) {
             <div
               key={a.id}
               onClick={() => onSelectArticle(a.slug)}
-              className="bg-white border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-teal-400 transition flex items-center justify-between"
+              className="bg-white border border-gray-200 rounded-xl p-4 cursor-pointer hover:border-violet-400 transition flex items-center justify-between"
             >
               <span className="text-sm text-gray-800 font-medium">{a.title}</span>
               <span className="text-xs text-violet-600 bg-violet-50 border border-violet-200 rounded-full px-2.5 py-0.5 shrink-0 ml-3">

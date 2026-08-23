@@ -550,7 +550,7 @@ export default function Articles({
                 onSelectArticle(article.slug)
               }
             }}
-            className="w-full text-left bg-white border border-slate-200 rounded-xl p-5 cursor-pointer hover:border-teal-300 hover:shadow-md transition group focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+            className="w-full text-left bg-white border border-slate-200 rounded-xl p-5 cursor-pointer hover:border-violet-300 hover:shadow-md transition group focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
           >
 
             <div className="flex items-start gap-4">

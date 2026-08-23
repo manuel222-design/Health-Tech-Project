@@ -237,7 +237,6 @@ class Media(Base):
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
 
 
-# PASSWORD RESET OTP MODEL
 class PasswordResetOTP(Base):
     __tablename__ = "password_reset_otps"
 

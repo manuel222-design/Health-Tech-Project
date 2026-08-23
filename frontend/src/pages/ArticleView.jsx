@@ -561,7 +561,7 @@ export default function ArticleView({
                   ),
 
                   blockquote: ({ children }) => (
-                    <blockquote className="border-l-4 border-teal-400 bg-violet-50 rounded-r-xl px-5 py-4 my-6 text-sm text-violet-900">
+                    <blockquote className="border-l-4 border-violet-400 bg-violet-50 rounded-r-xl px-5 py-4 my-6 text-sm text-violet-900">
                       {children}
                     </blockquote>
                   ),

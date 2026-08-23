@@ -9,7 +9,7 @@ export default function Landing({
       {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 text-white">
 
-        <div className="absolute -top-44 -right-44 w-[520px] h-[520px] rounded-full bg-teal-400/10 blur-3xl" />
+        <div className="absolute -top-44 -right-44 w-[520px] h-[520px] rounded-full bg-violet-400/10 blur-3xl" />
         <div className="absolute bottom-0 -left-48 w-[420px] h-[420px] rounded-full bg-cyan-400/5 blur-3xl" />
 
         {/* Navigation */}
@@ -36,7 +36,7 @@ export default function Landing({
           </div>
 
           <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400">
-            <span className="w-2 h-2 rounded-full bg-teal-400" />
+            <span className="w-2 h-2 rounded-full bg-violet-400" />
             Healthcare knowledge &amp; assistance
           </div>
 
@@ -51,14 +51,14 @@ export default function Landing({
             {/* LEFT */}
             <div>
 
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-teal-400/20 bg-teal-400/10 text-teal-300 text-xs font-semibold mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-violet-400/20 bg-violet-400/10 text-violet-300 text-xs font-semibold mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
                 TAIFA CARE KNOWLEDGE CENTRE
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.07]">
                 Smarter healthcare.
-                <span className="block text-teal-400 mt-1">
+                <span className="block text-violet-400 mt-1">
                   Better information.
                 </span>
               </h1>
@@ -74,14 +74,14 @@ export default function Landing({
 
                 <button
                   onClick={onRegister}
-                  className="px-6 py-3.5 bg-violet-500 hover:bg-teal-400 text-slate-950 rounded-xl font-bold transition shadow-lg shadow-violet-500/15"
+                  className="px-6 py-3.5 bg-violet-500 hover:bg-violet-400 text-slate-950 rounded-xl font-bold transition shadow-lg shadow-violet-500/15"
                 >
                   Get Started →
                 </button>
 
                 <button
                   onClick={onLogin}
-                  className="px-6 py-3.5 border border-slate-600 hover:border-teal-400 hover:bg-white/5 text-white rounded-xl font-semibold transition"
+                  className="px-6 py-3.5 border border-slate-600 hover:border-violet-400 hover:bg-white/5 text-white rounded-xl font-semibold transition"
                 >
                   Sign in
                 </button>
@@ -93,17 +93,17 @@ export default function Landing({
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-slate-400">
 
                 <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
                   Trusted knowledge
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
                   Practical workflows
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
                   AI assistance
                 </div>
 
@@ -115,7 +115,7 @@ export default function Landing({
             {/* RIGHT HERO CARD */}
             <div className="relative">
 
-              <div className="absolute -inset-5 bg-teal-300/10 blur-3xl rounded-full" />
+              <div className="absolute -inset-5 bg-violet-300/10 blur-3xl rounded-full" />
 
               <div className="relative bg-white rounded-3xl border border-slate-200 shadow-2xl p-7 sm:p-8">
 
@@ -179,7 +179,7 @@ export default function Landing({
                   onClick={onOpenAssistant}
                   className="w-full mt-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-4 py-3.5 text-sm font-semibold transition flex items-center justify-center gap-2"
                 >
-                  <span className="text-teal-400">✦</span>
+                  <span className="text-violet-400">✦</span>
                   Ask the Taifa Care Assistant
                 </button>
 
@@ -303,7 +303,7 @@ export default function Landing({
 
         <div className="max-w-5xl mx-auto px-5 sm:px-8 py-14 text-center">
 
-          <div className="inline-flex w-12 h-12 rounded-xl bg-violet-500/20 border border-teal-400/20 items-center justify-center text-teal-300 text-xl mb-5">
+          <div className="inline-flex w-12 h-12 rounded-xl bg-violet-500/20 border border-violet-400/20 items-center justify-center text-violet-300 text-xl mb-5">
             ✦
           </div>
 
@@ -385,7 +385,7 @@ function Feature({
   return (
     <button
       onClick={onClick}
-      className="group bg-white border border-slate-200 rounded-xl p-5 text-left hover:border-teal-300 hover:shadow-md transition-all"
+      className="group bg-white border border-slate-200 rounded-xl p-5 text-left hover:border-violet-300 hover:shadow-md transition-all"
     >
 
       <div className="w-10 h-10 rounded-lg bg-violet-50 text-violet-700 flex items-center justify-center text-lg mb-4 group-hover:bg-violet-600 group-hover:text-white transition">
@@ -418,7 +418,7 @@ function Step({
   return (
     <button
       onClick={onClick}
-      className="group bg-white border border-slate-200 rounded-xl p-6 text-left hover:border-teal-300 hover:shadow-md transition-all"
+      className="group bg-white border border-slate-200 rounded-xl p-6 text-left hover:border-violet-300 hover:shadow-md transition-all"
     >
 
       <div className="flex items-center justify-between">

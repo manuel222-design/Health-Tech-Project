@@ -416,7 +416,7 @@ export default function Products({ onSelectProduct }) {
                         <span
                           className={`text-xl shrink-0 transition-transform group-hover:translate-x-1 ${
                             isPrimary
-                              ? "text-teal-300 group-hover:text-violet-600"
+                              ? "text-violet-300 group-hover:text-violet-600"
                               : "text-violet-200 group-hover:text-violet-600"
                           }`}
                         >

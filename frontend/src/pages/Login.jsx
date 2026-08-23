@@ -238,10 +238,6 @@ export default function Login({ onLogin, onShowRegister }) {
     setResetStep("email")
   }
 
-  /* =========================
-     PASSWORD RESET
-     ========================= */
-
   if (view === "forgot") {
     return (
       <main className="min-h-screen bg-gradient-to-br from-violet-700 to-blue-800 flex items-center justify-center p-4">
@@ -443,10 +439,6 @@ export default function Login({ onLogin, onShowRegister }) {
       </main>
     )
   }
-
-  /* =========================
-     LOGIN
-     ========================= */
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-violet-700 to-blue-800 flex items-center justify-center p-4">

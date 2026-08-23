@@ -233,7 +233,7 @@ export default function ProductDetails({
                 onClick={() =>
                   onSelectArticle(article.slug)
                 }
-                className="w-full text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-teal-300 hover:shadow-sm transition group"
+                className="w-full text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-violet-300 hover:shadow-sm transition group"
               >
 
                 <div className="flex items-start gap-4">

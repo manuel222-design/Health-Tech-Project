@@ -33,7 +33,6 @@ export default function ChatEmbed() {
     try {
       await submitChatFeedback(messageId, helpful)
     } catch {
-      // Feedback failure should not interrupt the conversation.
     }
   }
 

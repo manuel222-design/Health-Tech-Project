@@ -348,7 +348,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
                   className={`text-xs rounded-full px-3 py-1.5 border transition ${
                     tagIds.includes(tag.id)
                       ? "bg-violet-600 text-white border-violet-600"
-                      : "bg-white text-gray-600 border-gray-300 hover:border-teal-400"
+                      : "bg-white text-gray-600 border-gray-300 hover:border-violet-400"
                   }`}
                 >
                   {tag.name}

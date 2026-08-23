@@ -11,6 +11,7 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  CartesianGrid,
 } from "recharts"
 
 export default function AdminAnalytics() {
@@ -116,8 +117,6 @@ export default function AdminAnalytics() {
   return (
     <div className="space-y-7 pb-10">
 
-      {/* Page Header */}
-
       <section>
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
 
@@ -142,8 +141,6 @@ export default function AdminAnalytics() {
         </div>
       </section>
 
-
-      {/* Summary Cards */}
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
@@ -215,8 +212,6 @@ export default function AdminAnalytics() {
       </section>
 
 
-      {/* Analytics Grid */}
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         <AnalyticsCard
@@ -257,12 +252,29 @@ export default function AdminAnalytics() {
                       bottom: 4
                     }}
                   >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#E2E8F0"
+                    />
+
                     <XAxis
                       dataKey="date"
                       tick={{ fontSize: 10 }}
                       tickLine={false}
                       axisLine={false}
                       interval="preserveStartEnd"
+                      tickFormatter={(value) =>
+                        new Date(
+                          `${value}T00:00:00`
+                        ).toLocaleDateString(
+                          undefined,
+                          {
+                            month: "short",
+                            day: "numeric"
+                          }
+                        )
+                      }
                     />
 
                     <YAxis
@@ -294,49 +306,19 @@ export default function AdminAnalytics() {
                     <Line
                       type="monotone"
                       dataKey="searches"
-                      stroke="#6D28D9"
-                      strokeWidth={2}
-                      dot={false}
-                      activeDot={{ r: 4 }}
+                      stroke="#7C3AED"
+                      strokeWidth={2.5}
+                      dot={{ r: 2 }}
+                      activeDot={{ r: 5 }}
+                      connectNulls
+                      isAnimationActive={false}
                     />
                   </LineChart>
                 </ResponsiveContainer>
 
               </div>
 
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
-                <span>
-                  {trend[0]?.date
-                    ? new Date(
-                        `${trend[0].date}T00:00:00`
-                      ).toLocaleDateString(
-                        undefined,
-                        {
-                          month: "short",
-                          day: "numeric"
-                        }
-                      )
-                    : ""}
-                </span>
 
-                <span>
-                  Last 30 days
-                </span>
-
-                <span>
-                  {trend[trend.length - 1]?.date
-                    ? new Date(
-                        `${trend[trend.length - 1].date}T00:00:00`
-                      ).toLocaleDateString(
-                        undefined,
-                        {
-                          month: "short",
-                          day: "numeric"
-                        }
-                      )
-                    : ""}
-                </span>
-              </div>
 
             </div>
           )}

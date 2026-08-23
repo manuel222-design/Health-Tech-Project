@@ -49,7 +49,7 @@ export default function Widget() {
         { helpful }
       )
     } catch {
-      // Keep the UI responsive even if feedback submission fails.
+      return
     }
   }
 
@@ -95,7 +95,7 @@ export default function Widget() {
           feedbackGiven: null
         }
       ])
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, {
         role: "assistant",
         content: "Sorry, I couldn't connect to the server. Please try again."

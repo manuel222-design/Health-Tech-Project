@@ -451,8 +451,6 @@ def search_articles(
     if not q or len(q.strip()) < 2:
         raise HTTPException(status_code=400, detail="Search query too short")
 
-    # Normalize common product-name variants so that user queries
-    # such as "TaifaCare" and "Taifa Care" retrieve the same content.
     q = re.sub(r"\btaifacare\b", "Taifa Care", q, flags=re.IGNORECASE)
 
     filters = ["status = 'published'"]
@@ -1185,9 +1183,6 @@ def chat(
     
     search_text = payload.message.strip()
 
-    # Normalize common product-name variants before knowledge retrieval.
-    # This keeps "TaifaCare" consistent with articles written as
-    # "Taifa Care".
     search_text = re.sub(
         r"\btaifacare\b",
         "Taifa Care",
@@ -1198,11 +1193,6 @@ def chat(
     relevant_articles = []
     prior_messages = []
 
-    # --------------------------------------------------------
-    # Determine product context.
-    # The current embedded assistant is Taifa Care-first.
-    # Explicit KenyaEMR questions are routed to KenyaEMR.
-    # --------------------------------------------------------
     product_slug = "taifa-care"
 
     if re.search(
@@ -1239,9 +1229,6 @@ def chat(
                 for m in prior_msgs
             ]
 
-    # Search the entire question as one PostgreSQL full-text query.
-    # This prevents unrelated articles from being selected because of
-    # individual generic words such as "hospital", "patient", or "system".
     chat_search = text("""
         SELECT
             a.id,
@@ -1327,13 +1314,6 @@ def chat(
         if article is not None
     ]
 
-    # ------------------------------------------------------------
-    # Keyword fallback for natural-language questions
-    # ------------------------------------------------------------
-    # The strict PostgreSQL full-text query may return zero results
-    # when a natural-language question contains too many words.
-    # In that case, search meaningful words across article title,
-    # body, and tags before giving the final no-results response.
     if not relevant_articles:
         stop_words = {
             "a", "an", "and", "are", "can", "could", "do", "does",
@@ -1419,8 +1399,6 @@ def chat(
                         + len(matched) * 5
                     )
 
-                    # Do not treat a single weak body match as
-                    # sufficient evidence for a grounded answer.
                     if (
                         len(matched) >= 2
                         or title_matches >= 1
@@ -1857,19 +1835,35 @@ def get_analytics(db: Session = Depends(get_db), user: dict = Depends(require_ad
     }
 
 @app.get("/api/v1/admin/search-trend")
-def get_search_trend(db: Session = Depends(get_db), user: dict = Depends(require_admin)):
-    from sqlalchemy import func, cast, Date
-    from datetime import datetime, timedelta, timezone
+def get_search_trend(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    rows = db.execute(
+        text("""
+            SELECT
+                days.day::date AS search_date,
+                COUNT(sl.id)::int AS searches
+            FROM generate_series(
+                CURRENT_DATE - INTERVAL '29 days',
+                CURRENT_DATE,
+                INTERVAL '1 day'
+            ) AS days(day)
+            LEFT JOIN search_logs sl
+                ON DATE(sl.searched_at) = days.day::date
+            GROUP BY days.day
+            ORDER BY days.day
+        """)
+    ).fetchall()
 
-    cutoff = datetime.now(timezone.utc) - timedelta(days=30)
-    results = db.query(
-            cast(SearchLog.searched_at, Date).label("day"),
-            func.count(SearchLog.id).label("count")
-        ) \
-        .filter(SearchLog.searched_at >= cutoff) \
-        .group_by("day").order_by("day").all()
+    return [
+        {
+            "date": str(row.search_date),
+            "searches": int(row.searches or 0),
+        }
+        for row in rows
+    ]
 
-    return [{"date": str(day), "count": count} for day, count in results]
 
 @app.get("/api/v1/admin/audit-logs")
 def get_audit_logs(db: Session = Depends(get_db), user: dict = Depends(require_admin)):
@@ -1949,11 +1943,9 @@ def get_unanswered_questions(
         normalized = re.sub(r"\s+", " ", question.lower()).strip()
         normalized = normalized.strip(" ?!.,")
 
-        # Ignore ordinary conversation/greetings.
         if normalized in generic_phrases:
             continue
 
-        # Avoid treating tiny fragments as documentation gaps.
         if len(normalized) < 5:
             continue
 

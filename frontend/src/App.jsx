@@ -847,10 +847,6 @@ setSelectedCategory(categoryId)
   function handleNotificationClick(notification) {
     setNotificationsOpen(false)
 
-    // Mark the clicked notification as handled locally.
-    // The current notification API does not persist read state,
-    // so removing it from the local list keeps the badge accurate
-    // immediately after the user opens it.
     setNotifications(prev =>
       prev.filter(item => {
         const clickedId = notification?.id
@@ -1049,13 +1045,13 @@ setSelectedCategory(categoryId)
             }
           >
 
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shrink-0 shadow-lg shadow-teal-950/40 ring-1 ring-teal-400/20 group-hover:ring-teal-300/40 transition">
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shrink-0 shadow-lg shadow-violet-950/40 ring-1 ring-teal-400/20 group-hover:ring-teal-300/40 transition">
 
               <span className="text-white font-extrabold text-sm tracking-tight">
                 TC
               </span>
 
-              <span className="absolute -right-0.5 -bottom-0.5 w-2.5 h-2.5 rounded-full bg-teal-300 ring-2 ring-slate-950" />
+              <span className="absolute -right-0.5 -bottom-0.5 w-2.5 h-2.5 rounded-full bg-violet-300 ring-2 ring-slate-950" />
 
             </div>
 
@@ -1086,7 +1082,7 @@ setSelectedCategory(categoryId)
             }
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
               currentPage === "home"
-                ? "bg-teal-950/60 text-teal-300 border border-violet-900 shadow-sm"
+                ? "bg-violet-950/60 text-violet-300 border border-violet-900 shadow-sm"
                 : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
             }`}
           >
@@ -1128,7 +1124,7 @@ setSelectedCategory(categoryId)
               className={`flex-1 min-w-0 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
                 currentPage === "articles" ||
                 currentPage === "article"
-                  ? "bg-teal-950/60 text-teal-300 border border-violet-900 shadow-sm"
+                  ? "bg-violet-950/60 text-violet-300 border border-violet-900 shadow-sm"
                   : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
               }`}
             >
@@ -1181,7 +1177,7 @@ setSelectedCategory(categoryId)
                 aria-expanded={categoriesOpen}
                 className={`w-8 h-8 rounded-lg flex items-center justify-center transition shrink-0 ${
                   categoriesOpen
-                    ? "bg-slate-800 text-teal-300"
+                    ? "bg-slate-800 text-violet-300"
                     : "text-slate-500 hover:bg-slate-800 hover:text-slate-200"
                 }`}
               >
@@ -1221,7 +1217,7 @@ setSelectedCategory(categoryId)
                   className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-left transition group ${
                     currentPage === "articles" &&
                     selectedCategory === category.id
-                      ? "bg-teal-950/70 text-teal-300"
+                      ? "bg-violet-950/70 text-violet-300"
                       : "text-slate-400 hover:bg-slate-800/80 hover:text-slate-200"
                   }`}
                 >
@@ -1230,8 +1226,8 @@ setSelectedCategory(categoryId)
                     className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
                       currentPage === "articles" &&
                       selectedCategory === category.id
-                        ? "bg-violet-900 text-teal-300"
-                        : "bg-slate-800 text-slate-500 group-hover:text-teal-400"
+                        ? "bg-violet-900 text-violet-300"
+                        : "bg-slate-800 text-slate-500 group-hover:text-violet-400"
                     }`}
                   >
                     <CategorySidebarIcon
@@ -1249,7 +1245,7 @@ setSelectedCategory(categoryId)
                     className={`min-w-[24px] h-5 px-1.5 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0 border ${
                       currentPage === "articles" &&
                       selectedCategory === category.id
-                        ? "bg-violet-900/70 text-teal-300 border-violet-800"
+                        ? "bg-violet-900/70 text-violet-300 border-violet-800"
                         : "bg-slate-900 text-slate-500 border-slate-800 group-hover:text-slate-300 group-hover:border-slate-700"
                     }`}
                   >
@@ -1513,7 +1509,7 @@ setSelectedCategory(categoryId)
             onClick={() => goTo("settings")}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
               currentPage === "settings"
-                ? "bg-teal-950/60 text-teal-300 border border-violet-900 shadow-sm"
+                ? "bg-violet-950/60 text-violet-300 border border-violet-900 shadow-sm"
                 : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
             }`}
           >
@@ -1597,7 +1593,6 @@ setSelectedCategory(categoryId)
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-[100]">
 
-          {/* Backdrop */}
           <button
             type="button"
             aria-label="Close navigation"
@@ -1605,10 +1600,8 @@ setSelectedCategory(categoryId)
             className="absolute inset-0 bg-slate-950/60"
           />
 
-          {/* Right-side navigation drawer */}
           <aside className="absolute top-0 right-0 h-[100dvh] w-[88vw] max-w-sm bg-slate-950 text-slate-300 shadow-2xl flex flex-col">
 
-            {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 shrink-0">
 
               <div className="flex items-center gap-3 min-w-0">
@@ -1640,18 +1633,16 @@ setSelectedCategory(categoryId)
 
             </div>
 
-            {/* Navigation */}
             <nav className="flex-1 overflow-y-auto px-3 py-4">
 
               <div className="space-y-1">
 
-                {/* Dashboard */}
                 <button
                   type="button"
                   onClick={() => handleMobileNavigate("home")}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                     currentPage === "home"
-                      ? "bg-teal-950/70 text-teal-300 border border-violet-900"
+                      ? "bg-violet-950/70 text-violet-300 border border-violet-900"
                       : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   }`}
                 >
@@ -1659,13 +1650,12 @@ setSelectedCategory(categoryId)
                   <span className="flex-1 text-left">Dashboard</span>
                 </button>
 
-                {/* Knowledge Base */}
                 <button
                   type="button"
                   onClick={() => handleMobileNavigate("articles")}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                     currentPage === "articles" || currentPage === "article"
-                      ? "bg-teal-950/70 text-teal-300 border border-violet-900"
+                      ? "bg-violet-950/70 text-violet-300 border border-violet-900"
                       : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   }`}
                 >
@@ -1684,14 +1674,13 @@ setSelectedCategory(categoryId)
                   </span>
                 </button>
 
-                {/* Manage Articles */}
                 {canManage && (
                   <button
                     type="button"
                     onClick={() => handleMobileNavigate("manage")}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                       currentPage === "manage"
-                        ? "bg-teal-950/70 text-teal-300 border border-violet-900"
+                        ? "bg-violet-950/70 text-violet-300 border border-violet-900"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
@@ -1702,14 +1691,13 @@ setSelectedCategory(categoryId)
                   </button>
                 )}
 
-                {/* Products */}
                 {canManage && (
                   <button
                     type="button"
                     onClick={() => handleMobileNavigate("products")}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                       currentPage === "products" || currentPage === "product"
-                        ? "bg-teal-950/70 text-teal-300 border border-violet-900"
+                        ? "bg-violet-950/70 text-violet-300 border border-violet-900"
                         : "text-slate-300 hover:bg-slate-800 hover:text-white"
                     }`}
                   >
@@ -1720,7 +1708,6 @@ setSelectedCategory(categoryId)
                   </button>
                 )}
 
-                {/* Administration */}
                 {isAdmin && (
                   <>
                     <div className="mt-5 mb-2 px-4 pt-4 border-t border-slate-800">
@@ -1729,13 +1716,12 @@ setSelectedCategory(categoryId)
                       </div>
                     </div>
 
-                    {/* Users */}
                     <button
                       type="button"
                       onClick={() => handleMobileNavigate("users")}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                         currentPage === "users"
-                          ? "bg-teal-950/70 text-teal-300 border border-violet-900"
+                          ? "bg-violet-950/70 text-violet-300 border border-violet-900"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
@@ -1743,13 +1729,12 @@ setSelectedCategory(categoryId)
                       <span className="flex-1 text-left">Users</span>
                     </button>
 
-                    {/* Analytics */}
                     <button
                       type="button"
                       onClick={() => handleMobileNavigate("analytics")}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                         currentPage === "analytics"
-                          ? "bg-teal-950/70 text-teal-300 border border-violet-900"
+                          ? "bg-violet-950/70 text-violet-300 border border-violet-900"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
@@ -1757,13 +1742,12 @@ setSelectedCategory(categoryId)
                       <span className="flex-1 text-left">Analytics</span>
                     </button>
 
-                    {/* Feedback */}
                     <button
                       type="button"
                       onClick={() => handleMobileNavigate("feedback")}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                         currentPage === "feedback"
-                          ? "bg-teal-950/70 text-teal-300 border border-violet-900"
+                          ? "bg-violet-950/70 text-violet-300 border border-violet-900"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
@@ -1771,13 +1755,12 @@ setSelectedCategory(categoryId)
                       <span className="flex-1 text-left">Feedback</span>
                     </button>
 
-                    {/* Audit */}
                     <button
                       type="button"
                       onClick={() => handleMobileNavigate("audit")}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                         currentPage === "audit"
-                          ? "bg-teal-950/70 text-teal-300 border border-violet-900"
+                          ? "bg-violet-950/70 text-violet-300 border border-violet-900"
                           : "text-slate-300 hover:bg-slate-800 hover:text-white"
                       }`}
                     >
@@ -1787,13 +1770,12 @@ setSelectedCategory(categoryId)
                   </>
                 )}
 
-                {/* Settings */}
                 <button
                   type="button"
                   onClick={() => handleMobileNavigate("settings")}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                     currentPage === "settings"
-                      ? "bg-teal-950/70 text-teal-300 border border-violet-900"
+                      ? "bg-violet-950/70 text-violet-300 border border-violet-900"
                       : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   }`}
                 >
@@ -1805,7 +1787,6 @@ setSelectedCategory(categoryId)
 
             </nav>
 
-            {/* Sign out */}
             <div className="shrink-0 border-t border-slate-800 p-3">
               <button
                 type="button"
@@ -2324,7 +2305,6 @@ setSelectedCategory(categoryId)
 
             <section className="max-w-5xl mx-auto space-y-8 pb-20">
 
-              {/* PAGE HEADER */}
               <div>
 
                 <div className="flex items-center gap-3">
@@ -2359,7 +2339,6 @@ setSelectedCategory(categoryId)
               </div>
 
 
-              {/* PROFILE */}
               <section>
 
                 <div className="flex items-center justify-between mb-3">
@@ -2420,7 +2399,6 @@ setSelectedCategory(categoryId)
               </section>
 
 
-              {/* PREFERENCES */}
               <section>
 
                 <div className="mb-3">
@@ -2548,7 +2526,6 @@ setSelectedCategory(categoryId)
               </section>
 
 
-              {/* ROLE & PERMISSIONS */}
               <section>
 
                 <div className="mb-3">
