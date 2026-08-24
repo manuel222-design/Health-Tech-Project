@@ -66,10 +66,10 @@ export default function Register({ onRegister, onBackToLogin }) {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-teal-700 via-teal-600 to-blue-800 flex items-center justify-center p-4">
+    <main className="min-h-screen bg-gradient-to-br from-violet-700 via-violet-600 to-blue-800 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white text-2xl font-bold">
               TC
             </span>
@@ -80,7 +80,7 @@ export default function Register({ onRegister, onBackToLogin }) {
           </h1>
 
           <p className="text-gray-500 mt-1">
-            Join the Taifa Care HMIS Knowledge System
+            Join Taifa Care
           </p>
         </div>
 
@@ -102,7 +102,7 @@ export default function Register({ onRegister, onBackToLogin }) {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Your name"
               autoComplete="username"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               required
             />
           </div>
@@ -118,7 +118,7 @@ export default function Register({ onRegister, onBackToLogin }) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               autoComplete="email"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               required
             />
           </div>
@@ -134,7 +134,7 @@ export default function Register({ onRegister, onBackToLogin }) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Create a password"
               autoComplete="new-password"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
               required
             />
           </div>
@@ -150,7 +150,7 @@ export default function Register({ onRegister, onBackToLogin }) {
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
               placeholder="e.g. Clinical, ICT, Administration"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>
 
@@ -162,7 +162,7 @@ export default function Register({ onRegister, onBackToLogin }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Creating Account..." : "Create Account"}
           </button>
@@ -171,13 +171,13 @@ export default function Register({ onRegister, onBackToLogin }) {
         <button
           type="button"
           onClick={onBackToLogin}
-          className="w-full text-teal-700 hover:text-teal-800 text-sm font-medium py-2 mt-3"
+          className="w-full text-violet-700 hover:text-violet-800 text-sm font-medium py-2 mt-3"
         >
           Already have an account? Sign in
         </button>
 
         <p className="text-center text-xs text-gray-500 mt-4">
-          Taifa Care HMIS Knowledge Base & Chatbot System
+          Taifa Care Knowledge Centre
         </p>
       </div>
     </main>

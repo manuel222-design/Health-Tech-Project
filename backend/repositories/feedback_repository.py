@@ -32,3 +32,12 @@ class FeedbackRepository:
             .filter(ArticleFeedback.article_id == article_id)
             .first()
         )
+
+    def list_feedback(self, limit=200):
+        return (
+            self.db.query(ArticleFeedback)
+            .join(Article, Article.id == ArticleFeedback.article_id)
+            .order_by(ArticleFeedback.created_at.desc())
+            .limit(limit)
+            .all()
+        )

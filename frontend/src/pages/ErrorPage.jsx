@@ -7,12 +7,12 @@ export default function ErrorPage({
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-6">
       <div className="text-center max-w-lg">
-        <div className="text-7xl font-extrabold text-teal-100 mb-4">
+        <div className="text-7xl font-extrabold text-violet-100 mb-4">
           404
         </div>
 
-        <div className="w-16 h-16 mx-auto mb-5 bg-teal-50 rounded-2xl flex items-center justify-center">
-          <span className="text-2xl text-teal-600">!</span>
+        <div className="w-16 h-16 mx-auto mb-5 bg-violet-50 rounded-2xl flex items-center justify-center">
+          <span className="text-2xl text-violet-600">!</span>
         </div>
 
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
@@ -36,7 +36,7 @@ export default function ErrorPage({
           {onHome && (
             <button
               onClick={onHome}
-              className="px-4 py-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 transition"
+              className="px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition"
             >
               Go Home
             </button>

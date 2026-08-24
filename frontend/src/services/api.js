@@ -92,6 +92,7 @@ export default api
 export const submitFeedback = (slug, rating, comment) =>
   api.post(`/articles/${slug}/feedback`, { rating, comment })
 export const getFeedbackSummary = (slug) => api.get(`/articles/${slug}/feedback/summary`)
+export const getAdminFeedback = () => api.get("/admin/feedback")
 
 export const submitChatFeedback = (messageId, helpful) =>
   api.post(`/chat/${messageId}/feedback`, { helpful })
@@ -101,6 +102,7 @@ export const updateUserRole = (userId, role) => api.put(`/admin/users/${userId}/
 export const toggleUserActive = (userId) => api.put(`/admin/users/${userId}/toggle-active`)
 
 export const getAnalytics = () => api.get('/admin/analytics')
+export const getSearchTrend = () => api.get('/admin/search-trend')
 
 export const getAuditLogs = () => api.get('/admin/audit-logs')
 

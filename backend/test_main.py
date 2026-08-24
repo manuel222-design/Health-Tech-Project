@@ -218,10 +218,9 @@ def test_migrated_editor_login_success():
     assert response.json()["role"] == "editor"
 
 
-def test_editor_can_approve_pending_article():
-    """Editor should be able to approve an article pending review."""
+def test_editor_cannot_approve_pending_article():
+    """Editor must not be allowed to approve an article pending review."""
 
-    # Login as admin to create the test article
     admin_login = client.post("/api/v1/auth/login", json={
         "email": "admin@healthtech.co.ke",
         "password": "Admin@1234"
@@ -246,7 +245,6 @@ def test_editor_can_approve_pending_article():
     assert create_response.status_code == 201
     assert create_response.json()["status"] == "pending_review"
 
-    # Login as Editor
     editor_login = client.post("/api/v1/auth/login", json={
         "email": "sme@healthtech.co.ke",
         "password": "SME@1234"
@@ -255,18 +253,17 @@ def test_editor_can_approve_pending_article():
     assert editor_login.status_code == 200
     editor_token = editor_login.json()["access_token"]
 
-    # Editor approves the article
     approve_response = client.post(
         f"/api/v1/articles/{slug}/approve",
         headers={"Authorization": f"Bearer {editor_token}"}
     )
 
-    assert approve_response.status_code == 200
-    assert "approved" in approve_response.json()["message"].lower()
+    assert approve_response.status_code == 403
+    assert "admin role" in approve_response.json()["detail"].lower()
 
 
-def test_editor_can_reject_pending_article():
-    """Editor should be able to reject an article pending review."""
+def test_editor_cannot_reject_pending_article():
+    """Editor must not be allowed to reject an article pending review."""
 
     admin_login = client.post("/api/v1/auth/login", json={
         "email": "admin@healthtech.co.ke",
@@ -292,7 +289,6 @@ def test_editor_can_reject_pending_article():
     assert create_response.status_code == 201
     assert create_response.json()["status"] == "pending_review"
 
-    # Login as Editor
     editor_login = client.post("/api/v1/auth/login", json={
         "email": "sme@healthtech.co.ke",
         "password": "SME@1234"
@@ -309,8 +305,8 @@ def test_editor_can_reject_pending_article():
         headers={"Authorization": f"Bearer {editor_token}"}
     )
 
-    assert reject_response.status_code == 200
-    assert "draft" in reject_response.json()["message"].lower()
+    assert reject_response.status_code == 403
+    assert "admin role" in reject_response.json()["detail"].lower()
 
 
 def test_viewer_cannot_approve_article():
@@ -339,6 +335,3 @@ def test_viewer_cannot_approve_article():
 
     assert create_response.status_code == 201
 
-    # We don't have an editor account guaranteed by the seed,
-    # so this test verifies the endpoint rejects a viewer/admin mismatch
-    # through the role-protected dependency using an existing viewer token.

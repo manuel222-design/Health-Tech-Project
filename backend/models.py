@@ -100,8 +100,9 @@ class Article(Base):
     )
     author_id     = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     view_count    = Column(Integer, default=0)
-    published_at  = Column(DateTime(timezone=True), nullable=True)
-    created_at    = Column(DateTime(timezone=True), server_default=func.now())
+    published_at    = Column(DateTime(timezone=True), nullable=True)
+    last_reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at      = Column(DateTime(timezone=True), server_default=func.now())
     updated_at    = Column(DateTime(timezone=True), onupdate=func.now())
 
     author        = relationship("User", back_populates="articles")
@@ -236,7 +237,6 @@ class Media(Base):
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
 
 
-# PASSWORD RESET OTP MODEL
 class PasswordResetOTP(Base):
     __tablename__ = "password_reset_otps"
 

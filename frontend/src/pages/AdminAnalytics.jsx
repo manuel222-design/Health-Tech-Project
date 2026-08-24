@@ -1,13 +1,24 @@
 import { useState, useEffect } from "react"
 import {
   getAnalytics,
+  getSearchTrend,
   getUnansweredQuestions,
 } from "../services/api"
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts"
 
 export default function AdminAnalytics() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [unanswered, setUnanswered] = useState([])
+  const [trend, setTrend] = useState([])
 
   useEffect(() => {
     getAnalytics()
@@ -22,11 +33,20 @@ export default function AdminAnalytics() {
 
     getUnansweredQuestions()
       .then(res =>
-        setUnanswered(res.data || [])
+        setUnanswered(res.data?.results || [])
       )
       .catch(error =>
         console.error(
           "UNANSWERED QUESTIONS ERROR:",
+          error
+        )
+      )
+
+    getSearchTrend()
+      .then(res => setTrend(res.data || []))
+      .catch(error =>
+        console.error(
+          "SEARCH TREND LOAD ERROR:",
           error
         )
       )
@@ -36,7 +56,7 @@ export default function AdminAnalytics() {
     return (
       <div className="flex items-center justify-center py-24">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-4 border-violet-100 border-t-violet-600 rounded-full animate-spin mx-auto mb-4" />
 
           <p className="text-sm text-slate-500">
             Loading analytics...
@@ -97,16 +117,14 @@ export default function AdminAnalytics() {
   return (
     <div className="space-y-7 pb-10">
 
-      {/* Page Header */}
-
       <section>
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
 
           <div>
             <div className="inline-flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-teal-500" />
+              <span className="w-2 h-2 rounded-full bg-violet-500" />
 
-              <span className="text-[10px] uppercase tracking-wider font-semibold text-teal-700">
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-violet-700">
                 System Insights
               </span>
             </div>
@@ -123,8 +141,6 @@ export default function AdminAnalytics() {
         </div>
       </section>
 
-
-      {/* Summary Cards */}
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
@@ -148,7 +164,7 @@ export default function AdminAnalytics() {
               <path d="M8 16h5" />
             </svg>
           }
-          iconClass="bg-teal-50 text-teal-700"
+          iconClass="bg-violet-50 text-violet-700"
         />
 
         <MetricCard
@@ -196,9 +212,117 @@ export default function AdminAnalytics() {
       </section>
 
 
-      {/* Analytics Grid */}
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <AnalyticsCard
+          title="Search Activity"
+          description="Knowledge-base searches recorded over the last 30 days"
+          className="lg:col-span-2"
+          icon={
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-4 h-4"
+            >
+              <path d="M4 19V5" />
+              <path d="M4 19h16" />
+              <path d="m7 15 4-4 3 2 5-6" />
+            </svg>
+          }
+          iconClass="bg-violet-50 text-violet-700"
+        >
+          {trend.length === 0 ? (
+            <EmptyState message="No search activity has been recorded yet." />
+          ) : (
+            <div className="space-y-3">
+
+              <div className="h-56 w-full">
+
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={trend}
+                    margin={{
+                      top: 8,
+                      right: 8,
+                      left: -18,
+                      bottom: 4
+                    }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#E2E8F0"
+                    />
+
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 10 }}
+                      tickLine={false}
+                      axisLine={false}
+                      interval="preserveStartEnd"
+                      tickFormatter={(value) =>
+                        new Date(
+                          `${value}T00:00:00`
+                        ).toLocaleDateString(
+                          undefined,
+                          {
+                            month: "short",
+                            day: "numeric"
+                          }
+                        )
+                      }
+                    />
+
+                    <YAxis
+                      allowDecimals={false}
+                      tick={{ fontSize: 10 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+
+                    <Tooltip
+                      formatter={(value) => [
+                        value,
+                        value === 1 ? "search" : "searches"
+                      ]}
+                      labelFormatter={(label) =>
+                        new Date(
+                          `${label}T00:00:00`
+                        ).toLocaleDateString(
+                          undefined,
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric"
+                          }
+                        )
+                      }
+                    />
+
+                    <Line
+                      type="monotone"
+                      dataKey="searches"
+                      stroke="#7C3AED"
+                      strokeWidth={2.5}
+                      dot={{ r: 2 }}
+                      activeDot={{ r: 5 }}
+                      connectNulls
+                      isAnimationActive={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+
+              </div>
+
+
+
+            </div>
+          )}
+        </AnalyticsCard>
 
         <AnalyticsCard
           title="Top Viewed Articles"
@@ -217,7 +341,7 @@ export default function AdminAnalytics() {
               <circle cx="12" cy="12" r="2.5" />
             </svg>
           }
-          iconClass="bg-teal-50 text-teal-700"
+          iconClass="bg-violet-50 text-violet-700"
         >
           {topViewed.length === 0 ? (
             <EmptyState message="No article views have been recorded yet." />
@@ -236,7 +360,7 @@ export default function AdminAnalytics() {
                     {article.title}
                   </span>
 
-                  <span className="text-sm text-teal-600 font-semibold shrink-0">
+                  <span className="text-sm text-violet-600 font-semibold shrink-0">
                     {article.views} views
                   </span>
                 </div>
@@ -378,8 +502,8 @@ export default function AdminAnalytics() {
 
 
         <AnalyticsCard
-          title="Content Needing Attention"
-          description="Articles flagged because they are more than 180 days old"
+          title="Content Needing Re-certification"
+          description="Not reviewed or updated in over 180 days"
           icon={
             <svg
               viewBox="0 0 24 24"
@@ -401,7 +525,7 @@ export default function AdminAnalytics() {
           iconClass="bg-orange-50 text-orange-700"
         >
           {staleArticles.length === 0 ? (
-            <EmptyState message="No articles currently require an age-based review." />
+            <EmptyState message="All published articles are within their 180-day review period." />
           ) : (
             <div className="space-y-1">
               {staleArticles.map((article, index) => (
@@ -414,9 +538,11 @@ export default function AdminAnalytics() {
                   </span>
 
                   <span className="text-xs text-orange-600 font-medium shrink-0">
-                    {new Date(
-                      article.created_at
-                    ).toLocaleDateString()}
+                    {article.last_reviewed_at
+                      ? `Reviewed ${new Date(
+                          article.last_reviewed_at
+                        ).toLocaleDateString()}`
+                      : "Review date unavailable"}
                   </span>
                 </div>
               ))}
@@ -426,8 +552,8 @@ export default function AdminAnalytics() {
 
 
         <AnalyticsCard
-          title="Unanswered Chatbot Questions"
-          description="Questions the AI assistant could not resolve"
+          title="Chatbot Knowledge Gaps"
+          description="Questions for which approved KB content was not available"
           icon={
             <svg
               viewBox="0 0 24 24"
@@ -446,7 +572,7 @@ export default function AdminAnalytics() {
           iconClass="bg-purple-50 text-purple-700"
         >
           {unanswered.length === 0 ? (
-            <EmptyState message="No unanswered chatbot questions have been recorded." />
+            <EmptyState message="No current knowledge gaps have been identified." />
           ) : (
             <div className="space-y-3">
               {unanswered.map((item, index) => (
@@ -458,13 +584,21 @@ export default function AdminAnalytics() {
                     "{item.question}"
                   </p>
 
-                  <p className="text-[11px] text-slate-400 mt-1.5">
-                    {item.asked_at
-                      ? new Date(
-                          item.asked_at
-                        ).toLocaleString()
-                      : "Unknown time"}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                    <span className="text-[11px] text-purple-600 font-medium">
+                      Asked {item.count || 1}{" "}
+                      {item.count === 1 ? "time" : "times"}
+                    </span>
+
+                    {item.latest_at && (
+                      <span className="text-[11px] text-slate-400">
+                        Last asked{" "}
+                        {new Date(
+                          item.latest_at
+                        ).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -495,7 +629,7 @@ function MetricCard({
             {label}
           </p>
 
-          <p className="text-3xl font-bold text-teal-600 mt-2">
+          <p className="text-3xl font-bold text-violet-600 mt-2">
             {value}
           </p>
 
@@ -523,9 +657,12 @@ function AnalyticsCard({
   icon,
   iconClass,
   children,
+  className = "",
 }) {
   return (
-    <section className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+    <section
+      className={`bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden ${className}`}
+    >
 
       <div className="px-5 py-4 border-b border-slate-100">
 

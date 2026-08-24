@@ -42,3 +42,32 @@ class FeedbackService:
             "average_rating": round(float(avg_rating), 1) if avg_rating else None,
             "total_ratings": count
         }
+
+    def list_feedback(self, limit: int = 200):
+        items = self.repository.list_feedback(limit=limit)
+
+        return [
+            {
+                "id": str(item.id),
+                "article_id": str(item.article_id),
+                "article_title": (
+                    item.article.title
+                    if item.article
+                    else "Unknown article"
+                ),
+                "article_slug": (
+                    item.article.slug
+                    if item.article
+                    else None
+                ),
+                "rating": item.rating,
+                "comment": item.comment or "",
+                "submitted_at": (
+                    item.created_at.isoformat()
+                    if item.created_at
+                    else None
+                ),
+            }
+            for item in items
+        ]
+

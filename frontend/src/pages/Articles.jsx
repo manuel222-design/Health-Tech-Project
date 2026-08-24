@@ -58,6 +58,20 @@ export default function Articles({
   const [showSuggestions, setShowSuggestions] = useState(false)
 
   useEffect(() => {
+    const category = initialCategory || ""
+
+    setCategoryFilter(category)
+
+    runSearch(
+      search,
+      category,
+      typeFilter,
+      tagFilter,
+      productFilter
+    )
+  }, [initialCategory])
+
+  useEffect(() => {
     Promise.all([
       getArticles(),
       getCategories(),
@@ -184,7 +198,7 @@ export default function Articles({
 
     setTimeout(async () => {
       try {
-        const res = await searchArticles(q, {})
+        const res = await searchArticles(q, { log_search: "false" })
 
         const results = (
           res.data.results || []
@@ -301,8 +315,8 @@ export default function Articles({
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
 
           <div>
-            <div className="text-[10px] uppercase tracking-wider font-semibold text-teal-700 mb-2">
-              TaifaCare Knowledge Centre
+            <div className="text-[10px] uppercase tracking-wider font-semibold text-violet-700 mb-2">
+              Knowledge Centre
             </div>
 
             <h2 className="text-2xl font-bold text-slate-800">
@@ -346,7 +360,7 @@ export default function Articles({
               }, 150)
             }}
             placeholder="Search registration, vitals, laboratory, pharmacy..."
-            className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
           />
 
           {/* AUTOCOMPLETE */}
@@ -362,7 +376,7 @@ export default function Articles({
                       setShowSuggestions(false)
                       handleSuggestionClick(item.slug)
                     }}
-                    className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-teal-50 border-b border-slate-100 last:border-0 transition"
+                    className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-violet-50 border-b border-slate-100 last:border-0 transition"
                   >
                     {item.title}
                   </button>
@@ -386,7 +400,7 @@ export default function Articles({
             <select
               value={categoryFilter}
               onChange={handleCategoryChange}
-              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
             >
               <option value="">
                 All categories
@@ -414,7 +428,7 @@ export default function Articles({
             <select
               value={tagFilter}
               onChange={handleModuleChange}
-              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
             >
               <option value="">
                 All HMIS modules
@@ -442,7 +456,7 @@ export default function Articles({
             <select
               value={typeFilter}
               onChange={handleContentTypeChange}
-              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
             >
               <option value="">
                 All content types
@@ -485,7 +499,7 @@ export default function Articles({
             <select
               value={productFilter}
               onChange={handleProductChange}
-              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
             >
               <option value="">
                 All products
@@ -524,19 +538,25 @@ export default function Articles({
       <section className="grid gap-4">
 
         {articles.map(article => (
-          <button
+
+          <article
             key={article.id}
-            type="button"
-            onClick={() =>
-              onSelectArticle(article.slug)
-            }
-            className="w-full text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-teal-300 hover:shadow-md transition group"
+            role="button"
+            tabIndex={0}
+            onClick={() => onSelectArticle(article.slug)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault()
+                onSelectArticle(article.slug)
+              }
+            }}
+            className="w-full text-left bg-white border border-slate-200 rounded-xl p-5 cursor-pointer hover:border-violet-300 hover:shadow-md transition group focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
           >
 
             <div className="flex items-start gap-4">
 
               {/* ARTICLE ICON */}
-              <div className="w-11 h-11 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 group-hover:bg-teal-600 group-hover:text-white transition">
+              <div className="w-11 h-11 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center shrink-0 group-hover:bg-violet-600 group-hover:text-white transition">
 
                 <svg
                   viewBox="0 0 24 24"
@@ -555,36 +575,35 @@ export default function Articles({
 
               </div>
 
+
               {/* ARTICLE INFORMATION */}
               <div className="min-w-0 flex-1">
 
                 <div className="flex items-start justify-between gap-3">
 
-                  <h3 className="font-semibold text-slate-800 group-hover:text-teal-700 transition">
+                  <h3 className="font-semibold text-slate-800 group-hover:text-violet-700 transition">
                     {article.title}
                   </h3>
 
-                  <span className="text-slate-300 group-hover:text-teal-600 text-lg shrink-0">
+                  <span className="text-slate-300 group-hover:text-violet-600 text-lg shrink-0 transition-transform group-hover:translate-x-1">
                     →
                   </span>
 
                 </div>
 
+
                 {/* TAXONOMY BADGES */}
                 <div className="flex flex-wrap gap-2 mt-3">
 
                   {article.category_name && (
-                    <span className="text-[11px] bg-teal-50 text-teal-700 border border-teal-100 px-2.5 py-1 rounded-full">
+                    <span className="text-[11px] bg-violet-50 text-violet-700 border border-violet-100 px-2.5 py-1 rounded-full">
                       {article.category_name}
                     </span>
                   )}
 
                   {article.content_type && (
                     <span className="text-[11px] bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full capitalize">
-                      {article.content_type.replaceAll(
-                        "_",
-                        " "
-                      )}
+                      {article.content_type.replaceAll("_", " ")}
                     </span>
                   )}
 
@@ -596,6 +615,7 @@ export default function Articles({
 
                 </div>
 
+
                 <p className="text-xs text-slate-400 mt-3">
                   Published knowledge article
                 </p>
@@ -604,7 +624,8 @@ export default function Articles({
 
             </div>
 
-          </button>
+          </article>
+
         ))}
 
       </section>
