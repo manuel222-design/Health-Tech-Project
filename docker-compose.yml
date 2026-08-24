@@ -1,38 +1,43 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: healthtech_kb
-      POSTGRES_USER: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-healthtech_kb}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-healthtech_kb}"
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.backend
     restart: unless-stopped
+    env_file:
+      - ./backend/.env
     environment:
-      DATABASE_URL: postgresql://postgres:HealthTechDB%402026Secure@db:5432/healthtech_kb
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      GROQ_API_KEY: ${GROQ_API_KEY}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-healthtech_kb}
     ports:
-      - "8001:8000"
+      - "127.0.0.1:8001:8000"
     depends_on:
       db:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
     restart: unless-stopped
     ports:
       - "80:80"

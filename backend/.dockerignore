@@ -1,0 +1,40 @@
+ VCS
+.git
+.gitignore
+.gitattributes
+
+ Dependencies / build output
+node_modules
+vendor
+venv
+.venv
+__pycache__
+*.pyc
+dist
+build
+target
+*.o
+
+ Secrets and env
+.env
+.env.*
+*.pem
+*.key
+secrets/
+credentials.json
+
+ Editor / OS
+.vscode
+.idea
+.DS_Store
+*.swp
+
+ Docs, tests, CI
+*.md
+docs/
+.github/
+
+ Logs and local data
+*.log
+tmp/
+testdata/

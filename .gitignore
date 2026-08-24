@@ -19,3 +19,30 @@ dist/
 
 backups/
 .env
+
+# Development rollback backups
+*.before-*
+*.backup*
+*.save
+
+# One-time local repair scripts
+backend/fix_article_headings.py
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Local database backups
+backups/
+
+# Temporary/editor backups
+*.backup*
+*.before-*
+*.save
+*~
+
+# Python test cache
+.pytest_cache/
+__pycache__/
+*.py[cod]

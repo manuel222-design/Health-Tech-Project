@@ -86,6 +86,7 @@ class AuthService:
         refresh_token = self.create_refresh_token(str(new_user.id))
         return {
             "access_token": token,
+            "refresh_token": refresh_token,
             "token_type": "bearer",
             "expires_in": self.token_ttl * 3600,
             "role": new_user.role.value,

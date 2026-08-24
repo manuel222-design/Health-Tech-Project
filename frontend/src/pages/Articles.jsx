@@ -1,74 +1,162 @@
 import { useState, useEffect } from "react"
-import { getArticles, searchArticles, getCategories, getTags, getProducts } from "../services/api"
+import {
+  getArticles,
+  searchArticles,
+  getCategories,
+  getTags,
+  getProducts,
+} from "../services/api"
 
-export default function Articles({ onSelectArticle, initialCategory = "" }) {
-  const [articles, setArticles]   = useState([])
-  const [loading, setLoading]     = useState(true)
-  const [search, setSearch]       = useState("")
+const MODULE_TAGS = new Set([
+  "Registration",
+  "Appointments",
+  "Triage & Vitals",
+  "Consultation",
+  "Laboratory",
+  "Radiology",
+  "Procedures",
+  "Pharmacy",
+  "Admissions",
+  "Maternity",
+  "ANC",
+  "PNC",
+  "CWC",
+  "Family Planning",
+  "TB",
+  "Nutrition",
+  "EPI",
+  "Pre-Conception Care",
+  "Medically Assisted Therapy",
+  "Referred Patients",
+  "Accounting",
+  "Billing & Claims",
+  "Reports",
+  "User Administration",
+])
+
+export default function Articles({
+  onSelectArticle,
+  initialCategory = "",
+}) {
+  const [articles, setArticles] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState("")
   const [searching, setSearching] = useState(false)
+
   const [categories, setCategories] = useState([])
   const [categoryFilter, setCategoryFilter] = useState(initialCategory)
+
   const [typeFilter, setTypeFilter] = useState("")
+
   const [allTags, setAllTags] = useState([])
   const [tagFilter, setTagFilter] = useState("")
+
   const [products, setProducts] = useState([])
   const [productFilter, setProductFilter] = useState("")
+
   const [suggestions, setSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [fallbackArticles, setFallbackArticles] = useState([])
 
   useEffect(() => {
-    getArticles()
-      .then(res => {
-        const results = res.data.results || res.data || []
+    const category = initialCategory || ""
 
-        setArticles(results)
-        setFallbackArticles(results.slice(0, 3))
+    setCategoryFilter(category)
 
-        if (initialCategory) {
-          setCategoryFilter(initialCategory)
-          setArticles(
-            results.filter(
-              article => article.category_id === initialCategory
-            )
-          )
-        }
-      })
-      .finally(() => setLoading(false))
-
-    getCategories().then(res => setCategories(res.data))
-    getTags().then(res => setAllTags(res.data))
-    getProducts().then(res => setProducts(res.data))
+    runSearch(
+      search,
+      category,
+      typeFilter,
+      tagFilter,
+      productFilter
+    )
   }, [initialCategory])
 
-  async function runSearch(q, catFilter, typeF, tagF, productF) {
-    if (q.length < 2) {
-      const filters = {}
+  useEffect(() => {
+    Promise.all([
+      getArticles(),
+      getCategories(),
+      getTags(),
+      getProducts(),
+    ])
+      .then(([articlesRes, categoriesRes, tagsRes, productsRes]) => {
+        const results =
+          articlesRes.data.results ||
+          articlesRes.data ||
+          []
 
-      if (catFilter) filters.category_id = catFilter
-      if (typeF) filters.content_type = typeF
-      if (tagF) filters.tag_id = tagF
-      if (productF) filters.product_id = productF
+        setArticles(results)
+        setCategories(categoriesRes.data || [])
 
-      const res = await getArticles(filters)
-      const results = res.data.results || res.data || []
+        setAllTags(
+          (tagsRes.data || []).filter(tag =>
+            MODULE_TAGS.has(tag.name)
+          )
+        )
 
-      setArticles(results)
+        setProducts(productsRes.data || [])
+      })
+      .catch(error => {
+        console.error("ARTICLES PAGE LOAD ERROR:", error)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
+
+  async function runSearch(
+    q,
+    catFilter,
+    typeF,
+    tagF,
+    productF
+  ) {
+    const filters = {}
+
+    if (catFilter) {
+      filters.category_id = catFilter
+    }
+
+    if (typeF) {
+      filters.content_type = typeF
+    }
+
+    if (tagF) {
+      filters.tag_id = tagF
+    }
+
+    if (productF) {
+      filters.product_id = productF
+    }
+
+    if (q.trim().length < 2) {
+      setSearching(false)
+
+      try {
+        const res = await getArticles(filters)
+
+        setArticles(
+          res.data.results ||
+          res.data ||
+          []
+        )
+      } catch (error) {
+        console.error("ARTICLE FILTER ERROR:", error)
+      }
+
       return
     }
 
     setSearching(true)
 
     try {
-      const filters = {}
-
-      if (catFilter) filters.category_id = catFilter
-      if (typeF) filters.content_type = typeF
-      if (tagF) filters.tag_id = tagF
-      if (productF) filters.product_id = productF
-
       const res = await searchArticles(q, filters)
-      setArticles(res.data.results || [])
+
+      setArticles(
+        res.data.results || []
+      )
+    } catch (error) {
+      console.error("ARTICLE SEARCH ERROR:", error)
+      setArticles([])
     } finally {
       setSearching(false)
     }
@@ -76,22 +164,55 @@ export default function Articles({ onSelectArticle, initialCategory = "" }) {
 
   function handleSearch(e) {
     const q = e.target.value
+
     setSearch(q)
-    runSearch(q, categoryFilter, typeFilter, tagFilter, productFilter)
 
     clearTimeout(window.__searchDebounce)
-    if (q.length < 2) {
+
+    if (q.trim().length < 2) {
       setSuggestions([])
       setShowSuggestions(false)
+
+      window.__searchDebounce = setTimeout(() => {
+        runSearch(
+          q,
+          categoryFilter,
+          typeFilter,
+          tagFilter,
+          productFilter
+        )
+      }, 150)
+
       return
     }
-    window.__searchDebounce = setTimeout(async () => {
+
+    window.__searchDebounce = setTimeout(() => {
+      runSearch(
+        q,
+        categoryFilter,
+        typeFilter,
+        tagFilter,
+        productFilter
+      )
+    }, 250)
+
+    setTimeout(async () => {
       try {
-        const res = await searchArticles(q, {})
-        setSuggestions(res.data.results.slice(0, 5))
-        setShowSuggestions(true)
-      } catch {
+        const res = await searchArticles(q, { log_search: "false" })
+
+        const results = (
+          res.data.results || []
+        ).slice(0, 3)
+
+        setSuggestions(results)
+        setShowSuggestions(results.length > 0)
+      } catch (error) {
+        console.error(
+          "ARTICLE SUGGESTION ERROR:",
+          error
+        )
         setSuggestions([])
+        setShowSuggestions(false)
       }
     }, 300)
   }
@@ -101,170 +222,454 @@ export default function Articles({ onSelectArticle, initialCategory = "" }) {
     onSelectArticle(slug)
   }
 
-  function handleCategoryFilterChange(e) {
-    const val = e.target.value
-    setCategoryFilter(val)
-    runSearch(search, val, typeFilter, tagFilter, productFilter)
+  function applyFilters(
+    category = categoryFilter,
+    type = typeFilter,
+    tag = tagFilter,
+    product = productFilter
+  ) {
+    setShowSuggestions(false)
+
+    runSearch(
+      search,
+      category,
+      type,
+      tag,
+      product
+    )
   }
 
-  function handleTypeFilterChange(e) {
-    const val = e.target.value
-    setTypeFilter(val)
-    runSearch(search, categoryFilter, val, tagFilter, productFilter)
+  function handleCategoryChange(e) {
+    const value = e.target.value
+
+    setShowSuggestions(false)
+    setCategoryFilter(value)
+
+    applyFilters(
+      value,
+      typeFilter,
+      tagFilter,
+      productFilter
+    )
   }
 
-  function handleTagFilterChange(e) {
-    const val = e.target.value
-    setTagFilter(val)
-    runSearch(search, categoryFilter, typeFilter, val, productFilter)
+  function handleModuleChange(e) {
+    const value = e.target.value
+
+    setShowSuggestions(false)
+    setTagFilter(value)
+
+    applyFilters(
+      categoryFilter,
+      typeFilter,
+      value,
+      productFilter
+    )
   }
 
-  function handleProductFilterChange(e) {
-    const val = e.target.value
-    setProductFilter(val)
-    runSearch(search, categoryFilter, typeFilter, tagFilter, val)
+  function handleContentTypeChange(e) {
+    const value = e.target.value
+
+    setShowSuggestions(false)
+    setTypeFilter(value)
+
+    applyFilters(
+      categoryFilter,
+      value,
+      tagFilter,
+      productFilter
+    )
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-20">
-      <div className="text-gray-400">Loading articles...</div>
-    </div>
-  )
+  function handleProductChange(e) {
+    const value = e.target.value
+
+    setShowSuggestions(false)
+    setProductFilter(value)
+
+    applyFilters(
+      categoryFilter,
+      typeFilter,
+      tagFilter,
+      value
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-gray-400">
+          Loading knowledge articles...
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div>
-      <div className="mb-3 relative">
-        <input
-          type="text"
-          value={search}
-          onChange={handleSearch}
-          onFocus={() => search.length >= 2 && setShowSuggestions(true)}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-          placeholder="Search articles... e.g. vitals, registration, TB"
-          className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-        />
+    <div className="space-y-6 pb-20">
 
-        {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 overflow-hidden">
-            {suggestions.map(s => (
-              <button
-                key={s.id}
-                onMouseDown={() => handleSuggestionClick(s.slug)}
-                className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-teal-50 transition border-b border-gray-100 last:border-0"
-              >
-                {s.title}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* ======================================================
+          HEADER
+      ====================================================== */}
+      <section>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
 
-      <div className="flex flex-wrap gap-2 mb-6">
-        <select
-          value={categoryFilter}
-          onChange={handleCategoryFilterChange}
-          className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-        >
-          <option value="">All categories</option>
-          {categories.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-
-        <select
-          value={typeFilter}
-          onChange={handleTypeFilterChange}
-          className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-        >
-          <option value="">All content types</option>
-          <option value="how_to">How-To Guide</option>
-          <option value="sop">SOP</option>
-          <option value="faq">FAQ</option>
-          <option value="feature_reference">Feature Reference</option>
-          <option value="troubleshooting">Troubleshooting</option>
-          <option value="release_notes">Release Notes</option>
-        </select>
-
-        <select
-          value={tagFilter}
-          onChange={handleTagFilterChange}
-          className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-        >
-          <option value="">All tags</option>
-          {allTags.map(t => (
-            <option key={t.id} value={t.id}>{t.name}</option>
-          ))}
-        </select>
-      </div>
-     
-      <select
-        value={productFilter}
-        onChange={handleProductFilterChange}
-        className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-      >
-         <option value="">All products</option>
-         
-         {products.map(product => (
-            <option key={product.id} value={product.id}>
-              {product.icon ? `${product.icon} ` : ""}
-              {product.name}
-              {product.version ? ` — v${product.version}` : ""}
-            </option>
-      ))}
-      </select>   
-      <p className="text-sm text-gray-500 mb-4">
-        {searching ? "Searching..." : `${articles.length} article${articles.length !== 1 ? "s" : ""} found`}
-      </p>
-
-      <div className="grid gap-4 pb-20">
-        {articles.map(article => (
-          <div
-            key={article.id}
-            onClick={() => onSelectArticle(article.slug)}
-            className="bg-white border border-gray-200 rounded-xl p-5 cursor-pointer hover:border-teal-400 hover:shadow-md transition"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-1">
-                  {article.title}
-                </h3>
-                <p className="text-xs text-gray-400">
-                  {article.slug}
-                </p>
-              </div>
-              <span className="text-xs bg-teal-50 text-teal-700 border border-teal-200 rounded-full px-3 py-1 whitespace-nowrap">
-                {article.status}
-              </span>
+          <div>
+            <div className="text-[10px] uppercase tracking-wider font-semibold text-violet-700 mb-2">
+              Knowledge Centre
             </div>
-          </div>
-        ))}
 
-        {articles.length === 0 && !loading && (
-          <div className="text-center py-10">
-            <p className="text-gray-500 mb-1">No articles found for "{search}"</p>
-            <p className="text-sm text-gray-400 mb-6">
-              Try different keywords, or ask the chat assistant in the corner — it can often find related guidance even when search comes up empty.
+            <h2 className="text-2xl font-bold text-slate-800">
+              Knowledge Articles
+            </h2>
+
+            <p className="text-sm text-slate-500 mt-1 max-w-2xl">
+              Find verified guidance for TaifaCare HMIS
+              workflows, clinical services and system operations.
             </p>
+          </div>
 
-            {fallbackArticles.length > 0 && (
-              <div className="max-w-md mx-auto text-left">
-                <p className="text-xs uppercase tracking-wide text-gray-400 mb-2">You might find these helpful</p>
-                <div className="grid gap-2">
-                  {fallbackArticles.map(a => (
-                    <div
-                      key={a.id}
-                      onClick={() => onSelectArticle(a.slug)}
-                      className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 cursor-pointer hover:border-teal-400 transition"
-                    >
-                      {a.title}
-                    </div>
-                  ))}
-                </div>
+          <div className="text-xs text-slate-400">
+            {articles.length} result
+            {articles.length === 1 ? "" : "s"}
+          </div>
+
+        </div>
+      </section>
+
+      {/* ======================================================
+          SEARCH + FILTERS
+      ====================================================== */}
+      <section className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+
+        {/* SEARCH */}
+        <div className="mb-4">
+
+          <input
+            type="text"
+            value={search}
+            onChange={handleSearch}
+            onFocus={() => {
+              if (suggestions.length > 0) {
+                setShowSuggestions(true)
+              }
+            }}
+            onBlur={() => {
+              setTimeout(() => {
+                setShowSuggestions(false)
+              }, 150)
+            }}
+            placeholder="Search registration, vitals, laboratory, pharmacy..."
+            className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+          />
+
+          {/* AUTOCOMPLETE */}
+          {showSuggestions &&
+            suggestions.length > 0 && (
+              <div className="mt-2 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+
+                {suggestions.map(item => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onMouseDown={() => {
+                      setShowSuggestions(false)
+                      handleSuggestionClick(item.slug)
+                    }}
+                    className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-violet-50 border-b border-slate-100 last:border-0 transition"
+                  >
+                    {item.title}
+                  </button>
+                ))}
+
               </div>
             )}
+
+        </div>
+
+        {/* FILTERS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+
+          {/* CATEGORY */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-2">
+
+            <label className="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 px-1.5 mb-1">
+              Category
+            </label>
+
+            <select
+              value={categoryFilter}
+              onChange={handleCategoryChange}
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+            >
+              <option value="">
+                All categories
+              </option>
+
+              {categories.map(category => (
+                <option
+                  key={category.id}
+                  value={category.id}
+                >
+                  {category.name}
+                </option>
+              ))}
+            </select>
+
           </div>
-        )}
-      </div>
+
+          {/* HMIS MODULE */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-2">
+
+            <label className="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 px-1.5 mb-1">
+              HMIS Module
+            </label>
+
+            <select
+              value={tagFilter}
+              onChange={handleModuleChange}
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+            >
+              <option value="">
+                All HMIS modules
+              </option>
+
+              {allTags.map(tag => (
+                <option
+                  key={tag.id}
+                  value={tag.id}
+                >
+                  {tag.name}
+                </option>
+              ))}
+            </select>
+
+          </div>
+
+          {/* CONTENT TYPE */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-2">
+
+            <label className="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 px-1.5 mb-1">
+              Content Type
+            </label>
+
+            <select
+              value={typeFilter}
+              onChange={handleContentTypeChange}
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+            >
+              <option value="">
+                All content types
+              </option>
+
+              <option value="how_to">
+                How-To Guide
+              </option>
+
+              <option value="sop">
+                SOP
+              </option>
+
+              <option value="faq">
+                FAQ
+              </option>
+
+              <option value="feature_reference">
+                Feature Reference
+              </option>
+
+              <option value="troubleshooting">
+                Troubleshooting
+              </option>
+
+              <option value="release_notes">
+                Release Notes
+              </option>
+            </select>
+
+          </div>
+
+          {/* PRODUCT */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-2">
+
+            <label className="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 px-1.5 mb-1">
+              Product
+            </label>
+
+            <select
+              value={productFilter}
+              onChange={handleProductChange}
+              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+            >
+              <option value="">
+                All products
+              </option>
+
+              {products.map(product => (
+                <option
+                  key={product.id}
+                  value={product.id}
+                >
+                  {product.name}
+                  {" "}
+                  v{product.version || "N/A"}
+                </option>
+              ))}
+            </select>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* ======================================================
+          SEARCHING STATUS
+      ====================================================== */}
+      {searching && (
+        <div className="text-xs text-slate-400">
+          Searching the knowledge base...
+        </div>
+      )}
+
+      {/* ======================================================
+          ARTICLE RESULTS
+      ====================================================== */}
+      <section className="grid gap-4">
+
+        {articles.map(article => (
+
+          <article
+            key={article.id}
+            role="button"
+            tabIndex={0}
+            onClick={() => onSelectArticle(article.slug)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault()
+                onSelectArticle(article.slug)
+              }
+            }}
+            className="w-full text-left bg-white border border-slate-200 rounded-xl p-5 cursor-pointer hover:border-violet-300 hover:shadow-md transition group focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+          >
+
+            <div className="flex items-start gap-4">
+
+              {/* ARTICLE ICON */}
+              <div className="w-11 h-11 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center shrink-0 group-hover:bg-violet-600 group-hover:text-white transition">
+
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-5 h-5"
+                >
+                  <path d="M5 4h14v16H5z" />
+                  <path d="M8 8h8" />
+                  <path d="M8 12h8" />
+                  <path d="M8 16h5" />
+                </svg>
+
+              </div>
+
+
+              {/* ARTICLE INFORMATION */}
+              <div className="min-w-0 flex-1">
+
+                <div className="flex items-start justify-between gap-3">
+
+                  <h3 className="font-semibold text-slate-800 group-hover:text-violet-700 transition">
+                    {article.title}
+                  </h3>
+
+                  <span className="text-slate-300 group-hover:text-violet-600 text-lg shrink-0 transition-transform group-hover:translate-x-1">
+                    →
+                  </span>
+
+                </div>
+
+
+                {/* TAXONOMY BADGES */}
+                <div className="flex flex-wrap gap-2 mt-3">
+
+                  {article.category_name && (
+                    <span className="text-[11px] bg-violet-50 text-violet-700 border border-violet-100 px-2.5 py-1 rounded-full">
+                      {article.category_name}
+                    </span>
+                  )}
+
+                  {article.content_type && (
+                    <span className="text-[11px] bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full capitalize">
+                      {article.content_type.replaceAll("_", " ")}
+                    </span>
+                  )}
+
+                  <span className="text-[11px] bg-cyan-50 text-cyan-700 border border-cyan-100 px-2.5 py-1 rounded-full">
+                    {article.product_name || "TaifaCare"}
+                    {" "}
+                    v{article.product_version || "1.0"}
+                  </span>
+
+                </div>
+
+
+                <p className="text-xs text-slate-400 mt-3">
+                  Published knowledge article
+                </p>
+
+              </div>
+
+            </div>
+
+          </article>
+
+        ))}
+
+      </section>
+
+      {/* ======================================================
+          EMPTY STATE
+      ====================================================== */}
+      {articles.length === 0 && (
+        <div className="bg-white border border-slate-200 rounded-xl py-16 px-6 text-center">
+
+          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
+
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-6 h-6"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="7"
+              />
+
+              <path d="m16 16 4 4" />
+
+            </svg>
+
+          </div>
+
+          <h3 className="font-semibold text-slate-700">
+            No matching articles
+          </h3>
+
+          <p className="text-sm text-slate-400 mt-1">
+            Try a different search term, category or HMIS module.
+          </p>
+
+        </div>
+      )}
+
     </div>
   )
 }

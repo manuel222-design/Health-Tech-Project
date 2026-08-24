@@ -11,9 +11,12 @@ on:
       - develop
 
 jobs:
-  backend:
+  backend-tests:
     name: Backend Tests
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/healthtech_test
 
     services:
       postgres:

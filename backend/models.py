@@ -11,7 +11,6 @@ class UserRole(str, enum.Enum):
     viewer = "viewer"
     editor = "editor"
     admin  = "admin"
-    sme    = "sme"
 
 class ArticleStatus(str, enum.Enum):
     draft     = "draft"
@@ -101,8 +100,9 @@ class Article(Base):
     )
     author_id     = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     view_count    = Column(Integer, default=0)
-    published_at  = Column(DateTime(timezone=True), nullable=True)
-    created_at    = Column(DateTime(timezone=True), server_default=func.now())
+    published_at    = Column(DateTime(timezone=True), nullable=True)
+    last_reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    created_at      = Column(DateTime(timezone=True), server_default=func.now())
     updated_at    = Column(DateTime(timezone=True), onupdate=func.now())
 
     author        = relationship("User", back_populates="articles")
@@ -161,6 +161,30 @@ class ChatMessage(Base):
 
     session     = relationship("ChatSession", back_populates="messages")
 
+class ChatFeedback(Base):
+    __tablename__ = "chat_feedback"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    message_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("chat_messages.id"),
+        nullable=False
+    )
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=True
+    )
+    helpful = Column(Boolean, nullable=False)
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
+
+    message = relationship("ChatMessage")
+    user = relationship("User")
+
+
 class Tag(Base):
     __tablename__ = "tags"
 
@@ -211,3 +235,15 @@ class Media(Base):
     type        = Column(String(20), nullable=False)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class PasswordResetOTP(Base):
+    __tablename__ = "password_reset_otps"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String(255), nullable=False, index=True)
+    otp_hash = Column(String(64), nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    attempts = Column(Integer, nullable=False, default=0)
+    used_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

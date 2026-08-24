@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE = "http://127.0.0.1:8000/api/v1"
+const API_BASE = import.meta.env.VITE_API_BASE || "/api/v1"
 
 const api = axios.create({
   baseURL: `${API_BASE}`,
@@ -47,18 +47,6 @@ export const register = (username, email, password, department) =>
     department
   })
 
-export const submitSMEReview = (slug, decision, comments) =>
-  api.post(`/articles/${slug}/sme-review`, {
-    decision,
-    comments
-  })
-
-export const getPendingSMEArticles = () =>
-  api.get('/articles/sme/pending')
-
-export const getSMEReviews = (slug) =>
-  api.get(`/articles/${slug}/sme-reviews`)
-
 export const approveArticle = (slug) => api.post(`/articles/${slug}/approve`)
 export const getArticles = (filters = {}) => {
   const params = new URLSearchParams(filters)
@@ -104,6 +92,7 @@ export default api
 export const submitFeedback = (slug, rating, comment) =>
   api.post(`/articles/${slug}/feedback`, { rating, comment })
 export const getFeedbackSummary = (slug) => api.get(`/articles/${slug}/feedback/summary`)
+export const getAdminFeedback = () => api.get("/admin/feedback")
 
 export const submitChatFeedback = (messageId, helpful) =>
   api.post(`/chat/${messageId}/feedback`, { helpful })
@@ -113,6 +102,7 @@ export const updateUserRole = (userId, role) => api.put(`/admin/users/${userId}/
 export const toggleUserActive = (userId) => api.put(`/admin/users/${userId}/toggle-active`)
 
 export const getAnalytics = () => api.get('/admin/analytics')
+export const getSearchTrend = () => api.get('/admin/search-trend')
 
 export const getAuditLogs = () => api.get('/admin/audit-logs')
 
@@ -126,3 +116,16 @@ export const getUnansweredQuestions = () => api.get('/admin/unanswered-questions
 
 export const getContentNotifications = () =>
   api.get('/content-notifications')
+
+
+export const forgotPassword = (email) =>
+  api.post('/auth/forgot-password', {
+    email
+  })
+
+export const resetPassword = (email, otp, newPassword) =>
+  api.post('/auth/reset-password', {
+    email,
+    otp,
+    new_password: newPassword
+})
