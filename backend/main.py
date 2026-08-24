@@ -68,7 +68,7 @@ ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
         "ALLOWED_ORIGINS",
-        "http://localhost:5173,http://localhost:5174,http://localhost:3000,http://localhost:5500,http://127.0.0.1:5500,https://healthtech-kb-frontend.onrender.com"
+        "http://localhost:5173,http://localhost:5174,http://localhost:3000,http://localhost:5500,http://127.0.0.1:5500,https://healthtech-b4v3.onrender.com"
     ).split(",")
     if origin.strip()
 ]
