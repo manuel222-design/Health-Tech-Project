@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 from jose import jwt, JWTError                                 # type: ignore 
 from passlib.context import CryptContext               # type: ignore 
 from datetime import datetime, timedelta, timezone
-from pydantic import BaseModel                         # type: ignore 
+from pydantic import BaseModel                         # type: ignore, field_validator
+from pydantic import field_validator
 from database import get_db
 from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, Product, ChatSession, ChatMessage, ChatFeedback, MessageRole, UserRole, AuditLog, Media, ArticleSMEReview
 import os, uuid
@@ -101,6 +102,33 @@ cloudinary.config(
     secure=True
 )
 logger = logging.getLogger("healthtech")
+
+
+
+PASSWORD_POLICY_MESSAGE = (
+    "Password must be at least 8 characters long and contain "
+    "at least one uppercase letter, one lowercase letter, "
+    "one number, and one special character."
+)
+
+
+def validate_password_strength(value: str) -> str:
+    if len(value) < 8:
+        raise ValueError(PASSWORD_POLICY_MESSAGE)
+
+    if not re.search(r"[A-Z]", value):
+        raise ValueError(PASSWORD_POLICY_MESSAGE)
+
+    if not re.search(r"[a-z]", value):
+        raise ValueError(PASSWORD_POLICY_MESSAGE)
+
+    if not re.search(r"\d", value):
+        raise ValueError(PASSWORD_POLICY_MESSAGE)
+
+    if not re.search(r"[^A-Za-z0-9]", value):
+        raise ValueError(PASSWORD_POLICY_MESSAGE)
+
+    return value
 
 @app.get("/health")
 def health_check():
@@ -265,6 +293,13 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     department: Optional[str] = None
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        return validate_password_strength(value)
+
+
 
 class TagCreateRequest(BaseModel):
     name: str
@@ -2031,6 +2066,13 @@ class ResetPasswordRequest(BaseModel):
     email: str
     otp: str
     new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, value: str) -> str:
+        return validate_password_strength(value)
+
+
 
 
 def _ensure_password_reset_table(db: Session):
