@@ -133,8 +133,8 @@ export default function Products({ onSelectProduct }) {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-teal-500" />
-              <span className="text-[10px] uppercase tracking-wider font-semibold text-teal-700">
+              <span className="w-2 h-2 rounded-full bg-violet-500" />
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-violet-700">
                 System Catalogue
               </span>
             </div>
@@ -155,7 +155,7 @@ export default function Products({ onSelectProduct }) {
               setShowForm(prev => !prev)
               setError("")
             }}
-            className="inline-flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition shadow-sm"
+            className="inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition shadow-sm"
           >
             {showForm ? "Cancel" : "+ Add Product"}
           </button>
@@ -193,7 +193,7 @@ export default function Products({ onSelectProduct }) {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="e.g. TaifaCare"
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
               />
             </div>
 
@@ -207,7 +207,7 @@ export default function Products({ onSelectProduct }) {
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Briefly describe the product..."
                 rows={3}
-                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
               />
             </div>
 
@@ -222,7 +222,7 @@ export default function Products({ onSelectProduct }) {
                   value={version}
                   onChange={e => setVersion(e.target.value)}
                   placeholder="e.g. 1.0"
-                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                 />
               </div>
 
@@ -236,7 +236,7 @@ export default function Products({ onSelectProduct }) {
                   value={icon}
                   onChange={e => setIcon(e.target.value)}
                   placeholder="e.g. health"
-                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                 />
 
                 <p className="text-[11px] text-slate-400 mt-1">
@@ -261,7 +261,7 @@ export default function Products({ onSelectProduct }) {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-4 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium disabled:opacity-50 transition"
+                className="px-4 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium disabled:opacity-50 transition"
               >
                 {saving ? "Creating..." : "Create Product"}
               </button>
@@ -290,10 +290,10 @@ export default function Products({ onSelectProduct }) {
           )}
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <div>
           {loading ? (
             <div className="py-20 text-center">
-              <div className="w-9 h-9 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin mx-auto mb-3" />
+              <div className="w-9 h-9 border-4 border-violet-100 border-t-violet-600 rounded-full animate-spin mx-auto mb-3" />
               <p className="text-sm text-slate-400">
                 Loading products...
               </p>
@@ -313,55 +313,153 @@ export default function Products({ onSelectProduct }) {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-100">
-              {products.map(product => (
-                <button
-                  key={product.id}
-                  type="button"
-                  onClick={() => onSelectProduct(product.slug)}
-                  className="w-full p-5 flex items-center gap-4 text-left hover:bg-slate-50 transition group"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 group-hover:bg-teal-600 group-hover:text-white transition">
-                    <ProductIcon name={product.icon} />
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-slate-800 group-hover:text-teal-700 transition">
-                        {product.name}
-                      </h3>
+              {products.map((product, index) => {
 
-                      <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-                        v{product.version || "N/A"}
-                      </span>
+                const isPrimary =
+                  product.name?.toLowerCase() === "taifa care"
+
+                return (
+                  <button
+                    key={product.id}
+                    type="button"
+                    onClick={() =>
+                      onSelectProduct(product.slug)
+                    }
+                    className={`group relative overflow-hidden text-left rounded-2xl border shadow-sm hover:-translate-y-0.5 hover:shadow-lg transition duration-200 ${
+                      isPrimary
+                        ? "bg-gradient-to-br from-violet-50 via-white to-white border-violet-100"
+                        : "bg-gradient-to-br from-slate-50 via-white to-white border-slate-200"
+                    }`}
+                  >
+
+                    {/* subtle accent */}
+                    <div
+                      className={`absolute top-0 left-0 right-0 h-1 ${
+                        isPrimary
+                          ? "bg-violet-500"
+                          : "bg-violet-500"
+                      }`}
+                    />
+
+
+                    <div className="p-6">
+
+                      <div className="flex items-start justify-between gap-4">
+
+                        <div className="flex items-center gap-4 min-w-0">
+
+                          <div
+                            className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition ${
+                              isPrimary
+                                ? "bg-violet-100 text-violet-700 group-hover:bg-violet-600 group-hover:text-white"
+                                : "bg-violet-50 text-violet-700 group-hover:bg-violet-600 group-hover:text-white"
+                            }`}
+                          >
+                            <ProductIcon
+                              name={product.icon}
+                            />
+                          </div>
+
+
+                          <div className="min-w-0">
+
+                            <div className="flex items-center gap-2 flex-wrap">
+
+                              <h3
+                                className={`text-lg font-bold transition ${
+                                  isPrimary
+                                    ? "text-slate-800 group-hover:text-violet-700"
+                                    : "text-slate-800 group-hover:text-violet-700"
+                                }`}
+                              >
+                                {product.name}
+                              </h3>
+
+                              <span
+                                className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${
+                                  isPrimary
+                                    ? "bg-violet-50 text-violet-700 border-violet-100"
+                                    : "bg-violet-50 text-violet-700 border-violet-100"
+                                }`}
+                              >
+                                v{product.version || "N/A"}
+                              </span>
+
+                            </div>
+
+                            <div className="flex items-center gap-2 mt-1.5">
+
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  product.article_count > 0
+                                    ? "bg-emerald-500"
+                                    : "bg-slate-300"
+                                }`}
+                              />
+
+                              <span className="text-xs text-slate-400">
+                                {product.article_count || 0} knowledge{" "}
+                                {product.article_count === 1
+                                  ? "article"
+                                  : "articles"}
+                              </span>
+
+                            </div>
+
+                          </div>
+
+                        </div>
+
+
+                        <span
+                          className={`text-xl shrink-0 transition-transform group-hover:translate-x-1 ${
+                            isPrimary
+                              ? "text-violet-300 group-hover:text-violet-600"
+                              : "text-violet-200 group-hover:text-violet-600"
+                          }`}
+                        >
+                          →
+                        </span>
+
+                      </div>
+
+
+                      <div className="mt-6 pl-[72px]">
+
+                        <p className="text-sm text-slate-500 leading-relaxed min-h-[48px]">
+                          {product.description ||
+                            "No description provided."}
+                        </p>
+
+
+                        <div className="mt-6 flex items-center justify-between">
+
+                          <span className="text-xs font-semibold text-slate-400">
+                            Knowledge Centre
+                          </span>
+
+                          <span
+                            className={`text-xs font-semibold transition ${
+                              isPrimary
+                                ? "text-violet-700"
+                                : "text-violet-700"
+                            }`}
+                          >
+                            View product →
+                          </span>
+
+                        </div>
+
+                      </div>
+
                     </div>
 
-                    <p className="text-sm text-slate-500 mt-1 line-clamp-2">
-                      {product.description ||
-                        "No description provided."}
-                    </p>
+                  </button>
+                )
+              })}
 
-                    <div className="flex items-center gap-3 mt-2">
-                      <span className="text-xs text-slate-400">
-                        {product.article_count || 0} article
-                        {product.article_count === 1 ? "" : "s"}
-                      </span>
-
-                      <span className="text-slate-300">
-                        •
-                      </span>
-
-                      <span className="text-xs text-slate-400">
-                        Supported system
-                      </span>
-                    </div>
-                  </div>
-
-                  <span className="text-slate-300 group-hover:text-teal-600 group-hover:translate-x-1 transition text-lg shrink-0">
-                    →
-                  </span>
-                </button>
-              ))}
             </div>
           )}
         </div>

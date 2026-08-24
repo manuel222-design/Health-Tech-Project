@@ -18,7 +18,6 @@ class ArticleService:
                 detail="Article not found"
             )
 
-        # Business rule: viewing a published article increments its view count.
         article.view_count += 1
         self.repository.save()
 

@@ -8,11 +8,13 @@ import ArticleView from "./pages/ArticleView"
 import AdminArticles from "./pages/AdminArticles"
 import AdminUsers from "./pages/AdminUsers"
 import AdminAnalytics from "./pages/AdminAnalytics"
+import AdminFeedback from "./pages/AdminFeedback"
 import AdminAuditLog from "./pages/AdminAuditLog"
 import Products from "./pages/Products"
 import ProductDetails from "./pages/ProductDetails"
 import ArticleForm from "./pages/ArticleForm"
 import ChatWidget from "./components/ChatWidget"
+import ChatEmbed from "./pages/ChatEmbed"
 import Home from "./pages/Home"
 import ErrorPage from "./pages/ErrorPage"
 
@@ -141,6 +143,8 @@ function CategorySidebarIcon({ name }) {
 
 export default function App() {
 
+
+  const [categoriesOpen, setCategoriesOpen] = useState(false)
   const [user, setUser] = useState(() => {
 
     const token = localStorage.getItem("token")
@@ -168,6 +172,7 @@ export default function App() {
   const notificationRef = useRef(null)
 
   const [sidebarCategories, setSidebarCategories] = useState([])
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const [darkMode, setDarkMode] = useState(
     () => localStorage.getItem("darkMode") === "true"
@@ -190,7 +195,9 @@ export default function App() {
       initialPath === "/" ||
       initialPath === "/landing"
     ) {
-      return "landing"
+      return localStorage.getItem("token")
+        ? "home"
+        : "landing"
     }
 
     if (initialPath === "/login") {
@@ -261,6 +268,19 @@ export default function App() {
     if (initialPath === "/audit") {
       return "audit"
     }
+
+    if (initialPath === "/feedback") {
+      return "feedback"
+    }
+
+    if (initialPath === "/settings") {
+      return "settings"
+    }
+
+    if (initialPath === "/widget") {
+      return "widget"
+    }
+
     return "notfound"
   })
 
@@ -630,6 +650,24 @@ export default function App() {
       )
     }
 
+    if (page === "feedback") {
+
+      window.history.pushState(
+        {},
+        "",
+        "/feedback"
+      )
+    }
+
+    if (page === "settings") {
+
+      window.history.pushState(
+        {},
+        "",
+        "/settings"
+      )
+    }
+
   }
 
 
@@ -663,7 +701,8 @@ export default function App() {
 
   function handleSelectCategory(categoryId) {
 
-    setSelectedCategory(categoryId)
+        setCategoriesOpen(true)
+setSelectedCategory(categoryId)
 
     setCurrentPage("articles")
 
@@ -808,10 +847,6 @@ export default function App() {
   function handleNotificationClick(notification) {
     setNotificationsOpen(false)
 
-    // Mark the clicked notification as handled locally.
-    // The current notification API does not persist read state,
-    // so removing it from the local list keeps the badge accurate
-    // immediately after the user opens it.
     setNotifications(prev =>
       prev.filter(item => {
         const clickedId = notification?.id
@@ -837,7 +872,7 @@ export default function App() {
       notification?.type === "article_review" ||
       notification?.notification_type === "article_review"
     ) {
-      goTo("review")
+      goTo("manage")
       return
     }
 
@@ -852,7 +887,7 @@ export default function App() {
     }
 
     if (isAdmin || canManage) {
-      goTo("review")
+      goTo("manage")
       return
     }
 
@@ -895,9 +930,6 @@ export default function App() {
     article:
       "Knowledge Base",
 
-    review:
-      "Content Review",
-
     manage:
       editSlug
         ? "Edit Article"
@@ -917,6 +949,12 @@ export default function App() {
 
     audit:
       "Audit Log",
+
+    feedback:
+      "Feedback",
+
+    settings:
+      "Settings",
   }
 
   const pageAllowed =
@@ -932,6 +970,10 @@ export default function App() {
       currentPage === "audit"
     ? isAdmin
     : true
+
+  if (currentPage === "widget") {
+    return <ChatEmbed />
+  }
 
   if (!user) {
 
@@ -964,66 +1006,84 @@ export default function App() {
 
 
     return (
-      <Landing
-        onLogin={openLogin}
-        onRegister={openRegister}
-      />
+      <>
+        <Landing
+          onLogin={openLogin}
+          onRegister={openRegister}
+          onOpenAssistant={() =>
+            window.openTaifaCareAssistant?.()
+          }
+        />
+
+        <ChatWidget
+          onOpenArticle={handleSelectArticle}
+        />
+      </>
     )
   }
 
+  function handleMobileNavigate(page) {
+    setMobileMenuOpen(false)
+    goTo(page)
+  }
 
   return (
 
     <div className="min-h-screen bg-slate-100 text-slate-800">
 
 
-      <aside className="fixed left-0 top-0 bottom-0 w-60 bg-slate-900 text-slate-300 hidden md:flex flex-col z-40">
+      <aside className="fixed left-0 top-0 bottom-0 w-60 bg-slate-950 text-slate-300 hidden md:flex flex-col z-40 shadow-2xl shadow-slate-950/30">
 
-        <div className="px-5 py-5 border-b border-slate-800">
+        <div className="relative px-5 py-5 border-b border-slate-800/80 overflow-hidden">
+
+          <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-violet-500/10 blur-2xl pointer-events-none" />
 
           <div
-            className="flex items-center gap-3 cursor-pointer"
+            className="relative flex items-center gap-3 cursor-pointer group"
             onClick={() =>
               goTo("home")
             }
           >
 
-            <div className="w-9 h-9 bg-teal-600 rounded-lg flex items-center justify-center shrink-0">
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shrink-0 shadow-lg shadow-violet-950/40 ring-1 ring-teal-400/20 group-hover:ring-teal-300/40 transition">
 
-              <span className="text-white font-bold text-sm">
+              <span className="text-white font-extrabold text-sm tracking-tight">
                 TC
               </span>
+
+              <span className="absolute -right-0.5 -bottom-0.5 w-2.5 h-2.5 rounded-full bg-violet-300 ring-2 ring-slate-950" />
 
             </div>
 
 
-            <div>
+            <div className="min-w-0">
 
-              <div className="text-white font-semibold text-sm">
+              <div className="text-white font-bold text-[15px] tracking-tight group-hover:text-violet-200 transition">
                 Taifa Care
               </div>
 
-              <div className="text-slate-500 text-xs">
-                HMIS Knowledge System
+              <div className="text-slate-500 text-[10px] uppercase tracking-[0.12em] mt-0.5">
+                Knowledge Centre
               </div>
 
             </div>
 
           </div>
 
+
         </div>
 
 
-        <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900/95">
 
           <button
             onClick={() =>
               goTo("home")
             }
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
-              (currentPage === "articles" || currentPage === "article")
-                ? "bg-slate-800 text-white border-l-2 border-teal-500"
-                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
+              currentPage === "home"
+                ? "bg-violet-950/60 text-violet-300 border border-violet-900 shadow-sm"
+                : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
             }`}
           >
 
@@ -1052,54 +1112,97 @@ export default function App() {
           </button>
 
 
-          <div className="pt-5 pb-2 px-3 text-[10px] uppercase tracking-wider text-slate-600 font-semibold">
+          <div className="mt-5 pt-5 pb-2 px-3 border-t border-slate-800 text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
             Knowledge
           </div>
 
 
-          <button
-            onClick={() =>
-              goTo("articles")
-            }
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
-              currentPage === "articles" ||
-              currentPage === "article"
-                ? "bg-slate-800 text-white border-l-2 border-teal-500"
-                : "text-slate-400 hover:bg-slate-800 hover:text-white"
-            }`}
-          >
+          <div className="flex items-center gap-1.5">
 
-            <span className="w-5 h-5 flex items-center justify-center shrink-0">
+            <button
+              onClick={() => goTo("articles")}
+              className={`flex-1 min-w-0 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
+                currentPage === "articles" ||
+                currentPage === "article"
+                  ? "bg-violet-950/60 text-violet-300 border border-violet-900 shadow-sm"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
+              }`}
+            >
 
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-4 h-4"
+              <span className="w-5 h-5 flex items-center justify-center shrink-0">
+
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-4 h-4"
+                >
+                  <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16.5A1.5 1.5 0 0 0 18.5 18H6.5A2.5 2.5 0 0 0 4 20.5V5.5Z" />
+                  <path d="M7 7h8" />
+                  <path d="M7 10h8" />
+                  <path d="M7 13h5" />
+                </svg>
+
+              </span>
+
+              <span className="min-w-0 flex-1 text-left font-medium truncate">
+                Knowledge Base
+              </span>
+
+              <span className="min-w-[24px] h-5 px-1.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400 text-[10px] font-semibold flex items-center justify-center shrink-0">
+                {sidebarCategories.reduce(
+                  (sum, category) =>
+                    sum + (category.article_count || 0),
+                  0
+                )}
+              </span>
+
+            </button>
+
+
+            {sidebarCategories.length > 0 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setCategoriesOpen(prev => !prev)
+                }
+                aria-label={
+                  categoriesOpen
+                    ? "Hide knowledge base categories"
+                    : "Show knowledge base categories"
+                }
+                aria-expanded={categoriesOpen}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition shrink-0 ${
+                  categoriesOpen
+                    ? "bg-slate-800 text-violet-300"
+                    : "text-slate-500 hover:bg-slate-800 hover:text-slate-200"
+                }`}
               >
-                <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16.5A1.5 1.5 0 0 0 18.5 18H6.5A2.5 2.5 0 0 0 4 20.5V5.5Z" />
-                <path d="M7 7h8" />
-                <path d="M7 10h8" />
-                <path d="M7 13h5" />
-              </svg>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    categoriesOpen ? "rotate-180" : ""
+                  }`}
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+            )}
 
-            </span>
-
-            <span>
-              Knowledge Base
-            </span>
-
-          </button>
+          </div>
 
 
-          {sidebarCategories.length > 0 && (
+          {sidebarCategories.length > 0 && categoriesOpen && (
 
-            <div className="mt-3 space-y-1">
+            <div className="mt-2 rounded-xl bg-slate-900/35 border border-slate-800/70 p-1.5 space-y-1">
 
-              <div className="px-3 pt-1 pb-2 text-[9px] uppercase tracking-[0.14em] text-slate-600 font-semibold">
+              <div className="px-2.5 pt-1 pb-1.5 text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
                 Clinical Areas
               </div>
 
@@ -1111,20 +1214,20 @@ export default function App() {
                   onClick={() =>
                     handleSelectCategory(category.id)
                   }
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition group ${
+                  className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-left transition group ${
                     currentPage === "articles" &&
                     selectedCategory === category.id
-                      ? "bg-teal-950/70 text-teal-300 border border-teal-900"
-                      : "text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-transparent"
+                      ? "bg-violet-950/70 text-violet-300"
+                      : "text-slate-400 hover:bg-slate-800/80 hover:text-slate-200"
                   }`}
                 >
 
                   <span
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                    className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
                       currentPage === "articles" &&
                       selectedCategory === category.id
-                        ? "bg-teal-900 text-teal-300"
-                        : "bg-slate-800 text-slate-500 group-hover:text-teal-400"
+                        ? "bg-violet-900 text-violet-300"
+                        : "bg-slate-800 text-slate-500 group-hover:text-violet-400"
                     }`}
                   >
                     <CategorySidebarIcon
@@ -1139,11 +1242,11 @@ export default function App() {
                   </span>
 
                   <span
-                    className={`text-[10px] font-semibold shrink-0 ${
+                    className={`min-w-[24px] h-5 px-1.5 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0 border ${
                       currentPage === "articles" &&
                       selectedCategory === category.id
-                        ? "text-teal-400"
-                        : "text-slate-600"
+                        ? "bg-violet-900/70 text-violet-300 border-violet-800"
+                        : "bg-slate-900 text-slate-500 border-slate-800 group-hover:text-slate-300 group-hover:border-slate-700"
                     }`}
                   >
                     {category.article_count || 0}
@@ -1160,76 +1263,13 @@ export default function App() {
 
           {canManage && (
 
-            <>
-
-              <div className="pt-5 pb-2 px-3 text-[10px] uppercase tracking-wider text-slate-600 font-semibold">
-                Content Management
-              </div>
-
-
-              <button
-                onClick={() =>
-                  goTo("review")
-                }
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
-                  currentPage === "review"
-                    ? "bg-slate-800 text-white border-l-2 border-teal-500"
-                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                }`}
-              >
-
-                <span className="w-5 h-5 flex items-center justify-center shrink-0">
-
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-4 h-4"
-                  >
-                    <rect
-                      x="5"
-                      y="4"
-                      width="14"
-                      height="16"
-                      rx="2"
-                    />
-                    <path d="M9 4.5h6" />
-                    <path d="m9 12 2 2 4-4" />
-                    <path d="M9 8h6" />
-                  </svg>
-
-                </span>
-
-                <span>
-                  Content Review
-                </span>
-
-
-                {notifications.length > 0 && (
-                  <span className="ml-auto bg-red-500 text-white text-[10px] rounded-full px-1.5 py-0.5">
-                    {notifications.length}
-                  </span>
-                )}
-
-              </button>
-
-            </>
-
-          )}
-
-
-          {canManage && (
-
             <button
               onClick={() =>
                 goTo("manage")
               }
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                 currentPage === "manage"
-                  ? "bg-slate-800 text-white border-l-2 border-teal-500"
+                  ? "bg-slate-800 text-white border-l-2 border-violet-500"
                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
             >
@@ -1269,7 +1309,7 @@ export default function App() {
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                 currentPage === "products" ||
                 currentPage === "product"
-                  ? "bg-slate-800 text-white border-l-2 border-teal-500"
+                  ? "bg-slate-800 text-white border-l-2 border-violet-500"
                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
             >
@@ -1306,7 +1346,7 @@ export default function App() {
 
             <>
 
-              <div className="pt-5 pb-2 px-3 text-[10px] uppercase tracking-wider text-slate-600 font-semibold">
+              <div className="mt-5 pt-5 pb-2 px-3 border-t border-slate-800 text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
                 Administration
               </div>
 
@@ -1317,7 +1357,7 @@ export default function App() {
                 }
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                   currentPage === "users"
-                    ? "bg-slate-800 text-white border-l-2 border-teal-500"
+                    ? "bg-slate-800 text-white border-l-2 border-violet-500"
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
@@ -1352,7 +1392,7 @@ export default function App() {
                 }
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                   currentPage === "analytics"
-                    ? "bg-slate-800 text-white border-l-2 border-teal-500"
+                    ? "bg-slate-800 text-white border-l-2 border-violet-500"
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
@@ -1387,11 +1427,47 @@ export default function App() {
 
               <button
                 onClick={() =>
+                  goTo("feedback")
+                }
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
+                  currentPage === "feedback"
+                    ? "bg-slate-800 text-white border-l-2 border-violet-500"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                }`}
+              >
+
+                <span className="w-5 h-5 flex items-center justify-center shrink-0">
+
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-4 h-4"
+                  >
+                    <path d="M20 6H4v12h4l4 3 4-3h4V6Z" />
+                    <path d="M8 10h8" />
+                    <path d="M8 14h5" />
+                  </svg>
+
+                </span>
+
+                <span>
+                  Feedback
+                </span>
+
+              </button>
+
+
+              <button
+                onClick={() =>
                   goTo("audit")
                 }
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
                   currentPage === "audit"
-                    ? "bg-slate-800 text-white border-l-2 border-teal-500"
+                    ? "bg-slate-800 text-white border-l-2 border-violet-500"
                     : "text-slate-400 hover:bg-slate-800 hover:text-white"
                 }`}
               >
@@ -1425,40 +1501,308 @@ export default function App() {
 
         </nav>
 
+
+        <div className="px-3 pb-4 pt-3 border-t border-slate-800/80">
+
+          <button
+            type="button"
+            onClick={() => goTo("settings")}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
+              currentPage === "settings"
+                ? "bg-violet-950/60 text-violet-300 border border-violet-900 shadow-sm"
+                : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
+            }`}
+          >
+
+            <span className="w-5 h-5 flex items-center justify-center shrink-0">
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4"
+              >
+                <path d="M12 3l1.2 2.7 2.9.8-.9 2.9 2.2 2.1-2.2 2.1.9 2.9-2.9.8L12 21l-1.2-2.7-2.9-.8.9-2.9-2.2-2.1 2.2-2.1-.9-2.9 2.9-.8L12 3Z" />
+                <circle cx="12" cy="12" r="2.5" />
+              </svg>
+
+            </span>
+
+            <span>
+              Settings
+            </span>
+
+          </button>
+
+        </div>
+
       </aside>
 
 
 
-      <div className="md:hidden bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
+      <div className="md:hidden sticky top-0 z-50 bg-slate-950 text-white border-b border-slate-800 shadow-sm">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => handleMobileNavigate("home")}
+            className="flex items-center gap-2 min-w-0"
+          >
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center font-extrabold text-xs shrink-0">
+              TC
+            </div>
 
-        <div
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={() =>
-            goTo("home")
-          }
-        >
+            <div className="min-w-0 text-left">
+              <div className="font-semibold text-sm truncate">
+                Taifa Care
+              </div>
 
-          <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center font-bold text-xs">
-            TC
+              <div className="text-[10px] text-slate-400 uppercase tracking-wider truncate">
+                {pageTitle[currentPage] || "Knowledge Centre"}
+              </div>
+            </div>
+          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
+              className="w-10 h-10 rounded-xl bg-slate-800 text-white flex items-center justify-center"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-5 h-5"
+              >
+                <path d="M4 6h16" />
+                <path d="M4 12h16" />
+                <path d="M4 18h16" />
+              </svg>
+            </button>
           </div>
-
-          <span className="font-semibold text-sm">
-            Taifa Care HMIS
-          </span>
-
         </div>
-
-        <button
-          onClick={handleLogout}
-          className="text-xs bg-slate-800 px-3 py-1.5 rounded-lg"
-        >
-          Sign out
-        </button>
-
       </div>
 
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-[100]">
 
-      <div className="md:ml-60 min-h-screen">
+          <button
+            type="button"
+            aria-label="Close navigation"
+            onClick={() => setMobileMenuOpen(false)}
+            className="absolute inset-0 bg-slate-950/60"
+          />
+
+          <aside className="absolute top-0 right-0 h-[100dvh] w-[88vw] max-w-sm bg-slate-950 text-slate-300 shadow-2xl flex flex-col">
+
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 shrink-0">
+
+              <div className="flex items-center gap-3 min-w-0">
+
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-white font-extrabold text-sm shrink-0">
+                  TC
+                </div>
+
+                <div className="min-w-0">
+                  <div className="text-white font-bold text-sm truncate">
+                    Taifa Care
+                  </div>
+
+                  <div className="text-slate-500 text-[10px] uppercase tracking-wider">
+                    Knowledge Centre
+                  </div>
+                </div>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close navigation menu"
+                className="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-xl shrink-0"
+              >
+                ×
+              </button>
+
+            </div>
+
+            <nav className="flex-1 overflow-y-auto px-3 py-4">
+
+              <div className="space-y-1">
+
+                <button
+                  type="button"
+                  onClick={() => handleMobileNavigate("home")}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                    currentPage === "home"
+                      ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  }`}
+                >
+                  <span className="w-5 text-center">⌂</span>
+                  <span className="flex-1 text-left">Dashboard</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleMobileNavigate("articles")}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                    currentPage === "articles" || currentPage === "article"
+                      ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  }`}
+                >
+                  <span className="w-5 text-center">▤</span>
+
+                  <span className="flex-1 text-left">
+                    Knowledge Base
+                  </span>
+
+                  <span className="text-xs text-slate-500">
+                    {sidebarCategories.reduce(
+                      (sum, category) =>
+                        sum + (category.article_count || 0),
+                      0
+                    )}
+                  </span>
+                </button>
+
+                {canManage && (
+                  <button
+                    type="button"
+                    onClick={() => handleMobileNavigate("manage")}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                      currentPage === "manage"
+                        ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }`}
+                  >
+                    <span className="w-5 text-center">✎</span>
+                    <span className="flex-1 text-left">
+                      Manage Articles
+                    </span>
+                  </button>
+                )}
+
+                {canManage && (
+                  <button
+                    type="button"
+                    onClick={() => handleMobileNavigate("products")}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                      currentPage === "products" || currentPage === "product"
+                        ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }`}
+                  >
+                    <span className="w-5 text-center">▣</span>
+                    <span className="flex-1 text-left">
+                      Products
+                    </span>
+                  </button>
+                )}
+
+                {isAdmin && (
+                  <>
+                    <div className="mt-5 mb-2 px-4 pt-4 border-t border-slate-800">
+                      <div className="text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
+                        Administration
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleMobileNavigate("users")}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                        currentPage === "users"
+                          ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                          : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                      }`}
+                    >
+                      <span className="w-5 text-center">●</span>
+                      <span className="flex-1 text-left">Users</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleMobileNavigate("analytics")}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                        currentPage === "analytics"
+                          ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                          : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                      }`}
+                    >
+                      <span className="w-5 text-center">▥</span>
+                      <span className="flex-1 text-left">Analytics</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleMobileNavigate("feedback")}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                        currentPage === "feedback"
+                          ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                          : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                      }`}
+                    >
+                      <span className="w-5 text-center">♡</span>
+                      <span className="flex-1 text-left">Feedback</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleMobileNavigate("audit")}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                        currentPage === "audit"
+                          ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                          : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                      }`}
+                    >
+                      <span className="w-5 text-center">◷</span>
+                      <span className="flex-1 text-left">Audit Log</span>
+                    </button>
+                  </>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => handleMobileNavigate("settings")}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                    currentPage === "settings"
+                      ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  }`}
+                >
+                  <span className="w-5 text-center">⚙</span>
+                  <span className="flex-1 text-left">Settings</span>
+                </button>
+
+              </div>
+
+            </nav>
+
+            <div className="shrink-0 border-t border-slate-800 p-3">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm text-slate-200"
+              >
+                Sign out
+              </button>
+            </div>
+
+          </aside>
+        </div>
+      )}
+
+
+      <div className="md:ml-60 min-h-screen min-w-0 overflow-x-hidden">
 
 
         <header className="relative bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
@@ -1495,7 +1839,7 @@ export default function App() {
                 }
                 className={`relative w-9 h-9 flex items-center justify-center rounded-lg transition ${
                   notificationsOpen
-                    ? "bg-slate-100 text-teal-700"
+                    ? "bg-slate-100 text-violet-700"
                     : "text-slate-500 hover:bg-slate-100"
                 }`}
                 aria-label="Notifications"
@@ -1569,7 +1913,7 @@ export default function App() {
 
                       <div className="px-5 py-10 text-center">
 
-                        <div className="w-10 h-10 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-3">
+                        <div className="w-10 h-10 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center mx-auto mb-3">
 
                           <svg
                             viewBox="0 0 24 24"
@@ -1617,7 +1961,7 @@ export default function App() {
 
                             <div className="flex gap-3">
 
-                              <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+                              <div className="w-8 h-8 rounded-lg bg-violet-50 text-violet-700 flex items-center justify-center shrink-0">
 
                                 {notification.source === "feedback" ? (
 
@@ -1711,9 +2055,9 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() =>
-                          goTo("review")
+                          goTo("manage")
                         }
-                        className="w-full text-center text-xs font-semibold text-teal-700 hover:text-teal-800"
+                        className="w-full text-center text-xs font-semibold text-violet-700 hover:text-violet-800"
                       >
                         View all notifications →
                       </button>
@@ -1730,26 +2074,7 @@ export default function App() {
 
 
 
-            <button
-              onClick={() =>
-                setDarkMode(prev => !prev)
-              }
-              className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition"
-              title={
-                darkMode
-                  ? "Switch to light mode"
-                  : "Switch to dark mode"
-              }
-              aria-label={
-                darkMode
-                  ? "Switch to light mode"
-                  : "Switch to dark mode"
-              }
-            >
 
-              {darkMode ? "☀" : "☾"}
-
-            </button>
 
 
 
@@ -1774,7 +2099,7 @@ export default function App() {
               </div>
 
 
-              <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs font-semibold">
+              <div className="w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center text-xs font-semibold">
 
                 {displayName(user?.username)
                   .substring(0, 2)
@@ -1839,7 +2164,7 @@ export default function App() {
           </>
         )}
 
-        <main className="max-w-7xl mx-auto px-6 py-7">
+        <main className="min-w-0 px-4 py-5 sm:px-6 lg:px-8">
 
           {currentPage === "home" && (
 
@@ -1860,7 +2185,7 @@ export default function App() {
               </h2>
 
               <p className="text-gray-500 mb-6">
-                HMIS guides and clinical workflows
+                Healthcare guides and clinical workflows
               </p>
 
               <Articles
@@ -1964,10 +2289,463 @@ export default function App() {
             )}
 
 
+          {currentPage === "feedback" &&
+            isAdmin && (
+              <AdminFeedback />
+            )}
+
+
           {currentPage === "audit" &&
             isAdmin && (
               <AdminAuditLog />
             )}
+
+
+          {currentPage === "settings" && (
+
+            <section className="max-w-5xl mx-auto space-y-8 pb-20">
+
+              <div>
+
+                <div className="flex items-center gap-3">
+
+                  <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="w-5 h-5"
+                    >
+                      <path d="M12 3l1.2 2.7 2.9.8-.9 2.9 2.2 2.1-.9 2.9-2.9.8L12 21l-1.2-2.7-2.9-.8.9-2.9-2.2-2.1.9-2.9 2.9-.8.9-2.9L12 3Z" />
+                      <circle cx="12" cy="12" r="2.5" />
+                    </svg>
+                  </div>
+
+                  <div>
+                    <h2 className="text-2xl font-bold text-slate-800">
+                      Settings
+                    </h2>
+
+                    <p className="text-sm text-slate-500 mt-0.5">
+                      Manage your account and Taifa Care preferences.
+                    </p>
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <section>
+
+                <div className="flex items-center justify-between mb-3">
+
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
+                      Profile
+                    </h3>
+
+                    <p className="text-xs text-slate-400 mt-1">
+                      Your current Taifa Care account.
+                    </p>
+                  </div>
+
+                </div>
+
+
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+
+                    <div className="flex items-center gap-4 min-w-0">
+
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 text-white flex items-center justify-center text-lg font-bold shrink-0 shadow-sm">
+                        {(user?.name || user?.email || "U")
+                          .charAt(0)
+                          .toUpperCase()}
+                      </div>
+
+
+                      <div className="min-w-0">
+
+                        <div className="font-semibold text-slate-800 truncate">
+                          {user?.name || "Taifa Care User"}
+                        </div>
+
+                        <div className="text-sm text-slate-500 mt-0.5 truncate">
+                          {user?.email || "Signed-in account"}
+                        </div>
+
+                      </div>
+
+                    </div>
+
+
+                    <span className="inline-flex items-center gap-2 self-start sm:self-center px-3 py-1.5 rounded-full bg-violet-50 text-violet-700 border border-violet-100 text-xs font-semibold capitalize">
+
+                      <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+
+                      {user?.role || "viewer"}
+
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </section>
+
+
+              <section>
+
+                <div className="mb-3">
+
+                  <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
+                    Preferences
+                  </h3>
+
+                  <p className="text-xs text-slate-400 mt-1">
+                    Personalize how the application behaves.
+                  </p>
+
+                </div>
+
+
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+
+                  <div className="p-6">
+
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+
+                      <div className="flex items-start gap-4">
+
+                        <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+
+                          {darkMode ? (
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="w-5 h-5"
+                            >
+                              <path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.7 6.7 0 0 0 21 12.8Z" />
+                            </svg>
+                          ) : (
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="w-5 h-5"
+                            >
+                              <circle cx="12" cy="12" r="4" />
+                              <path d="M12 2v2" />
+                              <path d="M12 20v2" />
+                              <path d="m4.93 4.93 1.41 1.41" />
+                              <path d="m17.66 17.66 1.41 1.41" />
+                              <path d="M2 12h2" />
+                              <path d="M20 12h2" />
+                              <path d="m6.34 17.66-1.41 1.41" />
+                              <path d="m19.07 4.93-1.41 1.41" />
+                            </svg>
+                          )}
+
+                        </div>
+
+
+                        <div>
+
+                          <div className="font-semibold text-slate-800">
+                            Appearance
+                          </div>
+
+                          <p className="text-sm text-slate-500 mt-1 max-w-xl">
+                            Choose the visual theme used across your Taifa Care workspace.
+                          </p>
+
+                        </div>
+
+                      </div>
+
+
+                      <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl p-1 shrink-0">
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDarkMode(false)
+                            localStorage.setItem(
+                              "darkMode",
+                              "false"
+                            )
+                          }}
+                          className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
+                            !darkMode
+                              ? "bg-white text-slate-800 shadow-sm border border-slate-200"
+                              : "text-slate-500 hover:text-slate-700"
+                          }`}
+                        >
+                          Light
+                        </button>
+
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDarkMode(true)
+                            localStorage.setItem(
+                              "darkMode",
+                              "true"
+                            )
+                          }}
+                          className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
+                            darkMode
+                              ? "bg-slate-800 text-white shadow-sm"
+                              : "text-slate-500 hover:text-slate-700"
+                          }`}
+                        >
+                          Dark
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </section>
+
+
+              <section>
+
+                <div className="mb-3">
+
+                  <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
+                    Role &amp; Permissions
+                  </h3>
+
+                  <p className="text-xs text-slate-400 mt-1">
+                    Your permissions are determined by your assigned role.
+                  </p>
+
+                </div>
+
+
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+
+                  <div className="p-6">
+
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+                      <div className="flex items-center gap-4">
+
+                        <div className="w-11 h-11 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center shrink-0">
+
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-5 h-5"
+                          >
+                            <path d="M12 3 5 6v5c0 4.7 2.9 8.1 7 10 4.1-1.9 7-5.3 7-10V6l-7-3Z" />
+                            <path d="m9.5 12 1.7 1.7 3.5-3.5" />
+                          </svg>
+
+                        </div>
+
+
+                        <div>
+
+                          <div className="text-sm font-semibold text-slate-800">
+                            Current role
+                          </div>
+
+                          <div className="text-sm text-slate-500 mt-0.5 capitalize">
+                            {user?.role || "viewer"}
+                          </div>
+
+                        </div>
+
+                      </div>
+
+
+                      <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-50 text-violet-700 border border-violet-100 text-xs font-semibold capitalize">
+
+                        <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+
+                        {user?.role || "viewer"}
+
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                  <div className="border-t border-slate-100 p-6">
+
+                    <div className="mb-4">
+
+                      <div className="text-sm font-semibold text-slate-800">
+                        Permissions
+                      </div>
+
+                      <p className="text-xs text-slate-500 mt-1">
+                        Access available to your current role.
+                      </p>
+
+                    </div>
+
+
+                    <div className="space-y-2.5">
+
+                      {(user?.role === "admin" || user?.role === "editor") && (
+                        <>
+                          {[
+                            "Create articles",
+                            "Edit articles",
+                            "Save drafts",
+                            "Submit articles for review",
+                          ].map(permission => (
+                            <div
+                              key={permission}
+                              className="flex items-center gap-3 text-sm text-slate-600"
+                            >
+                              <span className="w-5 h-5 rounded-full bg-violet-50 text-violet-700 flex items-center justify-center shrink-0">
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  className="w-3.5 h-3.5"
+                                >
+                                  <path d="m5 12 4 4L19 6" />
+                                </svg>
+                              </span>
+
+                              <span>{permission}</span>
+                            </div>
+                          ))}
+                        </>
+                      )}
+
+
+                      {user?.role === "admin" && (
+                        <>
+                          {[
+                            "Archive articles",
+                            "Approve or reject submitted articles",
+                            "Manage users",
+                            "View analytics",
+                            "View audit logs",
+                          ].map(permission => (
+                            <div
+                              key={permission}
+                              className="flex items-center gap-3 text-sm text-slate-600"
+                            >
+                              <span className="w-5 h-5 rounded-full bg-violet-50 text-violet-700 flex items-center justify-center shrink-0">
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  className="w-3.5 h-3.5"
+                                >
+                                  <path d="m5 12 4 4L19 6" />
+                                </svg>
+                              </span>
+
+                              <span>{permission}</span>
+                            </div>
+                          ))}
+                        </>
+                      )}
+
+
+                      {user?.role === "editor" && (
+                        <>
+                          {[
+                            "Approve articles",
+                            "Reject articles",
+                            "Manage users",
+                            "View analytics",
+                            "View audit logs",
+                          ].map(permission => (
+                            <div
+                              key={permission}
+                              className="flex items-center gap-3 text-sm text-slate-500"
+                            >
+                              <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center shrink-0">
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  className="w-3.5 h-3.5"
+                                >
+                                  <path d="m7 7 10 10M17 7 7 17" />
+                                </svg>
+                              </span>
+
+                              <span>{permission}</span>
+                            </div>
+                          ))}
+                        </>
+                      )}
+
+
+                      {(!user?.role || user?.role === "viewer") && (
+                        <>
+                          {[
+                            "Read published knowledge articles",
+                            "Search and filter the knowledge base",
+                          ].map(permission => (
+                            <div
+                              key={permission}
+                              className="flex items-center gap-3 text-sm text-slate-600"
+                            >
+                              <span className="w-5 h-5 rounded-full bg-violet-50 text-violet-700 flex items-center justify-center shrink-0">
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  className="w-3.5 h-3.5"
+                                >
+                                  <path d="m5 12 4 4L19 6" />
+                                </svg>
+                              </span>
+
+                              <span>{permission}</span>
+                            </div>
+                          ))}
+                        </>
+                      )}
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </section>
+
+            </section>
+
+          )}
 
 
           {currentPage === "notfound" && (
