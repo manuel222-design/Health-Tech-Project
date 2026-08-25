@@ -6,6 +6,15 @@ export default function Register({ onRegister, onBackToLogin }) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [department, setDepartment] = useState("")
+  const passwordRequirements = {
+    length: password.length >= 8,
+    upper: /[A-Z]/.test(password),
+    lower: /[a-z]/.test(password),
+    number: /\d/.test(password),
+    special: /[^A-Za-z0-9]/.test(password),
+  }
+  const passwordIsValid =
+    Object.values(passwordRequirements).every(Boolean)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -14,6 +23,14 @@ export default function Register({ onRegister, onBackToLogin }) {
 
     if (!username.trim() || !email.trim() || !password) {
       setError("Please complete the required fields")
+      return
+    }
+
+    if (!passwordIsValid) {
+      setError(
+        "Password must be at least 8 characters and include an uppercase letter, " +
+        "lowercase letter, number, and special character."
+      )
       return
     }
 
@@ -54,8 +71,21 @@ export default function Register({ onRegister, onBackToLogin }) {
     } catch (err) {
       console.error("REGISTER ERROR:", err)
 
+      const detail = err.response?.data?.detail
+
+      const backendMessage = Array.isArray(detail)
+        ? detail
+            .map(item =>
+              typeof item === "string"
+                ? item
+                : item?.msg
+            )
+            .filter(Boolean)
+            .join(" ")
+        : detail
+
       setError(
-        err.response?.data?.detail ||
+        backendMessage ||
         err.response?.data?.message ||
         err.message ||
         "Registration failed. Please try again."
@@ -134,9 +164,56 @@ export default function Register({ onRegister, onBackToLogin }) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Create a password"
               autoComplete="new-password"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              aria-describedby="password-requirements"
+              className={`w-full border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                password && !passwordIsValid
+                  ? "border-amber-300"
+                  : password && passwordIsValid
+                    ? "border-violet-300"
+                    : "border-gray-300"
+              }`}
               required
             />
+
+            <div
+              id="password-requirements"
+              className="mt-2 bg-slate-50 border border-slate-200 rounded-lg p-3"
+            >
+              <p className="text-xs font-semibold text-slate-700 mb-2">
+                Password requirements
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                {[
+                  ["length", "At least 8 characters"],
+                  ["upper", "One uppercase letter"],
+                  ["lower", "One lowercase letter"],
+                  ["number", "One number"],
+                  ["special", "One special character"],
+                ].map(([key, label]) => (
+                  <div
+                    key={key}
+                    className={`flex items-center gap-2 text-xs ${
+                      passwordRequirements[key]
+                        ? "text-violet-700"
+                        : "text-slate-400"
+                    }`}
+                  >
+                    <span
+                      className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                        passwordRequirements[key]
+                          ? "bg-violet-100 text-violet-700"
+                          : "bg-slate-200 text-slate-400"
+                      }`}
+                    >
+                      {passwordRequirements[key] ? "✓" : "•"}
+                    </span>
+
+                    <span>{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div>

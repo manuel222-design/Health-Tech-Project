@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException # type: ignore
 
 from repositories.article_repository import ArticleRepository
 

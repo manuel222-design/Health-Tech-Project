@@ -2,15 +2,15 @@
 
 ## 1. Document Information
 
-| Item | Details |
-|---|---|
-| Project | Health-Tech Knowledge Management System |
-| Testing Type | User Acceptance Testing (UAT) |
-| Environment | Local development/test environment |
-| Backend | FastAPI |
-| Frontend | React + Vite |
-| Database | SQLAlchemy-supported relational database |
-| UAT Status | Completed |
+| Item             | Details                             |
+
+| Project          | Health-Tech Knowledge Management System |
+| Testing Type     | User Acceptance Testing (UAT)       |
+| Environment      | Local development/test environment  |
+| Backend          | FastAPI                             |
+| Frontend         | React + Vite                        |
+| Database         | SQLAlchemy-supported relational database |
+| UAT Status       | Completed                           |
 | Document Purpose | Define the procedure used to validate that the system meets functional, security, workflow and usability requirements |
 
 ---
@@ -131,7 +131,7 @@ The following procedure was followed during UAT:
 ## 7. UAT Test Scenarios
 
 | ID | Test Scenario | User Role | Expected Result | Result | Status |
-|---|---|---|---|---|---|
+
 | UAT-01 | Login with valid credentials | Admin | User is authenticated successfully | Successful | PASS |
 | UAT-02 | Login with invalid password | Any | Authentication fails with HTTP 401 | Successful | PASS |
 | UAT-03 | Login with invalid email | Any | Authentication fails with HTTP 401 | Successful | PASS |
@@ -151,8 +151,7 @@ The following procedure was followed during UAT:
 | UAT-17 | Refresh expired authentication session | Authenticated user | New access token is issued using refresh token | Successful | PASS |
 | UAT-18 | Invalid refresh token | Authenticated user | Refresh request is rejected | Verified | PASS |
 
-
- 8. Security Acceptance Tests
+ 1. Security Acceptance Tests
 
 Security-related UAT included verification of:
 
@@ -179,8 +178,7 @@ Security-related UAT included verification of:
 - The refresh endpoint validates the refresh token type and expiry.
 - A valid refresh token can obtain a new access token.
 
-
- 9. Article Workflow Acceptance
+ 1. Article Workflow Acceptance
 
 The complete article workflow was tested as follows:
 
