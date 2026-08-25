@@ -1,4 +1,4 @@
- Sequence Diagrams — Healthtech KB & HMIS Chatbot
+# Sequence Diagrams — Healthtech KB & HMIS Chatbot
 
  1. User Login Flow
 
@@ -20,7 +20,7 @@ sequenceDiagram
     Frontend-->>User: Redirect to dashboard
 ```
 
- 2. Chatbot RAG Flow
+ 1. Chatbot RAG Flow
 
 ```mermaid
 sequenceDiagram
@@ -42,7 +42,7 @@ sequenceDiagram
     Widget-->>Nurse: Display concise answer
 ```
 
- 3. Article CRUD Flow (Editor)
+ 1. Article CRUD Flow (Editor)
 
 ```mermaid
 sequenceDiagram
