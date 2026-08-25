@@ -1,5 +1,5 @@
 $kind: http-request
-url: http://127.0.0.1:8000/api/v1/auth/login
+url: {{base_url}}/auth/login
 method: POST
 headers:
   Content-Type: application/json
@@ -8,6 +8,6 @@ body:
   content: |-
     {
       "email": "admin@healthtech.co.ke",
-      "password": "Admin@1234"
+      "password": "{{admin_password}}"
     }
 order: 1000
