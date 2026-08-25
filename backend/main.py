@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from jose import jwt, JWTError                                 # type: ignore 
 from passlib.context import CryptContext               # type: ignore 
 from datetime import datetime, timedelta, timezone
-from pydantic import BaseModel                         # type: ignore, field_validator
-from pydantic import field_validator
+from pydantic import BaseModel                         # type: ignore # type: ignore, field_validator
+from pydantic import field_validator # type: ignore
 from database import get_db
 from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, Product, ChatSession, ChatMessage, ChatFeedback, MessageRole, UserRole, AuditLog, Media, ArticleSMEReview
 import os, uuid
