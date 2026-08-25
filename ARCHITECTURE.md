@@ -1,4 +1,4 @@
- Healthtech KB & HMIS Chatbot — Architecture
+# Healthtech KB & HMIS Chatbot — Architecture
 
  System Architecture
 
