@@ -237,6 +237,27 @@ class Media(Base):
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
 
 
+class SupportRequest(Base):
+    __tablename__ = "support_requests"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False
+    )
+    subject = Column(String(180), nullable=False)
+    category = Column(String(60), nullable=False)
+    message = Column(Text, nullable=False)
+    status = Column(String(30), nullable=False, default="open")
+    priority = Column(String(30), nullable=False, default="normal")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    resolved_at = Column(DateTime(timezone=True), nullable=True)
+
+    user = relationship("User")
+
+
 class PasswordResetOTP(Base):
     __tablename__ = "password_reset_otps"
 

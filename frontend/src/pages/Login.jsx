@@ -110,10 +110,16 @@ export default function Login({ onLogin, onShowRegister }) {
     } catch (err) {
       console.error("LOGIN ERROR:", err)
 
-      setError(
-        err.response?.data?.detail ||
-        "Invalid email or password. Please try again."
-      )
+      if (err.response?.status === 429) {
+        setError(
+          "Too many login attempts. Please wait a few minutes before trying again."
+        )
+      } else {
+        setError(
+          err.response?.data?.detail ||
+          "Invalid email or password. Please try again."
+        )
+      }
     } finally {
       setLoading(false)
     }

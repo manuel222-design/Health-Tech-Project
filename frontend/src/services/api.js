@@ -117,6 +117,15 @@ export const getUnansweredQuestions = () => api.get('/admin/unanswered-questions
 export const getContentNotifications = () =>
   api.get('/content-notifications')
 
+export const createSupportRequest = (data) =>
+  api.post('/support', data)
+
+export const getAdminSupportRequests = () =>
+  api.get('/admin/support')
+
+export const updateSupportRequestStatus = (id, status) =>
+  api.patch(`/admin/support/${id}/status`, { status })
+
 
 export const forgotPassword = (email) =>
   api.post('/auth/forgot-password', {

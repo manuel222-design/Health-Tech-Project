@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel                         # type: ignore # type: ignore, field_validator
 from pydantic import field_validator # type: ignore
 from database import get_db
-from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, Product, ChatSession, ChatMessage, ChatFeedback, MessageRole, UserRole, AuditLog, Media, ArticleSMEReview
+from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, Product, ChatSession, ChatMessage, ChatFeedback, MessageRole, UserRole, AuditLog, Media, ArticleSMEReview, SupportRequest
 import os, uuid
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
 from groq import Groq # type: ignore
@@ -37,6 +37,8 @@ from repositories.homepage_repository import HomepageRepository
 from services.homepage_service import HomepageService
 from repositories.product_repository import ProductRepository
 from services.product_service import ProductService
+from repositories.support_repository import SupportRepository
+from services.support_service import SupportService
 
 def log_audit(db: Session, user_id: str, action: str, target_type: str, target_id: str = None, details: str = None):
     from models import AuditLog
@@ -211,12 +213,33 @@ def get_current_user(
             algorithms=[ALGORITHM]
         )
         user_id = payload.get("sub")
-        role    = payload.get("role")
 
         if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token"
+            )
 
-        return {"user_id": user_id, "role": role}
+        user = db.query(User).filter(
+            User.id == user_id
+        ).first()
+
+        if not user:
+            raise HTTPException(
+                status_code=401,
+                detail="User session is no longer valid. Please sign in again."
+            )
+
+        if not user.is_active:
+            raise HTTPException(
+                status_code=401,
+                detail="Your account is inactive. Please contact an administrator."
+            )
+
+        return {
+            "user_id": str(user.id),
+            "role": user.role.value,
+        }
 
     except JWTError:
         raise HTTPException(status_code=401, detail="Token invalid or expired")
@@ -237,14 +260,16 @@ def get_optional_user(
         )
 
         user_id = payload.get("sub")
-        role = payload.get("role")
 
         if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token"
+            )
 
         return {
             "user_id": user_id,
-            "role": role,
+            "role": payload.get("role"),
         }
 
     except JWTError:
@@ -307,6 +332,17 @@ class TagCreateRequest(BaseModel):
 class FeedbackRequest(BaseModel):
     rating: int
     comment: Optional[str] = None
+
+
+class SupportRequestCreate(BaseModel):
+    subject: str
+    category: str
+    message: str
+
+
+class SupportStatusUpdate(BaseModel):
+    status: str
+
 
 @app.get("/")
 def root():
@@ -777,6 +813,81 @@ def get_admin_feedback(
     service = FeedbackService(repository)
 
     return service.list_feedback()
+
+
+@app.post("/api/v1/support", status_code=201)
+def create_support_request(
+    payload: SupportRequestCreate,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
+):
+    repository = SupportRepository(db)
+    service = SupportService(repository)
+
+    try:
+        result = service.create_request(
+            user["user_id"],
+            payload.subject,
+            payload.category,
+            payload.message,
+        )
+
+        log_audit(
+            db,
+            user["user_id"],
+            "create_support_request",
+            "support_request",
+            result["id"],
+            f"category={payload.category}"
+        )
+
+        return result
+
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/api/v1/admin/support")
+def get_admin_support_requests(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    repository = SupportRepository(db)
+    service = SupportService(repository)
+    return service.list_requests()
+
+
+@app.patch("/api/v1/admin/support/{request_id}/status")
+def update_support_status(
+    request_id: str,
+    payload: SupportStatusUpdate,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    repository = SupportRepository(db)
+    service = SupportService(repository)
+
+    try:
+        result = service.update_status(
+            request_id,
+            payload.status
+        )
+
+        log_audit(
+            db,
+            user["user_id"],
+            "update_support_status",
+            "support_request",
+            request_id,
+            f"status={payload.status}"
+        )
+
+        return result
+
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
 
 
 @app.get("/api/v1/my-notifications")

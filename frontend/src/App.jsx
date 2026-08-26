@@ -17,6 +17,8 @@ import ChatWidget from "./components/ChatWidget"
 import ChatEmbed from "./pages/ChatEmbed"
 import Home from "./pages/Home"
 import ErrorPage from "./pages/ErrorPage"
+import HelpSupport from "./pages/HelpSupport"
+import AdminSupport from "./pages/AdminSupport"
 
 import {
   getCategories,
@@ -195,8 +197,11 @@ export default function App() {
       initialPath === "/" ||
       initialPath === "/landing"
     ) {
-      return localStorage.getItem("token")
-        ? "home"
+      const token = localStorage.getItem("token")
+      const role = localStorage.getItem("role")
+
+      return token
+        ? getRoleLandingPage(role)
         : "landing"
     }
 
@@ -277,6 +282,14 @@ export default function App() {
       return "settings"
     }
 
+    if (initialPath === "/help") {
+      return "help"
+    }
+
+    if (initialPath === "/support-requests") {
+      return "support"
+    }
+
     if (initialPath === "/widget") {
       return "widget"
     }
@@ -341,6 +354,12 @@ export default function App() {
     }
   }
 
+  function getRoleLandingPage(role) {
+    if (role === "admin") return "home"
+    if (role === "editor") return "manage"
+    return "articles"
+  }
+
 
   function persistUser(userData) {
 
@@ -396,13 +415,10 @@ export default function App() {
       setProfileOpen(false)
       setNotificationsOpen(false)
 
-      setCurrentPage("home")
+      const destination =
+        getRoleLandingPage(normalized.role)
 
-      window.history.pushState(
-        {},
-        "",
-        "/dashboard"
-      )
+      goTo(destination)
 
     } catch (error) {
       console.error(
@@ -665,6 +681,24 @@ export default function App() {
         {},
         "",
         "/settings"
+      )
+    }
+
+    if (page === "help") {
+
+      window.history.pushState(
+        {},
+        "",
+        "/help"
+      )
+    }
+
+    if (page === "support") {
+
+      window.history.pushState(
+        {},
+        "",
+        "/support-requests"
       )
     }
 
@@ -955,10 +989,18 @@ setSelectedCategory(categoryId)
 
     settings:
       "Settings",
+
+    help:
+      "Help & Support",
+
+    support:
+      "Support Requests",
   }
 
   const pageAllowed =
-  currentPage === "review"
+  currentPage === "home"
+    ? isAdmin
+    : currentPage === "review"
     ? canManage
     : currentPage === "manage" ||
       currentPage === "form" ||
@@ -967,7 +1009,8 @@ setSelectedCategory(categoryId)
     ? canManage
     : currentPage === "users" ||
       currentPage === "analytics" ||
-      currentPage === "audit"
+      currentPage === "audit" ||
+      currentPage === "support"
     ? isAdmin
     : true
 
@@ -1041,7 +1084,7 @@ setSelectedCategory(categoryId)
           <div
             className="relative flex items-center gap-3 cursor-pointer group"
             onClick={() =>
-              goTo("home")
+              goTo(getRoleLandingPage(user?.role))
             }
           >
 
@@ -1076,16 +1119,17 @@ setSelectedCategory(categoryId)
 
         <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900/95">
 
-          <button
-            onClick={() =>
-              goTo("home")
-            }
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
-              currentPage === "home"
-                ? "bg-violet-950/60 text-violet-300 border border-violet-900 shadow-sm"
-                : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
-            }`}
-          >
+          {isAdmin && (
+            <button
+              onClick={() =>
+                goTo("home")
+              }
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
+                currentPage === "home"
+                  ? "bg-violet-950/60 text-violet-300 border border-violet-900 shadow-sm"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
+              }`}
+            >
 
             <span className="w-5 h-5 flex items-center justify-center shrink-0">
 
@@ -1109,7 +1153,8 @@ setSelectedCategory(categoryId)
               Dashboard
             </span>
 
-          </button>
+            </button>
+          )}
 
 
           <div className="mt-5 pt-5 pb-2 px-3 border-t border-slate-800 text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
@@ -1463,6 +1508,38 @@ setSelectedCategory(categoryId)
 
               <button
                 onClick={() =>
+                  goTo("support")
+                }
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
+                  currentPage === "support"
+                    ? "bg-slate-800 text-white border-l-2 border-violet-500"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                }`}
+              >
+                <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-4 h-4"
+                  >
+                    <path d="M5 5h14v11H9l-4 3V5Z" />
+                    <path d="M9 9h6" />
+                    <path d="M9 12h4" />
+                  </svg>
+                </span>
+
+                <span>
+                  Support Requests
+                </span>
+              </button>
+
+
+              <button
+                onClick={() =>
                   goTo("audit")
                 }
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
@@ -1503,6 +1580,38 @@ setSelectedCategory(categoryId)
 
 
         <div className="px-3 pb-4 pt-3 border-t border-slate-800/80">
+
+          <button
+            type="button"
+            onClick={() => goTo("help")}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
+              currentPage === "help"
+                ? "bg-violet-950/60 text-violet-300 border border-violet-900 shadow-sm"
+                : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
+            }`}
+          >
+
+            <span className="w-5 h-5 flex items-center justify-center shrink-0">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M9.5 9a2.5 2.5 0 1 1 3.9 2.1c-.9.5-1.4 1-1.4 2.1" />
+                <path d="M12 17h.01" />
+              </svg>
+            </span>
+
+            <span>
+              Help & Support
+            </span>
+
+          </button>
 
           <button
             type="button"
@@ -1547,7 +1656,11 @@ setSelectedCategory(categoryId)
         <div className="px-4 py-3 flex items-center justify-between">
           <button
             type="button"
-            onClick={() => handleMobileNavigate("home")}
+            onClick={() =>
+              handleMobileNavigate(
+                getRoleLandingPage(user?.role)
+              )
+            }
             className="flex items-center gap-2 min-w-0"
           >
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center font-extrabold text-xs shrink-0">
@@ -1637,18 +1750,20 @@ setSelectedCategory(categoryId)
 
               <div className="space-y-1">
 
-                <button
-                  type="button"
-                  onClick={() => handleMobileNavigate("home")}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
-                    currentPage === "home"
-                      ? "bg-violet-950/70 text-violet-300 border border-violet-900"
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                  }`}
-                >
-                  <span className="w-5 text-center">⌂</span>
-                  <span className="flex-1 text-left">Dashboard</span>
-                </button>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => handleMobileNavigate("home")}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                      currentPage === "home"
+                        ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }`}
+                  >
+                    <span className="w-5 text-center">⌂</span>
+                    <span className="flex-1 text-left">Dashboard</span>
+                  </button>
+                )}
 
                 <button
                   type="button"
@@ -1757,6 +1872,19 @@ setSelectedCategory(categoryId)
 
                     <button
                       type="button"
+                      onClick={() => handleMobileNavigate("support")}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                        currentPage === "support"
+                          ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                          : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                      }`}
+                    >
+                      <span className="w-5 text-center">✉</span>
+                      <span className="flex-1 text-left">Support Requests</span>
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => handleMobileNavigate("audit")}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                         currentPage === "audit"
@@ -1769,6 +1897,19 @@ setSelectedCategory(categoryId)
                     </button>
                   </>
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => handleMobileNavigate("help")}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                    currentPage === "help"
+                      ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  }`}
+                >
+                  <span className="w-5 text-center">?</span>
+                  <span className="flex-1 text-left">Help & Support</span>
+                </button>
 
                 <button
                   type="button"
@@ -2166,6 +2307,23 @@ setSelectedCategory(categoryId)
 
         <main className="min-w-0 px-4 py-5 sm:px-6 lg:px-8">
 
+          {currentPage === "help" && (
+
+            <HelpSupport
+              onSelectArticle={(slug) => {
+                if (slug) {
+                  handleSelectArticle(slug)
+                } else {
+                  goTo("articles")
+                }
+              }}
+              onOpenAssistant={() =>
+                window.openTaifaCareAssistant?.()
+              }
+            />
+
+          )}
+
           {currentPage === "home" && (
 
             <Home
@@ -2294,6 +2452,11 @@ setSelectedCategory(categoryId)
               <AdminFeedback />
             )}
 
+
+          {currentPage === "support" &&
+            isAdmin && (
+              <AdminSupport />
+            )}
 
           {currentPage === "audit" &&
             isAdmin && (
