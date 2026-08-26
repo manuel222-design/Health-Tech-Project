@@ -23,7 +23,7 @@ export default function Home({
           <div className="w-10 h-10 border-4 border-violet-100 border-t-violet-600 rounded-full animate-spin mx-auto mb-4" />
 
           <p className="text-sm text-slate-500">
-            Loading Knowledge Centre...
+            Loading Featured Knowledge...
           </p>
         </div>
       </div>
@@ -64,7 +64,14 @@ export default function Home({
     localStorage.getItem("username") || "User"
 
   const username =
-    rawUsername.replace(/\s+Admin$/i, "").trim()
+    rawUsername
+      .replace(/\s+Admin$/i, "")
+      .replace(
+        /^(Dr\.?|Prof\.?|Mr\.?|Mrs\.?|Ms\.?|Miss)\s+/i,
+        ""
+      )
+      .trim()
+      .split(/\s+/)[0] || "User"
 
   const coveredCategories = categories.filter(
     category => (category.article_count || 0) > 0
@@ -77,14 +84,14 @@ export default function Home({
   return (
     <div className="space-y-8 pb-12">
 
-      {/* =====================================================
-          HERO
-      ===================================================== */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-950 via-violet-800 to-emerald-700 text-white shadow-lg">
+      {
 
-        <div className="absolute -right-28 -top-24 w-96 h-96 rounded-full bg-violet-500/18 blur-3xl" />
+}
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-800 via-violet-800 to-slate-900 text-white shadow-lg">
+
+        <div className="absolute -right-28 -top-24 w-96 h-96 rounded-full bg-violet-400/15 blur-3xl" />
         <div className="absolute right-20 -bottom-24 w-64 h-64 rounded-full bg-slate-900/15 blur-3xl" />
-        <div className="absolute -left-20 -bottom-24 w-64 h-64 rounded-full bg-violet-300/10 blur-3xl" />
+        <div className="absolute -left-20 -bottom-24 w-64 h-64 rounded-full bg-violet-300/8 blur-3xl" />
         <div className="absolute left-1/2 -top-20 w-48 h-48 rounded-full bg-white/5 blur-3xl" />
 
         <div className="relative px-6 py-8 sm:px-9 sm:py-9">
@@ -98,18 +105,17 @@ export default function Home({
                 <span className="w-1.5 h-1.5 rounded-full bg-violet-200" />
 
                 <span className="text-[10px] uppercase tracking-[0.16em] text-violet-100 font-semibold">
-                  Taifa Care Knowledge Centre
+                  Taifa Care
                 </span>
 
               </div>
 
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight tracking-tight">
-                Welcome back, {username}
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight tracking-tight">
+                Welcome, {username}
               </h1>
 
               <p className="text-sm sm:text-base text-violet-50 mt-3 max-w-2xl leading-relaxed">
-                Find trusted healthcare knowledge, practical workflows,
-                and the assistance you need to work confidently.
+                Knowledge, activity and system overview.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 mt-6">
@@ -186,15 +192,15 @@ export default function Home({
       </section>
 
 
-      {/* =====================================================
-          SUMMARY
-      ===================================================== */}
+      {
+
+}
       <section className="grid grid-cols-1 lg:grid-cols-4 gap-4">
 
-        {/* PRIMARY METRIC */}
+        {}
         <div className="lg:col-span-2">
 
-          <div className="relative overflow-hidden h-full min-h-[190px] rounded-2xl bg-gradient-to-br from-violet-700 via-violet-600 to-cyan-600 text-white p-6 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
+          <div className="relative overflow-hidden h-full min-h-[190px] rounded-2xl bg-gradient-to-br from-violet-700 via-violet-600 to-indigo-600 text-white p-6 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
 
             <div className="absolute -right-10 -top-10 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
 
@@ -207,7 +213,7 @@ export default function Home({
                   <span className="w-2 h-2 rounded-full bg-violet-200" />
 
                   <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-violet-50">
-                    Published Guides
+                    Published
                   </span>
 
                 </div>
@@ -217,7 +223,7 @@ export default function Home({
                 </div>
 
                 <p className="text-sm text-violet-50 mt-1">
-                  Ready to explore
+                  Available
                 </p>
 
               </div>
@@ -247,7 +253,7 @@ export default function Home({
         </div>
 
 
-        {/* KNOWLEDGE AREAS */}
+        {}
         <div>
 
           <div className="relative overflow-hidden h-full min-h-[190px] rounded-2xl bg-gradient-to-br from-slate-50 via-white to-white border border-slate-200 border-t-2 border-t-slate-500 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
@@ -257,7 +263,7 @@ export default function Home({
               <span className="w-2 h-2 rounded-full bg-slate-500" />
 
               <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500 font-bold">
-                Knowledge Areas
+                Browse by Area
               </span>
 
             </div>
@@ -267,7 +273,7 @@ export default function Home({
             </div>
 
             <p className="text-xs text-slate-500 mt-1.5">
-              Available topics
+              Topic areas
             </p>
 
             <div className="absolute bottom-5 right-5 text-slate-300 text-lg">
@@ -279,7 +285,7 @@ export default function Home({
         </div>
 
 
-        {/* COVERED AREAS */}
+        {}
         <div>
 
           <div className="relative overflow-hidden h-full min-h-[190px] rounded-2xl bg-white border border-slate-200 border-t-2 border-t-emerald-500 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
@@ -307,7 +313,7 @@ export default function Home({
             </div>
 
             <p className="text-xs text-slate-500 mt-1.5">
-              Areas with published content
+              Areas with content
             </p>
 
             <div className="absolute bottom-5 right-5 text-slate-300 text-lg">
@@ -319,67 +325,12 @@ export default function Home({
         </div>
 
 
-        {/* PRODUCT VERSION */}
-        <div className="lg:col-span-2">
-
-          <div className="relative overflow-hidden min-h-[150px] rounded-2xl bg-gradient-to-br from-violet-50/80 via-white to-white border border-violet-100 border-t-2 border-t-violet-500 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
-
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-
-              <div>
-
-                <div className="flex items-center gap-2">
-
-                  <span className="w-2 h-2 rounded-full bg-violet-500" />
-
-                  <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500 font-bold">
-                    Product Version
-                  </span>
-
-                </div>
-
-                <div className="text-3xl font-bold text-violet-700 mt-5">
-                  v1.0
-                </div>
-
-                <p className="text-xs text-slate-500 mt-1.5">
-                  Current release
-                </p>
-
-              </div>
-
-
-              <div className="sm:text-right">
-
-                <p className="text-xs text-slate-400">
-                  Taifa Care
-                </p>
-
-                <p className="text-sm font-semibold text-slate-700 mt-1">
-                  Knowledge Centre
-                </p>
-
-                {emptyCategories > 0 && (
-                  <p className="text-[11px] text-violet-700 mt-2">
-                    {emptyCategories} area{emptyCategories !== 1 ? "s" : ""} expanding
-                  </p>
-                )}
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
       </section>
 
 
-      {/* =====================================================
-          ACTIVITY
-      ===================================================== */}
+      {
+
+}
       <section>
 
         <div className="flex items-end justify-between mb-4">
@@ -394,12 +345,12 @@ export default function Home({
               </span>
             </div>
 
-            <h2 className="text-lg font-bold text-slate-800">
-              Today's Activity
+            <h2 className="text-base sm:text-lg font-semibold text-slate-800">
+              Today
             </h2>
 
             <p className="text-sm text-slate-500 mt-1">
-              Activity recorded in the knowledge system today
+              System activity today.
             </p>
 
           </div>
@@ -492,9 +443,9 @@ export default function Home({
       </section>
 
 
-      {/* =====================================================
-          FEATURED KNOWLEDGE
-      ===================================================== */}
+      {
+
+}
       <section data-knowledge-centre>
 
         <div className="flex items-end justify-between mb-4">
@@ -509,12 +460,12 @@ export default function Home({
               </span>
             </div>
 
-            <h2 className="text-lg font-bold text-slate-800">
-              Knowledge Centre
+            <h2 className="text-base sm:text-lg font-semibold text-slate-800">
+              Featured Knowledge
             </h2>
 
             <p className="text-sm text-slate-500 mt-1">
-              Featured and recently accessed guidance
+              Recently featured guidance.
             </p>
 
           </div>
@@ -607,7 +558,7 @@ export default function Home({
 
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-800 leading-tight group-hover:text-violet-700 transition">
+                <h3 className="text-lg sm:text-xl font-semibold text-slate-800 leading-tight group-hover:text-violet-700 transition">
                   {featuredArticles[0].title}
                 </h3>
 
@@ -777,9 +728,9 @@ export default function Home({
       </section>
 
 
-      {/* =====================================================
-          KNOWLEDGE AREAS
-      ===================================================== */}
+      {
+
+}
       <section>
 
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
@@ -794,12 +745,12 @@ export default function Home({
               </span>
             </div>
 
-            <h2 className="text-lg font-bold text-slate-800">
-              Knowledge Areas
+            <h2 className="text-base sm:text-lg font-semibold text-slate-800">
+              Browse by Area
             </h2>
 
             <p className="text-sm text-slate-500 mt-1">
-              Browse guidance by operational and clinical area
+              Browse knowledge by area.
             </p>
 
           </div>
@@ -902,13 +853,13 @@ export default function Home({
       </section>
 
 
-      {/* =====================================================
-          AI ASSISTANT
-      ===================================================== */}
+      {
+
+}
       <section className="relative overflow-hidden rounded-xl bg-slate-900 border border-slate-800 px-6 py-7 sm:px-8">
 
         <div className="absolute -right-8 -top-10 w-32 h-32 rounded-full bg-violet-500/10" />
-        <div className="absolute -right-3 -bottom-12 w-24 h-24 rounded-full bg-cyan-400/10" />
+        <div className="absolute -right-3 -bottom-12 w-24 h-24 rounded-full bg-indigo-400/10" />
 
         <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
@@ -1158,75 +1109,3 @@ function ActivityCard({
     </div>
   )
 }
-
-
-function SummaryCard({
-  accentClass = "border-t-slate-300",
-  label,
-  value,
-  description,
-}) {
-  const accentMap = {
-    "border-t-violet-500": {
-      dot: "bg-violet-500",
-      surface: "from-violet-50/80",
-      number: "text-violet-700",
-    },
-
-    "border-t-blue-500": {
-      dot: "bg-blue-500",
-      surface: "from-blue-50/80",
-      number: "text-blue-700",
-    },
-
-    "border-t-emerald-500": {
-      dot: "bg-emerald-500",
-      surface: "from-emerald-50/80",
-      number: "text-emerald-700",
-    },
-
-    "border-t-cyan-500": {
-      dot: "bg-cyan-500",
-      surface: "from-cyan-50/80",
-      number: "text-cyan-700",
-    },
-  }
-
-  const tone =
-    accentMap[accentClass] || {
-      dot: "bg-slate-400",
-      surface: "from-slate-50",
-      number: "text-slate-700",
-    }
-
-  return (
-    <div
-      className={`relative overflow-hidden bg-gradient-to-br ${tone.surface} via-white to-white border border-slate-200 border-t-2 ${accentClass} rounded-2xl p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200`}
-    >
-
-      <div className="flex items-center gap-2">
-
-        <span
-          className={`w-2 h-2 rounded-full ${tone.dot}`}
-        />
-
-        <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500 font-bold">
-          {label}
-        </span>
-
-      </div>
-
-
-      <div className={`text-3xl font-bold mt-4 ${tone.number}`}>
-        {value}
-      </div>
-
-
-      <p className="text-xs text-slate-500 mt-1.5">
-        {description}
-      </p>
-
-    </div>
-  )
-}
-

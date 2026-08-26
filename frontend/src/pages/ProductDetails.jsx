@@ -75,7 +75,7 @@ export default function ProductDetails({
   return (
     <div className="space-y-7 pb-10">
 
-      {/* Back */}
+      {}
 
       <button
         onClick={onBack}
@@ -85,11 +85,11 @@ export default function ProductDetails({
       </button>
 
 
-      {/* Product Header */}
+      {}
 
       <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
 
-        <div className="h-2 bg-gradient-to-r from-violet-500 to-cyan-500" />
+        <div className="h-2 bg-gradient-to-r from-violet-500 to-indigo-500" />
 
         <div className="p-6 sm:p-8">
 
@@ -161,7 +161,7 @@ export default function ProductDetails({
       </section>
 
 
-      {/* Articles */}
+      {}
 
       <section>
 

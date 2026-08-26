@@ -26,7 +26,7 @@ api.interceptors.response.use(
           localStorage.setItem('token', res.data.access_token)
           originalRequest.headers.Authorization = `Bearer ${res.data.access_token}`
           return api(originalRequest)
-        } catch (refreshError) {
+        } catch {
           localStorage.clear()
           window.location.reload()
         }
@@ -116,6 +116,15 @@ export const getUnansweredQuestions = () => api.get('/admin/unanswered-questions
 
 export const getContentNotifications = () =>
   api.get('/content-notifications')
+
+export const createSupportRequest = (data) =>
+  api.post('/support', data)
+
+export const getAdminSupportRequests = () =>
+  api.get('/admin/support')
+
+export const updateSupportRequestStatus = (id, status) =>
+  api.patch(`/admin/support/${id}/status`, { status })
 
 
 export const forgotPassword = (email) =>

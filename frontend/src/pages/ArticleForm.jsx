@@ -171,7 +171,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
 
   if (loading) return (
     <div className="flex items-center justify-center py-20">
-      <div className="text-gray-400">Loading article...</div>
+      <div className="text-slate-400">Loading article...</div>
     </div>
   )
 
@@ -185,7 +185,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
       </button>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-6">
+        <h2 className="text-xl font-bold text-slate-800 mb-6">
           {isEditing ? "Edit Article" : "New Article"}
         </h2>
 
@@ -197,7 +197,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
             <input
               type="text"
               value={title}
@@ -208,8 +208,8 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Slug {isEditing && <span className="text-gray-400">(cannot be changed)</span>}
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Slug {isEditing && <span className="text-slate-400">(cannot be changed)</span>}
             </label>
             <input
               type="text"
@@ -217,14 +217,14 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
               disabled={isEditing}
               onChange={e => setArticleSlug(generateSlug(e.target.value))}
               placeholder="how-to-reset-hmis-password"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-50 disabled:text-gray-400"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-50 disabled:text-slate-400"
             />
           </div>
           
           <div className="grid md:grid-cols-2 gap-4">
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                 Product
               </label>
               
@@ -244,13 +244,13 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
              ))}
             </select>
 
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-slate-400 mt-1">
               Link this guide to a healthcare product or system.
             </p>
           </div>
 
           <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1">
+    <label className="block text-sm font-medium text-slate-700 mb-1">
       Product Version
     </label>
 
@@ -262,7 +262,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
       className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
     />
 
-    <p className="text-xs text-gray-400 mt-1">
+    <p className="text-xs text-slate-400 mt-1">
       Version of the product this guide applies to.
     </p>
   </div>
@@ -270,8 +270,8 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
 </div>
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="block text-sm font-medium text-gray-700">
-                Content <span className="text-gray-400">(Markdown supported)</span>
+              <label className="block text-sm font-medium text-slate-700">
+                Content <span className="text-slate-400">(Markdown supported)</span>
               </label>
               <div className="flex gap-2 items-center">
                 <label className="text-xs text-violet-700 border border-violet-200 hover:bg-violet-50 px-2 py-1 rounded transition cursor-pointer">
@@ -306,7 +306,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
             <select
               value={categoryId}
               onChange={e => setCategoryId(e.target.value)}
@@ -330,7 +330,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
                 type="button"
                 onClick={handleCreateCategory}
                 disabled={creatingCategory || !newCategoryInput.trim()}
-                className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+                className="text-sm bg-gray-100 hover:bg-gray-200 text-slate-700 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
               >
                 {creatingCategory ? "Adding..." : "+ Add Category"}
               </button>
@@ -338,7 +338,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Tags</label>
             <div className="flex flex-wrap gap-2 mb-2">
               {allTags.map(tag => (
                 <button
@@ -348,7 +348,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
                   className={`text-xs rounded-full px-3 py-1.5 border transition ${
                     tagIds.includes(tag.id)
                       ? "bg-violet-600 text-white border-violet-600"
-                      : "bg-white text-gray-600 border-gray-300 hover:border-violet-400"
+                      : "bg-white text-slate-600 border-gray-300 hover:border-violet-400"
                   }`}
                 >
                   {tag.name}
@@ -368,7 +368,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
                 type="button"
                 onClick={handleCreateTag}
                 disabled={creatingTag || !newTagInput.trim()}
-                className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
+                className="text-sm bg-gray-100 hover:bg-gray-200 text-slate-700 px-3 py-1.5 rounded-lg transition disabled:opacity-50"
               >
                 {creatingTag ? "Adding..." : "+ Add Tag"}
               </button>
@@ -376,7 +376,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Content Type</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Content Type</label>
             <select
               value={contentType}
               onChange={e => setContentType(e.target.value)}
@@ -392,8 +392,8 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Product Version <span className="text-gray-400">(optional)</span>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Product Version <span className="text-slate-400">(optional)</span>
             </label>
             <input
               type="text"
@@ -405,7 +405,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
             <select
               value={status}
               onChange={e => setStatus(e.target.value)}
@@ -428,7 +428,7 @@ export default function ArticleForm({ slug, onDone, onCancel }) {
             </button>
             <button
               onClick={onCancel}
-              className="text-gray-600 hover:text-gray-800 font-medium px-5 py-2.5 text-sm transition"
+              className="text-slate-600 hover:text-slate-800 font-medium px-5 py-2.5 text-sm transition"
             >
               Cancel
             </button>

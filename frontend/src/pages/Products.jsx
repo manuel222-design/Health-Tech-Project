@@ -128,7 +128,7 @@ export default function Products({ onSelectProduct }) {
   return (
     <div className="space-y-7 pb-10">
 
-      {/* Header */}
+      {}
       <section>
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
@@ -162,14 +162,14 @@ export default function Products({ onSelectProduct }) {
         </div>
       </section>
 
-      {/* Error */}
+      {}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
           {error}
         </div>
       )}
 
-      {/* Add form */}
+      {}
       {showForm && (
         <section className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-slate-100">
@@ -270,7 +270,7 @@ export default function Products({ onSelectProduct }) {
         </section>
       )}
 
-      {/* Product list */}
+      {}
       <section>
         <div className="flex items-end justify-between mb-3">
           <div>
@@ -315,7 +315,7 @@ export default function Products({ onSelectProduct }) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-              {products.map((product, index) => {
+              {products.map(product => {
 
                 const isPrimary =
                   product.name?.toLowerCase() === "taifa care"
@@ -334,7 +334,7 @@ export default function Products({ onSelectProduct }) {
                     }`}
                   >
 
-                    {/* subtle accent */}
+                    {}
                     <div
                       className={`absolute top-0 left-0 right-0 h-1 ${
                         isPrimary

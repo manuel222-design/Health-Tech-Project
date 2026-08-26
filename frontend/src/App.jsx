@@ -17,6 +17,8 @@ import ChatWidget from "./components/ChatWidget"
 import ChatEmbed from "./pages/ChatEmbed"
 import Home from "./pages/Home"
 import ErrorPage from "./pages/ErrorPage"
+import HelpSupport from "./pages/HelpSupport"
+import AdminSupport from "./pages/AdminSupport"
 
 import {
   getCategories,
@@ -182,7 +184,6 @@ export default function App() {
 
 
   const initialPath = window.location.pathname
-  const initialSearch = window.location.search
 
   const initialSlug = initialPath.startsWith("/article/")
     ? initialPath.split("/article/")[1]
@@ -195,8 +196,11 @@ export default function App() {
       initialPath === "/" ||
       initialPath === "/landing"
     ) {
-      return localStorage.getItem("token")
-        ? "home"
+      const token = localStorage.getItem("token")
+      const role = localStorage.getItem("role")
+
+      return token
+        ? getRoleLandingPage(role)
         : "landing"
     }
 
@@ -277,6 +281,14 @@ export default function App() {
       return "settings"
     }
 
+    if (initialPath === "/help") {
+      return "help"
+    }
+
+    if (initialPath === "/support-requests") {
+      return "support"
+    }
+
     if (initialPath === "/widget") {
       return "widget"
     }
@@ -306,9 +318,16 @@ export default function App() {
     user?.role === "admin"
 
   function displayName(username) {
-    const name = username || "User"
+    const name = (username || "User")
+      .replace(/\s+Admin$/i, "")
+      .trim()
 
-    return name.replace(/\s+Admin$/i, "").trim()
+    const withoutTitle = name.replace(
+      /^(Dr\.?|Prof\.?|Mr\.?|Mrs\.?|Ms\.?|Miss)\s+/i,
+      ""
+    )
+
+    return withoutTitle.split(/\s+/)[0] || "User"
   }
 
   function normalizeUser(userData) {
@@ -339,6 +358,12 @@ export default function App() {
       username,
       role,
     }
+  }
+
+  function getRoleLandingPage(role) {
+    if (role === "admin") return "home"
+    if (role === "editor") return "manage"
+    return "articles"
   }
 
 
@@ -396,13 +421,10 @@ export default function App() {
       setProfileOpen(false)
       setNotificationsOpen(false)
 
-      setCurrentPage("home")
+      const destination =
+        getRoleLandingPage(normalized.role)
 
-      window.history.pushState(
-        {},
-        "",
-        "/dashboard"
-      )
+      goTo(destination)
 
     } catch (error) {
       console.error(
@@ -668,6 +690,24 @@ export default function App() {
       )
     }
 
+    if (page === "help") {
+
+      window.history.pushState(
+        {},
+        "",
+        "/help"
+      )
+    }
+
+    if (page === "support") {
+
+      window.history.pushState(
+        {},
+        "",
+        "/support-requests"
+      )
+    }
+
   }
 
 
@@ -925,10 +965,10 @@ setSelectedCategory(categoryId)
       "Dashboard",
 
     articles:
-      "Knowledge Base",
+      "Search & Browse",
 
     article:
-      "Knowledge Base",
+      "Search & Browse",
 
     manage:
       editSlug
@@ -955,10 +995,18 @@ setSelectedCategory(categoryId)
 
     settings:
       "Settings",
+
+    help:
+      "Help & Support",
+
+    support:
+      "Support Requests",
   }
 
   const pageAllowed =
-  currentPage === "review"
+  currentPage === "home"
+    ? isAdmin
+    : currentPage === "review"
     ? canManage
     : currentPage === "manage" ||
       currentPage === "form" ||
@@ -967,7 +1015,8 @@ setSelectedCategory(categoryId)
     ? canManage
     : currentPage === "users" ||
       currentPage === "analytics" ||
-      currentPage === "audit"
+      currentPage === "audit" ||
+      currentPage === "support"
     ? isAdmin
     : true
 
@@ -1005,6 +1054,97 @@ setSelectedCategory(categoryId)
     }
 
 
+    if (
+      currentPage === "articles" ||
+      currentPage === "article"
+    ) {
+
+      return (
+        <div className="min-h-screen bg-slate-100 text-slate-800">
+
+          <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+
+              <button
+                type="button"
+                onClick={goLanding}
+                className="flex items-center gap-3"
+              >
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-white font-extrabold text-xs">
+                  TC
+                </div>
+
+                <div className="text-left">
+                  <div className="text-sm font-semibold text-slate-800">
+                    Taifa Care
+                  </div>
+
+                  <div className="text-[10px] uppercase tracking-[0.12em] text-slate-400">
+                    Knowledge Centre
+                  </div>
+                </div>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={openLogin}
+                  className="px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-violet-700 transition"
+                >
+                  Sign in
+                </button>
+
+                <button
+                  type="button"
+                  onClick={openRegister}
+                  className="px-4 py-2 rounded-lg bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition"
+                >
+                  Get started
+                </button>
+              </div>
+
+            </div>
+          </header>
+
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+            {currentPage === "articles" && (
+              <>
+                <div className="mb-6">
+                  <h1 className="text-xl sm:text-2xl font-semibold text-slate-800">
+                    Knowledge Base
+                  </h1>
+
+                  <p className="text-sm text-slate-500 mt-1">
+                    Browse healthcare guidance and practical workflows.
+                  </p>
+                </div>
+
+                <Articles
+                  onSelectArticle={handleSelectArticle}
+                  initialCategory={selectedCategory}
+                />
+              </>
+            )}
+
+            {currentPage === "article" && selectedSlug && (
+              <ArticleView
+                slug={selectedSlug}
+                onBack={() => goTo("articles")}
+              />
+            )}
+
+          </main>
+
+          <ChatWidget
+            onOpenArticle={handleSelectArticle}
+          />
+
+        </div>
+      )
+    }
+
+
     return (
       <>
         <Landing
@@ -1012,6 +1152,9 @@ setSelectedCategory(categoryId)
           onRegister={openRegister}
           onOpenAssistant={() =>
             window.openTaifaCareAssistant?.()
+          }
+          onOpenKnowledge={() =>
+            goTo("articles")
           }
         />
 
@@ -1041,11 +1184,11 @@ setSelectedCategory(categoryId)
           <div
             className="relative flex items-center gap-3 cursor-pointer group"
             onClick={() =>
-              goTo("home")
+              goTo(getRoleLandingPage(user?.role))
             }
           >
 
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shrink-0 shadow-lg shadow-violet-950/40 ring-1 ring-teal-400/20 group-hover:ring-teal-300/40 transition">
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shrink-0 shadow-lg shadow-violet-950/40 ring-1 ring-violet-400/20 group-hover:ring-violet-300/40 transition">
 
               <span className="text-white font-extrabold text-sm tracking-tight">
                 TC
@@ -1076,16 +1219,17 @@ setSelectedCategory(categoryId)
 
         <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900/95">
 
-          <button
-            onClick={() =>
-              goTo("home")
-            }
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
-              currentPage === "home"
-                ? "bg-violet-950/60 text-violet-300 border border-violet-900 shadow-sm"
-                : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
-            }`}
-          >
+          {isAdmin && (
+            <button
+              onClick={() =>
+                goTo("home")
+              }
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
+                currentPage === "home"
+                  ? "bg-violet-950/60 text-violet-300 border border-violet-900 shadow-sm"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
+              }`}
+            >
 
             <span className="w-5 h-5 flex items-center justify-center shrink-0">
 
@@ -1109,10 +1253,11 @@ setSelectedCategory(categoryId)
               Dashboard
             </span>
 
-          </button>
+            </button>
+          )}
 
 
-          <div className="mt-5 pt-5 pb-2 px-3 border-t border-slate-800 text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
+          <div className="mt-5 pt-5 pb-2 px-3 border-t border-slate-800 text-[10px] uppercase tracking-[0.14em] text-slate-500 font-semibold">
             Knowledge
           </div>
 
@@ -1202,7 +1347,7 @@ setSelectedCategory(categoryId)
 
             <div className="mt-2 rounded-xl bg-slate-900/35 border border-slate-800/70 p-1.5 space-y-1">
 
-              <div className="px-2.5 pt-1 pb-1.5 text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
+              <div className="px-2.5 pt-1 pb-1.5 text-[10px] uppercase tracking-[0.14em] text-slate-500 font-semibold">
                 Clinical Areas
               </div>
 
@@ -1346,7 +1491,7 @@ setSelectedCategory(categoryId)
 
             <>
 
-              <div className="mt-5 pt-5 pb-2 px-3 border-t border-slate-800 text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
+              <div className="mt-5 pt-5 pb-2 px-3 border-t border-slate-800 text-[10px] uppercase tracking-[0.14em] text-slate-500 font-semibold">
                 Administration
               </div>
 
@@ -1463,6 +1608,38 @@ setSelectedCategory(categoryId)
 
               <button
                 onClick={() =>
+                  goTo("support")
+                }
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
+                  currentPage === "support"
+                    ? "bg-slate-800 text-white border-l-2 border-violet-500"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                }`}
+              >
+                <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-4 h-4"
+                  >
+                    <path d="M5 5h14v11H9l-4 3V5Z" />
+                    <path d="M9 9h6" />
+                    <path d="M9 12h4" />
+                  </svg>
+                </span>
+
+                <span>
+                  Support Requests
+                </span>
+              </button>
+
+
+              <button
+                onClick={() =>
                   goTo("audit")
                 }
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
@@ -1503,6 +1680,38 @@ setSelectedCategory(categoryId)
 
 
         <div className="px-3 pb-4 pt-3 border-t border-slate-800/80">
+
+          <button
+            type="button"
+            onClick={() => goTo("help")}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
+              currentPage === "help"
+                ? "bg-violet-950/60 text-violet-300 border border-violet-900 shadow-sm"
+                : "text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-transparent"
+            }`}
+          >
+
+            <span className="w-5 h-5 flex items-center justify-center shrink-0">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M9.5 9a2.5 2.5 0 1 1 3.9 2.1c-.9.5-1.4 1-1.4 2.1" />
+                <path d="M12 17h.01" />
+              </svg>
+            </span>
+
+            <span>
+              Help & Support
+            </span>
+
+          </button>
 
           <button
             type="button"
@@ -1547,7 +1756,11 @@ setSelectedCategory(categoryId)
         <div className="px-4 py-3 flex items-center justify-between">
           <button
             type="button"
-            onClick={() => handleMobileNavigate("home")}
+            onClick={() =>
+              handleMobileNavigate(
+                getRoleLandingPage(user?.role)
+              )
+            }
             className="flex items-center gap-2 min-w-0"
           >
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center font-extrabold text-xs shrink-0">
@@ -1637,18 +1850,20 @@ setSelectedCategory(categoryId)
 
               <div className="space-y-1">
 
-                <button
-                  type="button"
-                  onClick={() => handleMobileNavigate("home")}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
-                    currentPage === "home"
-                      ? "bg-violet-950/70 text-violet-300 border border-violet-900"
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                  }`}
-                >
-                  <span className="w-5 text-center">⌂</span>
-                  <span className="flex-1 text-left">Dashboard</span>
-                </button>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => handleMobileNavigate("home")}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                      currentPage === "home"
+                        ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }`}
+                  >
+                    <span className="w-5 text-center">⌂</span>
+                    <span className="flex-1 text-left">Dashboard</span>
+                  </button>
+                )}
 
                 <button
                   type="button"
@@ -1711,7 +1926,7 @@ setSelectedCategory(categoryId)
                 {isAdmin && (
                   <>
                     <div className="mt-5 mb-2 px-4 pt-4 border-t border-slate-800">
-                      <div className="text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
+                      <div className="text-[10px] uppercase tracking-[0.14em] text-slate-500 font-semibold">
                         Administration
                       </div>
                     </div>
@@ -1757,6 +1972,19 @@ setSelectedCategory(categoryId)
 
                     <button
                       type="button"
+                      onClick={() => handleMobileNavigate("support")}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                        currentPage === "support"
+                          ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                          : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                      }`}
+                    >
+                      <span className="w-5 text-center">✉</span>
+                      <span className="flex-1 text-left">Support Requests</span>
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => handleMobileNavigate("audit")}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
                         currentPage === "audit"
@@ -1769,6 +1997,19 @@ setSelectedCategory(categoryId)
                     </button>
                   </>
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => handleMobileNavigate("help")}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${
+                    currentPage === "help"
+                      ? "bg-violet-950/70 text-violet-300 border border-violet-900"
+                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  }`}
+                >
+                  <span className="w-5 text-center">?</span>
+                  <span className="flex-1 text-left">Help & Support</span>
+                </button>
 
                 <button
                   type="button"
@@ -2166,6 +2407,23 @@ setSelectedCategory(categoryId)
 
         <main className="min-w-0 px-4 py-5 sm:px-6 lg:px-8">
 
+          {currentPage === "help" && (
+
+            <HelpSupport
+              onSelectArticle={(slug) => {
+                if (slug) {
+                  handleSelectArticle(slug)
+                } else {
+                  goTo("articles")
+                }
+              }}
+              onOpenAssistant={() =>
+                window.openTaifaCareAssistant?.()
+              }
+            />
+
+          )}
+
           {currentPage === "home" && (
 
             <Home
@@ -2178,22 +2436,10 @@ setSelectedCategory(categoryId)
 
           {currentPage === "articles" && (
 
-            <>
-
-              <h2 className="text-2xl font-bold text-gray-800 mb-1">
-                Knowledge Base
-              </h2>
-
-              <p className="text-gray-500 mb-6">
-                Healthcare guides and clinical workflows
-              </p>
-
-              <Articles
-                onSelectArticle={handleSelectArticle}
-                initialCategory={selectedCategory}
-              />
-
-            </>
+            <Articles
+              onSelectArticle={handleSelectArticle}
+              initialCategory={selectedCategory}
+            />
 
           )}
 
@@ -2294,6 +2540,11 @@ setSelectedCategory(categoryId)
               <AdminFeedback />
             )}
 
+
+          {currentPage === "support" &&
+            isAdmin && (
+              <AdminSupport />
+            )}
 
           {currentPage === "audit" &&
             isAdmin && (

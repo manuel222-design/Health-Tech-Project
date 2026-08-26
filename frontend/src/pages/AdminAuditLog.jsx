@@ -22,26 +22,26 @@ export default function AdminAuditLog() {
 
   if (loading) return (
     <div className="flex items-center justify-center py-20">
-      <div className="text-gray-400">Loading audit log...</div>
+      <div className="text-slate-400">Loading audit log...</div>
     </div>
   )
 
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Audit Log</h2>
-        <p className="text-gray-500 text-sm">Record of all administrative actions — who did what, when</p>
+        <h2 className="text-2xl font-bold text-slate-800">Audit Log</h2>
+        <p className="text-slate-500 text-sm">Record of all administrative actions — who did what, when</p>
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         {logs.length === 0 ? (
-          <p className="text-sm text-gray-400 p-6">No actions logged yet</p>
+          <p className="text-sm text-slate-400 p-6">No actions logged yet</p>
         ) : (
           <div className="divide-y divide-gray-100">
             {logs.map(log => (
               <div key={log.id} className="p-4 flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm text-gray-800">
+                  <p className="text-sm text-slate-800">
                     <span className="font-semibold">{log.actor_name}</span>
                     {" "}
                     {ACTION_LABELS[log.action] || log.action}
@@ -49,10 +49,10 @@ export default function AdminAuditLog() {
                     {log.target_type === "user" && " (user account)"}
                   </p>
                   {log.details && (
-                    <p className="text-xs text-gray-400 mt-0.5">{log.details}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{log.details}</p>
                   )}
                 </div>
-                <span className="text-xs text-gray-400 whitespace-nowrap shrink-0">
+                <span className="text-xs text-slate-400 whitespace-nowrap shrink-0">
                   {new Date(log.created_at).toLocaleString()}
                 </span>
               </div>

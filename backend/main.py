@@ -1,26 +1,26 @@
 import logging
 from sqlalchemy import text
 from typing import Optional
-from fastapi import FastAPI, Depends, HTTPException, Request, UploadFile, File # type: ignore
-from fastapi.middleware.cors import CORSMiddleware # type: ignore
+from fastapi import FastAPI, Depends, HTTPException, Request, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from jose import jwt, JWTError                                 # type: ignore 
-from passlib.context import CryptContext               # type: ignore 
+from jose import jwt, JWTError
+from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
-from pydantic import BaseModel                         # type: ignore # type: ignore, field_validator
-from pydantic import field_validator # type: ignore
+from pydantic import BaseModel
+from pydantic import field_validator
 from database import get_db
-from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, Product, ChatSession, ChatMessage, ChatFeedback, MessageRole, UserRole, AuditLog, Media, ArticleSMEReview
+from models import Article, ArticleStatus, ContentType, User, SearchLog, Category, Product, ChatSession, ChatMessage, ChatFeedback, MessageRole, UserRole, AuditLog, Media, ArticleSMEReview, SupportRequest
 import os, uuid
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials # type: ignore
-from groq import Groq # type: ignore
-import cloudinary # type: ignore
-import cloudinary.uploader # type: ignore
-from fastapi.responses import JSONResponse # type: ignore
-from fastapi.exceptions import RequestValidationError # type: ignore
-from slowapi import Limiter, _rate_limit_exceeded_handler # type: ignore
-from slowapi.util import get_remote_address # type: ignore
-from slowapi.errors import RateLimitExceeded # type: ignore
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from groq import Groq
+import cloudinary
+import cloudinary.uploader
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from repositories.category_repository import CategoryRepository
 from repositories.tag_repository import TagRepository
 from services.category_service import CategoryService
@@ -37,6 +37,8 @@ from repositories.homepage_repository import HomepageRepository
 from services.homepage_service import HomepageService
 from repositories.product_repository import ProductRepository
 from services.product_service import ProductService
+from repositories.support_repository import SupportRepository
+from services.support_service import SupportService
 
 def log_audit(db: Session, user_id: str, action: str, target_type: str, target_id: str = None, details: str = None):
     from models import AuditLog
@@ -181,7 +183,7 @@ async def general_error_handler(request, exc):
             "message": "An unexpected error occurred. Please try again or contact support.",
         }
     )
-    
+
 def create_token(user_id: str, role: str) -> str:
     """Creates a JWT token that expires in 8 hours"""
     expire = datetime.now(timezone.utc) + timedelta(hours=TOKEN_TTL)
@@ -211,12 +213,33 @@ def get_current_user(
             algorithms=[ALGORITHM]
         )
         user_id = payload.get("sub")
-        role    = payload.get("role")
 
         if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token"
+            )
 
-        return {"user_id": user_id, "role": role}
+        user = db.query(User).filter(
+            User.id == user_id
+        ).first()
+
+        if not user:
+            raise HTTPException(
+                status_code=401,
+                detail="User session is no longer valid. Please sign in again."
+            )
+
+        if not user.is_active:
+            raise HTTPException(
+                status_code=401,
+                detail="Your account is inactive. Please contact an administrator."
+            )
+
+        return {
+            "user_id": str(user.id),
+            "role": user.role.value,
+        }
 
     except JWTError:
         raise HTTPException(status_code=401, detail="Token invalid or expired")
@@ -237,14 +260,16 @@ def get_optional_user(
         )
 
         user_id = payload.get("sub")
-        role = payload.get("role")
 
         if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token"
+            )
 
         return {
             "user_id": user_id,
-            "role": role,
+            "role": payload.get("role"),
         }
 
     except JWTError:
@@ -308,6 +333,17 @@ class FeedbackRequest(BaseModel):
     rating: int
     comment: Optional[str] = None
 
+
+class SupportRequestCreate(BaseModel):
+    subject: str
+    category: str
+    message: str
+
+
+class SupportStatusUpdate(BaseModel):
+    status: str
+
+
 @app.get("/")
 def root():
     return {"message": "Healthtech KB API is running"}
@@ -365,7 +401,7 @@ def get_articles(
         from models import ArticleTag
         query = query.join(ArticleTag, ArticleTag.article_id == Article.id) \
                       .filter(ArticleTag.tag_id == tag_id)
-    
+
     if product_id:
         query = query.filter(Article.product_id == product_id)
 
@@ -472,7 +508,7 @@ async def upload_media(
         "url": media.url,
         "filename": media.filename
     }
-    
+
 @app.get("/api/v1/articles/search")
 def search_articles(
     q: str,
@@ -779,6 +815,81 @@ def get_admin_feedback(
     return service.list_feedback()
 
 
+@app.post("/api/v1/support", status_code=201)
+def create_support_request(
+    payload: SupportRequestCreate,
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
+):
+    repository = SupportRepository(db)
+    service = SupportService(repository)
+
+    try:
+        result = service.create_request(
+            user["user_id"],
+            payload.subject,
+            payload.category,
+            payload.message,
+        )
+
+        log_audit(
+            db,
+            user["user_id"],
+            "create_support_request",
+            "support_request",
+            result["id"],
+            f"category={payload.category}"
+        )
+
+        return result
+
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/api/v1/admin/support")
+def get_admin_support_requests(
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    repository = SupportRepository(db)
+    service = SupportService(repository)
+    return service.list_requests()
+
+
+@app.patch("/api/v1/admin/support/{request_id}/status")
+def update_support_status(
+    request_id: str,
+    payload: SupportStatusUpdate,
+    db: Session = Depends(get_db),
+    user: dict = Depends(require_admin)
+):
+    repository = SupportRepository(db)
+    service = SupportService(repository)
+
+    try:
+        result = service.update_status(
+            request_id,
+            payload.status
+        )
+
+        log_audit(
+            db,
+            user["user_id"],
+            "update_support_status",
+            "support_request",
+            request_id,
+            f"status={payload.status}"
+        )
+
+        return result
+
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
 @app.get("/api/v1/my-notifications")
 def get_my_notifications(
     db: Session = Depends(get_db),
@@ -832,9 +943,9 @@ def get_article_by_slug(
 
 @app.get("/api/v1/articles/{slug}/pdf")
 def export_article_pdf(slug: str, db: Session = Depends(get_db)):
-    import markdown as md_lib # type: ignore
-    from xhtml2pdf import pisa # type: ignore
-    from fastapi.responses import Response # type: ignore
+    import markdown as md_lib
+    from xhtml2pdf import pisa
+    from fastapi.responses import Response
     import io
 
     article = db.query(Article).filter(
@@ -1004,7 +1115,7 @@ def create_article(payload: ArticleCreateRequest, db: Session = Depends(get_db),
 
     if user["role"] == "editor" and requested_status == "published":
         requested_status = "pending_review"
-    
+
     article = Article(
         id=uuid.uuid4(),
         title=payload.title,
@@ -1183,7 +1294,7 @@ def delete_article(
     return {"message": f"Article '{slug}' archived successfully"}
 
 
-    
+
 
 
 class ChatRequest(BaseModel):
@@ -1215,7 +1326,7 @@ def chat(
             "sources_used": 0,
             "articles_found": []
         }
-    
+
     search_text = payload.message.strip()
 
     search_text = re.sub(
@@ -1539,7 +1650,7 @@ Return only an answer grounded in the source articles."""
             if existing_session.user_id is None and user is not None:
                 existing_session.user_id = user["user_id"]
                 db.commit()
-            
+
             session = existing_session
 
     if not session:

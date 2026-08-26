@@ -3,7 +3,7 @@ import { sendMessage, submitChatFeedback } from "../services/api"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
-export default function ChatWidget({ onOpenArticle }) {
+export default function ChatWidget() {
   const [open, setOpen]       = useState(false)
   const [messages, setMessages] = useState([
     {
@@ -131,7 +131,7 @@ export default function ChatWidget({ onOpenArticle }) {
                   className={`max-w-[85%] px-3 py-2 rounded-xl text-sm leading-relaxed ${
                     msg.role === "user"
                       ? "bg-violet-600 text-white rounded-br-none"
-                      : "bg-gray-100 text-gray-800 rounded-bl-none overflow-x-auto"
+                      : "bg-gray-100 text-slate-800 rounded-bl-none overflow-x-auto"
                   }`}
                 >
                   {msg.role === "user" ? (
@@ -163,7 +163,7 @@ export default function ChatWidget({ onOpenArticle }) {
 
                       {msg.messageId && (
                         <div className="mt-2 pt-2 border-t border-gray-200 flex items-center gap-2">
-                          <span className="text-xs text-gray-400">Helpful?</span>
+                          <span className="text-xs text-slate-400">Helpful?</span>
                           <button
                             onClick={() => handleFeedback(i, msg.messageId, true)}
                             className={`text-sm transition ${msg.feedbackGiven === true ? "opacity-100" : "opacity-40 hover:opacity-70"}`}
@@ -186,7 +186,7 @@ export default function ChatWidget({ onOpenArticle }) {
 
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 text-gray-500 px-3 py-2 rounded-xl text-sm rounded-bl-none">
+                <div className="bg-gray-100 text-slate-500 px-3 py-2 rounded-xl text-sm rounded-bl-none">
                   Thinking...
                 </div>
               </div>

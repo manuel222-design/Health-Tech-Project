@@ -7,7 +7,7 @@ from alembic import context
 
 import os
 import sys
-from dotenv import load_dotenv # type: ignore
+from dotenv import load_dotenv
 
 sys.path.append(os.getcwd())
 load_dotenv()

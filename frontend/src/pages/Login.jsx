@@ -15,7 +15,7 @@ function EyeIcon({ open }) {
     >
       <path d="M2 2l20 20" />
       <path d="M6.7 6.7C4.2 8.3 2.7 10.2 2 12c1.5 3.5 5.3 7 10 7 1.7 0 3.2-.4 4.5-1.1" />
-      <path d="M10.7 10.7a2 2 0 0 0 2.8 2.8" />
+      <path d="M10.7 10.7a2 2 0 0 0 2.8 2.8"z />
       <path d="M9.9 5.2C10.6 5.1 11.3 5 12 5c4.7 0 8.5 3.5 10 7-0.6 1.4-1.7 3-3.3 4.3" />
     </svg>
   ) : (
@@ -110,10 +110,16 @@ export default function Login({ onLogin, onShowRegister }) {
     } catch (err) {
       console.error("LOGIN ERROR:", err)
 
-      setError(
-        err.response?.data?.detail ||
-        "Invalid email or password. Please try again."
-      )
+      if (err.response?.status === 429) {
+        setError(
+          "Too many login attempts. Please wait a few minutes before trying again."
+        )
+      } else {
+        setError(
+          err.response?.data?.detail ||
+          "Invalid email or password. Please try again."
+        )
+      }
     } finally {
       setLoading(false)
     }
@@ -252,11 +258,11 @@ export default function Login({ onLogin, onShowRegister }) {
               </span>
             </div>
 
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-slate-800">
               Reset your password
             </h1>
 
-            <p className="text-gray-500 mt-1 text-sm">
+            <p className="text-slate-500 mt-1 text-sm">
               Verify your account and create a new password.
             </p>
 
@@ -282,7 +288,7 @@ export default function Login({ onLogin, onShowRegister }) {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
                   Email address
                 </label>
 
@@ -321,7 +327,7 @@ export default function Login({ onLogin, onShowRegister }) {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
                   Verification code
                 </label>
 
@@ -340,7 +346,7 @@ export default function Login({ onLogin, onShowRegister }) {
                   required
                 />
 
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs text-slate-400 mt-2">
                   The code expires after 10 minutes.
                 </p>
 
@@ -348,7 +354,7 @@ export default function Login({ onLogin, onShowRegister }) {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
                   New password
                 </label>
 
@@ -377,7 +383,7 @@ export default function Login({ onLogin, onShowRegister }) {
                         prev => !prev
                       )
                     }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-violet-600 transition"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-violet-600 transition"
                     aria-label={
                       showNewPassword
                         ? "Hide password"
@@ -395,7 +401,7 @@ export default function Login({ onLogin, onShowRegister }) {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
                   Confirm password
                 </label>
 
@@ -453,11 +459,11 @@ export default function Login({ onLogin, onShowRegister }) {
             </span>
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-2xl font-bold text-slate-800">
             Taifa Care HMIS
           </h1>
 
-          <p className="text-gray-500 mt-1">
+          <p className="text-slate-500 mt-1">
             Sign in to access knowledge system
           </p>
 
@@ -482,7 +488,7 @@ export default function Login({ onLogin, onShowRegister }) {
 
           <div>
 
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               Email address
             </label>
 
@@ -503,7 +509,7 @@ export default function Login({ onLogin, onShowRegister }) {
 
           <div>
 
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               Password
             </label>
 
@@ -530,7 +536,7 @@ export default function Login({ onLogin, onShowRegister }) {
                 onClick={() =>
                   setShowPassword(prev => !prev)
                 }
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-violet-600 transition"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-violet-600 transition"
                 aria-label={
                   showPassword
                     ? "Hide password"
@@ -544,7 +550,7 @@ export default function Login({ onLogin, onShowRegister }) {
 
             </div>
 
-            {/* Forgot password is BELOW the field */}
+            {}
             <div className="flex justify-end mt-2">
 
               <button
@@ -582,7 +588,7 @@ export default function Login({ onLogin, onShowRegister }) {
         </button>
 
 
-        <p className="text-center text-xs text-gray-500 mt-4">
+        <p className="text-center text-xs text-slate-500 mt-4">
           Taifa Care Knowledge Centre
         </p>
 

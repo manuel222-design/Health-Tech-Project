@@ -41,15 +41,15 @@ export default function AdminUsers() {
 
   if (loading) return (
     <div className="flex items-center justify-center py-20">
-      <div className="text-gray-400">Loading users...</div>
+      <div className="text-slate-400">Loading users...</div>
     </div>
   )
 
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Manage Users</h2>
-        <p className="text-gray-500 text-sm">Assign roles and manage account access</p>
+        <h2 className="text-2xl font-bold text-slate-800">Manage Users</h2>
+        <p className="text-slate-500 text-sm">Assign roles and manage account access</p>
       </div>
 
       <div className="grid gap-3">
@@ -59,8 +59,8 @@ export default function AdminUsers() {
             className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap"
           >
             <div>
-              <h3 className="font-semibold text-gray-800">{u.username}</h3>
-              <p className="text-xs text-gray-400">{u.email}</p>
+              <h3 className="font-semibold text-slate-800">{u.username}</h3>
+              <p className="text-xs text-slate-400">{u.email}</p>
               <span className={`text-xs rounded-full px-2 py-0.5 border mt-1 inline-block ${
                 u.is_active
                   ? "bg-violet-50 text-violet-700 border-violet-200"
