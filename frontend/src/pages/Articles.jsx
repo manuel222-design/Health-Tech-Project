@@ -299,7 +299,7 @@ export default function Articles({
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-slate-400">
-          Loading knowledge articles...
+          Loading guides...
         </div>
       </div>
     )
@@ -307,35 +307,6 @@ export default function Articles({
 
   return (
     <div className="space-y-6 pb-20">
-
-      {/* ======================================================
-          HEADER
-      ====================================================== */}
-      <section>
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-
-          <div>
-            <div className="text-[10px] uppercase tracking-wider font-semibold text-violet-700 mb-2">
-              Knowledge Centre
-            </div>
-
-            <h2 className="text-2xl font-bold text-slate-800">
-              Knowledge Articles
-            </h2>
-
-            <p className="text-sm text-slate-500 mt-1 max-w-2xl">
-              Find verified guidance for TaifaCare HMIS
-              workflows, clinical services and system operations.
-            </p>
-          </div>
-
-          <div className="text-xs text-slate-400">
-            {articles.length} result
-            {articles.length === 1 ? "" : "s"}
-          </div>
-
-        </div>
-      </section>
 
       {/* ======================================================
           SEARCH + FILTERS

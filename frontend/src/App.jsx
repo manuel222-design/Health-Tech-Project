@@ -460,6 +460,25 @@ export default function App() {
   }
 
 
+  function goLanding() {
+
+    setShowLogin(false)
+    setShowRegister(false)
+
+    setCurrentPage("landing")
+
+    setSelectedSlug(null)
+    setSelectedProductSlug(null)
+    setEditSlug(null)
+
+    window.history.pushState(
+      {},
+      "",
+      "/"
+    )
+  }
+
+
   useEffect(() => {
 
     document.documentElement.classList.toggle(
@@ -939,10 +958,10 @@ setSelectedCategory(categoryId)
       "Dashboard",
 
     articles:
-      "Knowledge Base",
+      "Search & Browse",
 
     article:
-      "Knowledge Base",
+      "Search & Browse",
 
     manage:
       editSlug
@@ -1028,6 +1047,97 @@ setSelectedCategory(categoryId)
     }
 
 
+    if (
+      currentPage === "articles" ||
+      currentPage === "article"
+    ) {
+
+      return (
+        <div className="min-h-screen bg-slate-100 text-slate-800">
+
+          <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+
+              <button
+                type="button"
+                onClick={goLanding}
+                className="flex items-center gap-3"
+              >
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-white font-extrabold text-xs">
+                  TC
+                </div>
+
+                <div className="text-left">
+                  <div className="text-sm font-semibold text-slate-800">
+                    Taifa Care
+                  </div>
+
+                  <div className="text-[10px] uppercase tracking-[0.12em] text-slate-400">
+                    Knowledge Centre
+                  </div>
+                </div>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={openLogin}
+                  className="px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-violet-700 transition"
+                >
+                  Sign in
+                </button>
+
+                <button
+                  type="button"
+                  onClick={openRegister}
+                  className="px-4 py-2 rounded-lg bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition"
+                >
+                  Get started
+                </button>
+              </div>
+
+            </div>
+          </header>
+
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+            {currentPage === "articles" && (
+              <>
+                <div className="mb-6">
+                  <h1 className="text-xl sm:text-2xl font-semibold text-slate-800">
+                    Knowledge Base
+                  </h1>
+
+                  <p className="text-sm text-slate-500 mt-1">
+                    Browse healthcare guidance and practical workflows.
+                  </p>
+                </div>
+
+                <Articles
+                  onSelectArticle={handleSelectArticle}
+                  initialCategory={selectedCategory}
+                />
+              </>
+            )}
+
+            {currentPage === "article" && selectedSlug && (
+              <ArticleView
+                slug={selectedSlug}
+                onBack={() => goTo("articles")}
+              />
+            )}
+
+          </main>
+
+          <ChatWidget
+            onOpenArticle={handleSelectArticle}
+          />
+
+        </div>
+      )
+    }
+
+
     return (
       <>
         <Landing
@@ -1035,6 +1145,9 @@ setSelectedCategory(categoryId)
           onRegister={openRegister}
           onOpenAssistant={() =>
             window.openTaifaCareAssistant?.()
+          }
+          onOpenKnowledge={() =>
+            goTo("articles")
           }
         />
 
@@ -2316,22 +2429,10 @@ setSelectedCategory(categoryId)
 
           {currentPage === "articles" && (
 
-            <>
-
-              <h2 className="text-2xl font-bold text-slate-800 mb-1">
-                Knowledge Base
-              </h2>
-
-              <p className="text-slate-500 mb-6">
-                Healthcare guides and clinical workflows
-              </p>
-
-              <Articles
-                onSelectArticle={handleSelectArticle}
-                initialCategory={selectedCategory}
-              />
-
-            </>
+            <Articles
+              onSelectArticle={handleSelectArticle}
+              initialCategory={selectedCategory}
+            />
 
           )}
 

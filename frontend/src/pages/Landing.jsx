@@ -2,6 +2,7 @@ export default function Landing({
   onLogin,
   onRegister,
   onOpenAssistant,
+  onOpenKnowledge,
 }) {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
@@ -175,7 +176,12 @@ export default function Landing({
                     </div>
 
 
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 flex items-center gap-3 shadow-sm">
+                    <button
+  type="button"
+  onClick={onOpenKnowledge}
+  className="w-full text-left rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 flex items-center gap-3 shadow-sm hover:border-violet-200 hover:bg-violet-50/40 transition cursor-pointer"
+  aria-label="Browse the Knowledge Base"
+>
 
                       <span className="text-slate-400 text-xl">
                         ⌕
@@ -189,16 +195,16 @@ export default function Landing({
                         Search
                       </span>
 
-                    </div>
+                    </button>
 
 
                     {/* Search suggestions */}
                     <div className="flex flex-wrap gap-2 mt-4">
 
-                      <Suggestion text="Patient Registration" />
-                      <Suggestion text="Triage & Vitals" />
-                      <Suggestion text="Clinical Workflows" />
-                      <Suggestion text="Troubleshooting" />
+                      <Suggestion text="Patient Registration" onClick={onOpenKnowledge} />
+                      <Suggestion text="Triage & Vitals" onClick={onOpenKnowledge} />
+                      <Suggestion text="Clinical Workflows" onClick={onOpenKnowledge} />
+                      <Suggestion text="Troubleshooting" onClick={onOpenKnowledge} />
 
                     </div>
 
@@ -361,14 +367,17 @@ export default function Landing({
 }
 
 
-function Suggestion({ text }) {
+function Suggestion({ text, onClick }) {
   return (
-    <span className="inline-flex items-center rounded-lg bg-white border border-slate-200 px-3 py-2 text-[11px] font-medium text-slate-500">
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center rounded-lg bg-white border border-slate-200 px-3 py-2 text-[11px] font-medium text-slate-500 hover:border-violet-200 hover:text-violet-700 hover:bg-violet-50 transition"
+    >
       {text}
-    </span>
+    </button>
   )
 }
-
 
 function PreviewMetric({
   label,
