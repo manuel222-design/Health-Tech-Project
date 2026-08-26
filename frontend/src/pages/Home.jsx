@@ -64,7 +64,14 @@ export default function Home({
     localStorage.getItem("username") || "User"
 
   const username =
-    rawUsername.replace(/\s+Admin$/i, "").trim()
+    rawUsername
+      .replace(/\s+Admin$/i, "")
+      .replace(
+        /^(Dr\.?|Prof\.?|Mr\.?|Mrs\.?|Ms\.?|Miss)\s+/i,
+        ""
+      )
+      .trim()
+      .split(/\s+/)[0] || "User"
 
   const coveredCategories = categories.filter(
     category => (category.article_count || 0) > 0
@@ -98,17 +105,17 @@ export default function Home({
                 <span className="w-1.5 h-1.5 rounded-full bg-violet-200" />
 
                 <span className="text-[10px] uppercase tracking-[0.16em] text-violet-100 font-semibold">
-                  Taifa Care Featured Knowledge
+                  Taifa Care
                 </span>
 
               </div>
 
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight tracking-tight">
-                Welcome back, {username}
+                Welcome, {username}
               </h1>
 
               <p className="text-sm sm:text-base text-violet-50 mt-3 max-w-2xl leading-relaxed">
-                Find trusted knowledge, workflows and help in one place.
+                Knowledge, activity and system overview.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 mt-6">
@@ -206,7 +213,7 @@ export default function Home({
                   <span className="w-2 h-2 rounded-full bg-violet-200" />
 
                   <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-violet-50">
-                    Published Guides
+                    Published
                   </span>
 
                 </div>
@@ -216,7 +223,7 @@ export default function Home({
                 </div>
 
                 <p className="text-sm text-violet-50 mt-1">
-                  Available now
+                  Available
                 </p>
 
               </div>
@@ -318,61 +325,6 @@ export default function Home({
         </div>
 
 
-        {/* PRODUCT VERSION */}
-        <div className="lg:col-span-2">
-
-          <div className="relative overflow-hidden min-h-[150px] rounded-2xl bg-gradient-to-br from-violet-50/80 via-white to-white border border-violet-100 border-t-2 border-t-violet-500 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
-
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-
-              <div>
-
-                <div className="flex items-center gap-2">
-
-                  <span className="w-2 h-2 rounded-full bg-violet-500" />
-
-                  <span className="text-[11px] uppercase tracking-[0.12em] text-slate-500 font-bold">
-                    Product Version
-                  </span>
-
-                </div>
-
-                <div className="text-3xl font-bold text-violet-700 mt-5">
-                  v1.0
-                </div>
-
-                <p className="text-xs text-slate-500 mt-1.5">
-                  Current version
-                </p>
-
-              </div>
-
-
-              <div className="sm:text-right">
-
-                <p className="text-xs text-slate-400">
-                  Taifa Care
-                </p>
-
-                <p className="text-sm font-semibold text-slate-700 mt-1">
-                  Featured Knowledge
-                </p>
-
-                {emptyCategories > 0 && (
-                  <p className="text-[11px] text-violet-700 mt-2">
-                    {emptyCategories} area{emptyCategories !== 1 ? "s" : ""} expanding
-                  </p>
-                )}
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
       </section>
 
 
@@ -398,7 +350,7 @@ export default function Home({
             </h2>
 
             <p className="text-sm text-slate-500 mt-1">
-              What happened in the system today.
+              System activity today.
             </p>
 
           </div>
@@ -513,7 +465,7 @@ export default function Home({
             </h2>
 
             <p className="text-sm text-slate-500 mt-1">
-              Featured and recent guidance.
+              Recently featured guidance.
             </p>
 
           </div>
@@ -798,7 +750,7 @@ export default function Home({
             </h2>
 
             <p className="text-sm text-slate-500 mt-1">
-              Browse by operational or clinical area.
+              Browse knowledge by area.
             </p>
 
           </div>

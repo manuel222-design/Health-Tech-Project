@@ -318,9 +318,16 @@ export default function App() {
     user?.role === "admin"
 
   function displayName(username) {
-    const name = username || "User"
+    const name = (username || "User")
+      .replace(/\s+Admin$/i, "")
+      .trim()
 
-    return name.replace(/\s+Admin$/i, "").trim()
+    const withoutTitle = name.replace(
+      /^(Dr\.?|Prof\.?|Mr\.?|Mrs\.?|Ms\.?|Miss)\s+/i,
+      ""
+    )
+
+    return withoutTitle.split(/\s+/)[0] || "User"
   }
 
   function normalizeUser(userData) {
