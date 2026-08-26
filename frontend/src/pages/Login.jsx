@@ -550,7 +550,7 @@ export default function Login({ onLogin, onShowRegister }) {
 
             </div>
 
-            {/* Forgot password is BELOW the field */}
+            {}
             <div className="flex justify-end mt-2">
 
               <button

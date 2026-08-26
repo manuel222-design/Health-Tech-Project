@@ -4,7 +4,7 @@ from multiprocessing import get_context
 from database import SessionLocal
 from models import User, UserRole, Category, Article, ArticleStatus, Tag, ArticleTag
 import uuid
-from passlib.context import CryptContext # type: ignore
+from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def seed():
@@ -159,7 +159,7 @@ The system will automatically generate a unique CR Number (Client Registration N
 
  Common Errors
 | Error                       | Solution                                                   |
-                                                            
+
 | National ID already exists  | Patient is already registered — search for existing record |
 | Required field missing      | Check all mandatory fields are filled                      |
 | Session expired             | Log in again and repeat the process |

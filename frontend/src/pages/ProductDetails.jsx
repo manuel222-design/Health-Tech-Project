@@ -75,7 +75,7 @@ export default function ProductDetails({
   return (
     <div className="space-y-7 pb-10">
 
-      {/* Back */}
+      {}
 
       <button
         onClick={onBack}
@@ -85,7 +85,7 @@ export default function ProductDetails({
       </button>
 
 
-      {/* Product Header */}
+      {}
 
       <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
 
@@ -161,7 +161,7 @@ export default function ProductDetails({
       </section>
 
 
-      {/* Articles */}
+      {}
 
       <section>
 

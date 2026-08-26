@@ -510,9 +510,9 @@ html.dark .article-content td {
 }
 
 
-/* ------------------------------------------------------------
-   Taifa Care typography foundation
-   ------------------------------------------------------------ */
+
+
+
 
 @layer base {
   html {
@@ -552,7 +552,7 @@ html.dark .article-content td {
   }
 }
 
-/* Consistent page typography */
+
 .tc-page-title {
   font-size: 1.5rem;
   line-height: 1.25;
@@ -589,9 +589,9 @@ html.dark .article-content td {
 }
 
 
-/* ============================================================
-   Taifa Care Typography Scale
-   ============================================================ */
+
+
+
 
 @layer base {
   body {

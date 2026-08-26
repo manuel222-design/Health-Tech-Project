@@ -7,12 +7,12 @@ export default function Landing({
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
 
-      {/* =====================================================
-          HERO
-      ====================================================== */}
+      {
+
+}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-700 to-violet-900 text-white">
 
-        {/* Ambient background */}
+        {}
         <div className="absolute -top-40 -right-24 w-[520px] h-[520px] rounded-full bg-violet-300/15 blur-3xl" />
         <div className="absolute -bottom-48 -left-32 w-[480px] h-[480px] rounded-full bg-blue-300/10 blur-3xl" />
 
@@ -22,7 +22,7 @@ export default function Landing({
 
         <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8">
 
-          {/* NAVIGATION */}
+          {}
           <nav className="py-6 flex items-center justify-between">
 
             <div className="flex items-center gap-3">
@@ -57,7 +57,7 @@ export default function Landing({
           </nav>
 
 
-          {/* HERO MESSAGE */}
+          {}
           <div className="max-w-3xl mx-auto text-center pt-10 sm:pt-14">
 
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-[10px] uppercase tracking-[0.15em] font-semibold text-white">
@@ -105,10 +105,10 @@ export default function Landing({
           </div>
 
 
-          {/* KNOWLEDGE SEARCH STAGE */}
+          {}
           <div className="relative max-w-5xl mx-auto mt-12 sm:mt-14 pb-10">
 
-            {/* Floating chip - left */}
+            {}
             <div className="hidden md:flex absolute left-0 top-14 translate-x-0 items-center gap-2 rounded-xl border border-white/15 bg-white/10 backdrop-blur-md px-3.5 py-2.5 shadow-lg">
               <span className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-sm">
                 ▤
@@ -126,7 +126,7 @@ export default function Landing({
             </div>
 
 
-            {/* Floating chip - right */}
+            {}
             <div className="hidden md:flex absolute right-0 top-20 items-center gap-2 rounded-xl border border-white/15 bg-white/10 backdrop-blur-md px-3.5 py-2.5 shadow-lg">
               <span className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-sm text-violet-200">
                 ✦
@@ -144,7 +144,7 @@ export default function Landing({
             </div>
 
 
-            {/* Main search panel */}
+            {}
             <div className="relative mx-auto max-w-3xl">
 
               <div className="absolute -inset-5 rounded-[2rem] bg-white/10 blur-3xl" />
@@ -153,7 +153,7 @@ export default function Landing({
 
                 <div className="rounded-[1.35rem] bg-white overflow-hidden">
 
-                  {/* Search area */}
+                  {}
                   <div className="p-5 sm:p-7">
 
                     <div className="flex items-center justify-between mb-4">
@@ -198,7 +198,7 @@ export default function Landing({
                     </button>
 
 
-                    {/* Search suggestions */}
+                    {}
                     <div className="flex flex-wrap gap-2 mt-4">
 
                       <Suggestion text="Patient Registration" onClick={onOpenKnowledge} />
@@ -211,7 +211,7 @@ export default function Landing({
                   </div>
 
 
-                  {/* Product capability strip */}
+                  {}
                   <div className="border-t border-slate-100 bg-slate-50/80 px-5 sm:px-7 py-4">
 
                     <div className="grid grid-cols-3 divide-x divide-slate-200">
@@ -242,7 +242,7 @@ export default function Landing({
             </div>
 
 
-            {/* Small bottom caption */}
+            {}
             <div className="mt-5 text-center text-xs text-indigo-100/60">
               Search, learn and work with confidence.
             </div>
@@ -254,9 +254,9 @@ export default function Landing({
       </section>
 
 
-      {/* =====================================================
-          CORE CAPABILITIES
-      ====================================================== */}
+      {
+
+}
       <section className="bg-white border-b border-slate-200">
 
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-14">
@@ -302,9 +302,9 @@ export default function Landing({
       </section>
 
 
-      {/* =====================================================
-          CTA
-      ====================================================== */}
+      {
+
+}
       <section className="bg-slate-50">
 
         <div className="max-w-5xl mx-auto px-5 sm:px-8 py-14">
@@ -335,9 +335,9 @@ export default function Landing({
       </section>
 
 
-      {/* =====================================================
-          FOOTER
-      ====================================================== */}
+      {
+
+}
       <footer className="bg-slate-950 text-slate-500">
 
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">

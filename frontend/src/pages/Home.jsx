@@ -84,9 +84,9 @@ export default function Home({
   return (
     <div className="space-y-8 pb-12">
 
-      {/* =====================================================
-          HERO
-      ===================================================== */}
+      {
+
+}
       <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-800 via-violet-800 to-slate-900 text-white shadow-lg">
 
         <div className="absolute -right-28 -top-24 w-96 h-96 rounded-full bg-violet-400/15 blur-3xl" />
@@ -192,12 +192,12 @@ export default function Home({
       </section>
 
 
-      {/* =====================================================
-          SUMMARY
-      ===================================================== */}
+      {
+
+}
       <section className="grid grid-cols-1 lg:grid-cols-4 gap-4">
 
-        {/* PRIMARY METRIC */}
+        {}
         <div className="lg:col-span-2">
 
           <div className="relative overflow-hidden h-full min-h-[190px] rounded-2xl bg-gradient-to-br from-violet-700 via-violet-600 to-indigo-600 text-white p-6 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
@@ -253,7 +253,7 @@ export default function Home({
         </div>
 
 
-        {/* KNOWLEDGE AREAS */}
+        {}
         <div>
 
           <div className="relative overflow-hidden h-full min-h-[190px] rounded-2xl bg-gradient-to-br from-slate-50 via-white to-white border border-slate-200 border-t-2 border-t-slate-500 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
@@ -285,7 +285,7 @@ export default function Home({
         </div>
 
 
-        {/* COVERED AREAS */}
+        {}
         <div>
 
           <div className="relative overflow-hidden h-full min-h-[190px] rounded-2xl bg-white border border-slate-200 border-t-2 border-t-emerald-500 p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition duration-200">
@@ -328,9 +328,9 @@ export default function Home({
       </section>
 
 
-      {/* =====================================================
-          ACTIVITY
-      ===================================================== */}
+      {
+
+}
       <section>
 
         <div className="flex items-end justify-between mb-4">
@@ -443,9 +443,9 @@ export default function Home({
       </section>
 
 
-      {/* =====================================================
-          FEATURED KNOWLEDGE
-      ===================================================== */}
+      {
+
+}
       <section data-knowledge-centre>
 
         <div className="flex items-end justify-between mb-4">
@@ -728,9 +728,9 @@ export default function Home({
       </section>
 
 
-      {/* =====================================================
-          KNOWLEDGE AREAS
-      ===================================================== */}
+      {
+
+}
       <section>
 
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
@@ -853,9 +853,9 @@ export default function Home({
       </section>
 
 
-      {/* =====================================================
-          AI ASSISTANT
-      ===================================================== */}
+      {
+
+}
       <section className="relative overflow-hidden rounded-xl bg-slate-900 border border-slate-800 px-6 py-7 sm:px-8">
 
         <div className="absolute -right-8 -top-10 w-32 h-32 rounded-full bg-violet-500/10" />

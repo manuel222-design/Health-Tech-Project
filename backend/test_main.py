@@ -1,7 +1,7 @@
 
 import uuid
 import pytest
-from fastapi.testclient import TestClient # type: ignore
+from fastapi.testclient import TestClient
 from main import app
 
 client = TestClient(app)

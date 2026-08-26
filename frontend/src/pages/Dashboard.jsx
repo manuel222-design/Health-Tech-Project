@@ -37,7 +37,7 @@ export default function Dashboard({ user, onSelectArticle, onGoToArticles }) {
         </p>
       </div>
 
-      {/* Quick stats */}
+      {}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
         <div className="bg-white border border-gray-200 rounded-xl p-5">
           <p className="text-2xl font-bold text-violet-600">{totalCount}</p>
@@ -53,7 +53,7 @@ export default function Dashboard({ user, onSelectArticle, onGoToArticles }) {
         </div>
       </div>
 
-      {/* Category browse */}
+      {}
       <div className="mb-8">
         <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-3">
           Browse by Category
@@ -74,7 +74,7 @@ export default function Dashboard({ user, onSelectArticle, onGoToArticles }) {
         </div>
       </div>
 
-      {/* Recent articles */}
+      {}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">

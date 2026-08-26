@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import HTTPException # type: ignore
+from fastapi import HTTPException
 
 from models import User, UserRole
 from repositories.user_repository import UserRepository
