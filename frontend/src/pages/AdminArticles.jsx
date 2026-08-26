@@ -103,7 +103,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
 
   if (loading) return (
     <div className="flex items-center justify-center py-20">
-      <div className="text-gray-400">Loading articles...</div>
+      <div className="text-slate-400">Loading articles...</div>
     </div>
   )
 
@@ -111,13 +111,13 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
     <div>
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className="text-2xl font-bold text-slate-800">
             {userRole === "editor" 
               ? "Content Review"
               : "Manage Articles"}
           </h2>
 
-          <p className="text-gray-500 text-sm">
+          <p className="text-slate-500 text-sm">
             {userRole === "editor"
               ? "Review submitted articles, approve or request changes before publishing."
               : "Create, edit, archive, and manage knowledge base articles."}
@@ -149,7 +149,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
           >
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-4-4" />
@@ -159,7 +159,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
               aria-label="Clear search"
             >
               ×
@@ -172,7 +172,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
           className={`text-sm font-medium px-3 py-1.5 rounded-lg border transition ${
             showPendingOnly
               ? "bg-blue-600 text-white border-blue-600"
-              : "bg-white text-gray-600 border-gray-300 hover:border-blue-400"
+              : "bg-white text-slate-600 border-gray-300 hover:border-blue-400"
           }`}
         >
           {showPendingOnly ? "Show All" : "Pending Only"}
@@ -186,9 +186,9 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
             className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 min-w-0"
           >
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-gray-800 break-words">{article.title}</h3>
+              <h3 className="font-semibold text-slate-800 break-words">{article.title}</h3>
               <div className="flex flex-wrap items-center gap-2 mt-1">
-                <span className="text-xs text-gray-400">{article.slug}</span>
+                <span className="text-xs text-slate-400">{article.slug}</span>
 
                 {article.category_name && (
                   <span className="text-xs rounded-full px-2 py-0.5 border bg-purple-50 text-purple-700 border-purple-200">
@@ -202,7 +202,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
                     : article.status === "pending_review"
                       ? "bg-blue-50 text-blue-700 border-blue-200"
                       : article.status === "archived"
-                        ? "bg-gray-100 text-gray-600 border-gray-300"
+                        ? "bg-gray-100 text-slate-600 border-gray-300"
                         : "bg-amber-50 text-amber-700 border-amber-200"
                 }`}>
                   {article.status}
@@ -256,7 +256,7 @@ export default function AdminArticles({ onEdit, onCreate, userRole }) {
         ))}
 
         {filteredArticles.length === 0 && (
-          <div className="text-center py-12 text-gray-400">
+          <div className="text-center py-12 text-slate-400">
             {searchQuery.trim()
               ? `No articles found for "${searchQuery}"`
               : "No articles yet. Click \"New Article\" to create one."}

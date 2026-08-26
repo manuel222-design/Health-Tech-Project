@@ -311,7 +311,7 @@ export default function ArticleView({
 
       <section className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
 
-        <div className="h-1.5 bg-gradient-to-r from-violet-500 via-cyan-500 to-blue-500" />
+        <div className="h-1.5 bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500" />
 
         <div className="p-6 sm:p-8 lg:p-10">
 
@@ -327,7 +327,7 @@ export default function ArticleView({
               {contentType}
             </MetadataBadge>
 
-            <MetadataBadge className="bg-cyan-50 border-cyan-100 text-cyan-700">
+            <MetadataBadge className="bg-indigo-50 border-indigo-100 text-indigo-700">
               {productName} v{productVersion}
             </MetadataBadge>
 

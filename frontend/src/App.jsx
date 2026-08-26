@@ -184,7 +184,6 @@ export default function App() {
 
 
   const initialPath = window.location.pathname
-  const initialSearch = window.location.search
 
   const initialSlug = initialPath.startsWith("/article/")
     ? initialPath.split("/article/")[1]
@@ -457,25 +456,6 @@ export default function App() {
       {},
       "",
       "/register"
-    )
-  }
-
-
-  function goLanding() {
-
-    setShowLogin(false)
-    setShowRegister(false)
-
-    setCurrentPage("landing")
-
-    setSelectedSlug(null)
-    setSelectedProductSlug(null)
-    setEditSlug(null)
-
-    window.history.pushState(
-      {},
-      "",
-      "/"
     )
   }
 
@@ -1088,7 +1068,7 @@ setSelectedCategory(categoryId)
             }
           >
 
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shrink-0 shadow-lg shadow-violet-950/40 ring-1 ring-teal-400/20 group-hover:ring-teal-300/40 transition">
+            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shrink-0 shadow-lg shadow-violet-950/40 ring-1 ring-violet-400/20 group-hover:ring-violet-300/40 transition">
 
               <span className="text-white font-extrabold text-sm tracking-tight">
                 TC
@@ -1157,7 +1137,7 @@ setSelectedCategory(categoryId)
           )}
 
 
-          <div className="mt-5 pt-5 pb-2 px-3 border-t border-slate-800 text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
+          <div className="mt-5 pt-5 pb-2 px-3 border-t border-slate-800 text-[10px] uppercase tracking-[0.14em] text-slate-500 font-semibold">
             Knowledge
           </div>
 
@@ -1247,7 +1227,7 @@ setSelectedCategory(categoryId)
 
             <div className="mt-2 rounded-xl bg-slate-900/35 border border-slate-800/70 p-1.5 space-y-1">
 
-              <div className="px-2.5 pt-1 pb-1.5 text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
+              <div className="px-2.5 pt-1 pb-1.5 text-[10px] uppercase tracking-[0.14em] text-slate-500 font-semibold">
                 Clinical Areas
               </div>
 
@@ -1391,7 +1371,7 @@ setSelectedCategory(categoryId)
 
             <>
 
-              <div className="mt-5 pt-5 pb-2 px-3 border-t border-slate-800 text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
+              <div className="mt-5 pt-5 pb-2 px-3 border-t border-slate-800 text-[10px] uppercase tracking-[0.14em] text-slate-500 font-semibold">
                 Administration
               </div>
 
@@ -1826,7 +1806,7 @@ setSelectedCategory(categoryId)
                 {isAdmin && (
                   <>
                     <div className="mt-5 mb-2 px-4 pt-4 border-t border-slate-800">
-                      <div className="text-[9px] uppercase tracking-[0.16em] text-slate-500 font-bold">
+                      <div className="text-[10px] uppercase tracking-[0.14em] text-slate-500 font-semibold">
                         Administration
                       </div>
                     </div>
@@ -2338,11 +2318,11 @@ setSelectedCategory(categoryId)
 
             <>
 
-              <h2 className="text-2xl font-bold text-gray-800 mb-1">
+              <h2 className="text-2xl font-bold text-slate-800 mb-1">
                 Knowledge Base
               </h2>
 
-              <p className="text-gray-500 mb-6">
+              <p className="text-slate-500 mb-6">
                 Healthcare guides and clinical workflows
               </p>
 

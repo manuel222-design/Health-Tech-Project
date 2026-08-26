@@ -105,11 +105,11 @@ export default function Register({ onRegister, onBackToLogin }) {
             </span>
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-2xl font-bold text-slate-800">
             Create Account
           </h1>
 
-          <p className="text-gray-500 mt-1">
+          <p className="text-slate-500 mt-1">
             Join Taifa Care
           </p>
         </div>
@@ -122,7 +122,7 @@ export default function Register({ onRegister, onBackToLogin }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               Username
             </label>
 
@@ -138,7 +138,7 @@ export default function Register({ onRegister, onBackToLogin }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               Email address
             </label>
 
@@ -154,7 +154,7 @@ export default function Register({ onRegister, onBackToLogin }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               Password
             </label>
 
@@ -217,9 +217,9 @@ export default function Register({ onRegister, onBackToLogin }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               Department
-              <span className="text-gray-400 font-normal"> (optional)</span>
+              <span className="text-slate-400 font-normal"> (optional)</span>
             </label>
 
             <input
@@ -253,7 +253,7 @@ export default function Register({ onRegister, onBackToLogin }) {
           Already have an account? Sign in
         </button>
 
-        <p className="text-center text-xs text-gray-500 mt-4">
+        <p className="text-center text-xs text-slate-500 mt-4">
           Taifa Care Knowledge Centre
         </p>
       </div>

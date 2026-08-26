@@ -26,7 +26,7 @@ api.interceptors.response.use(
           localStorage.setItem('token', res.data.access_token)
           originalRequest.headers.Authorization = `Bearer ${res.data.access_token}`
           return api(originalRequest)
-        } catch (refreshError) {
+        } catch {
           localStorage.clear()
           window.location.reload()
         }

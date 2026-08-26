@@ -20,12 +20,6 @@ function formatDate(value) {
   }
 }
 
-function statusLabel(status) {
-  return status
-    .replace("_", " ")
-    .replace(/\w/g, letter => letter.toUpperCase())
-}
-
 export default function AdminSupport() {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)

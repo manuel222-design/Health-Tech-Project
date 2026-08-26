@@ -298,7 +298,7 @@ export default function Articles({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="text-gray-400">
+        <div className="text-slate-400">
           Loading knowledge articles...
         </div>
       </div>
@@ -607,7 +607,7 @@ export default function Articles({
                     </span>
                   )}
 
-                  <span className="text-[11px] bg-cyan-50 text-cyan-700 border border-cyan-100 px-2.5 py-1 rounded-full">
+                  <span className="text-[11px] bg-indigo-50 text-indigo-700 border border-indigo-100 px-2.5 py-1 rounded-full">
                     {article.product_name || "TaifaCare"}
                     {" "}
                     v{article.product_version || "1.0"}

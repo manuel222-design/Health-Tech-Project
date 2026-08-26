@@ -6,105 +6,229 @@ export default function Landing({
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
 
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 text-white">
+      {/* =====================================================
+          HERO
+      ====================================================== */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-700 to-violet-900 text-white">
 
-        <div className="absolute -top-44 -right-44 w-[520px] h-[520px] rounded-full bg-violet-400/10 blur-3xl" />
-        <div className="absolute bottom-0 -left-48 w-[420px] h-[420px] rounded-full bg-cyan-400/5 blur-3xl" />
+        {/* Ambient background */}
+        <div className="absolute -top-40 -right-24 w-[520px] h-[520px] rounded-full bg-violet-300/15 blur-3xl" />
+        <div className="absolute -bottom-48 -left-32 w-[480px] h-[480px] rounded-full bg-blue-300/10 blur-3xl" />
 
-        {/* Navigation */}
-        <nav className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 py-6 flex items-center justify-between">
+        <div className="absolute right-[7%] top-20 select-none pointer-events-none text-[18rem] font-black leading-none text-white/[0.025] tracking-[-0.08em]">
+          TC
+        </div>
 
-          <div className="flex items-center gap-3">
+        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8">
 
-            <div className="w-11 h-11 bg-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/15">
-              <span className="font-bold text-lg text-slate-950">
-                TC
-              </span>
-            </div>
+          {/* NAVIGATION */}
+          <nav className="py-6 flex items-center justify-between">
 
-            <div>
-              <div className="font-bold text-base">
-                Taifa Care
-              </div>
+            <div className="flex items-center gap-3">
 
-              <div className="text-xs text-slate-400">
-                Knowledge Centre
-              </div>
-            </div>
-
-          </div>
-
-          <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400">
-            <span className="w-2 h-2 rounded-full bg-violet-400" />
-            Healthcare knowledge &amp; assistance
-          </div>
-
-        </nav>
-
-
-        {/* HERO CONTENT */}
-        <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 pt-8 pb-16 lg:pt-14 lg:pb-20">
-
-          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-
-            {/* LEFT */}
-            <div>
-
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-violet-400/20 bg-violet-400/10 text-violet-300 text-xs font-semibold mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-                TAIFA CARE KNOWLEDGE CENTRE
-              </div>
-
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.07]">
-                Smarter healthcare.
-                <span className="block text-violet-400 mt-1">
-                  Better information.
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-indigo-950/20">
+                <span className="font-bold text-sm text-indigo-700">
+                  TC
                 </span>
-              </h1>
-
-              <p className="mt-6 max-w-xl text-base sm:text-lg text-slate-300 leading-relaxed">
-                Access trusted healthcare knowledge, practical workflows,
-                and AI assistance in one place.
-              </p>
-
-
-              {/* ACTIONS */}
-              <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap gap-3">
-
-                <button
-                  onClick={onRegister}
-                  className="px-6 py-3.5 bg-violet-500 hover:bg-violet-400 text-slate-950 rounded-xl font-bold transition shadow-lg shadow-violet-500/15"
-                >
-                  Get Started →
-                </button>
-
-                <button
-                  onClick={onLogin}
-                  className="px-6 py-3.5 border border-slate-600 hover:border-violet-400 hover:bg-white/5 text-white rounded-xl font-semibold transition"
-                >
-                  Sign in
-                </button>
-
               </div>
 
-
-              {/* TRUST */}
-              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-slate-400">
-
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-                  Trusted knowledge
+              <div>
+                <div className="font-semibold text-[15px] text-white">
+                  Taifa Care
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-                  Practical workflows
+                <div className="text-[10px] uppercase tracking-[0.14em] text-indigo-100/70">
+                  Knowledge Centre
                 </div>
+              </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-                  AI assistance
+            </div>
+
+
+            <button
+              type="button"
+              onClick={onLogin}
+              className="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/15 transition"
+            >
+              Sign in
+            </button>
+
+          </nav>
+
+
+          {/* HERO MESSAGE */}
+          <div className="max-w-3xl mx-auto text-center pt-10 sm:pt-14">
+
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-[10px] uppercase tracking-[0.15em] font-semibold text-white">
+              <span className="w-1.5 h-1.5 rounded-full bg-violet-200" />
+              Healthcare Knowledge Centre
+            </div>
+
+
+            <h1 className="mt-6 text-[2.35rem] sm:text-5xl lg:text-[3.35rem] font-bold tracking-tight leading-[1.08]">
+              Find what you need.
+            </h1>
+
+
+            <p className="mt-5 max-w-2xl mx-auto text-[15px] sm:text-base text-indigo-50/90 leading-7">
+              Clinical guidance, HMIS workflows and practical answers in one place.
+            </p>
+
+
+            <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
+
+              <button
+                type="button"
+                onClick={onRegister}
+                className="w-full sm:w-auto rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-indigo-800 hover:bg-indigo-50 transition shadow-md"
+              >
+                Get started
+                <span className="ml-2">→</span>
+              </button>
+
+
+              <button
+                type="button"
+                onClick={onOpenAssistant}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-medium text-white hover:bg-white/15 transition"
+              >
+                <span className="text-violet-200">
+                  ✦
+                </span>
+
+                Ask the AI Assistant
+              </button>
+
+            </div>
+
+          </div>
+
+
+          {/* KNOWLEDGE SEARCH STAGE */}
+          <div className="relative max-w-5xl mx-auto mt-12 sm:mt-14 pb-10">
+
+            {/* Floating chip - left */}
+            <div className="hidden md:flex absolute left-0 top-14 translate-x-0 items-center gap-2 rounded-xl border border-white/15 bg-white/10 backdrop-blur-md px-3.5 py-2.5 shadow-lg">
+              <span className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-sm">
+                ▤
+              </span>
+
+              <div>
+                <p className="text-[10px] uppercase tracking-wide text-indigo-100/60">
+                  Knowledge
+                </p>
+
+                <p className="text-xs font-medium text-white">
+                  Clinical Guides
+                </p>
+              </div>
+            </div>
+
+
+            {/* Floating chip - right */}
+            <div className="hidden md:flex absolute right-0 top-20 items-center gap-2 rounded-xl border border-white/15 bg-white/10 backdrop-blur-md px-3.5 py-2.5 shadow-lg">
+              <span className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-sm text-violet-200">
+                ✦
+              </span>
+
+              <div>
+                <p className="text-[10px] uppercase tracking-wide text-indigo-100/60">
+                  Assistance
+                </p>
+
+                <p className="text-xs font-medium text-white">
+                  Guided Answers
+                </p>
+              </div>
+            </div>
+
+
+            {/* Main search panel */}
+            <div className="relative mx-auto max-w-3xl">
+
+              <div className="absolute -inset-5 rounded-[2rem] bg-white/10 blur-3xl" />
+
+              <div className="relative rounded-[1.75rem] border border-white/20 bg-white/10 backdrop-blur-xl p-2 shadow-2xl">
+
+                <div className="rounded-[1.35rem] bg-white overflow-hidden">
+
+                  {/* Search area */}
+                  <div className="p-5 sm:p-7">
+
+                    <div className="flex items-center justify-between mb-4">
+
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.16em] font-semibold text-violet-600">
+                          Search Knowledge
+                        </p>
+
+                        <p className="text-xs text-slate-400 mt-1">
+                          Start with a workflow, topic or question
+                        </p>
+                      </div>
+
+                      <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-medium text-emerald-700">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        Knowledge ready
+                      </span>
+
+                    </div>
+
+
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 flex items-center gap-3 shadow-sm">
+
+                      <span className="text-slate-400 text-xl">
+                        ⌕
+                      </span>
+
+                      <span className="text-sm text-slate-400">
+                        Search healthcare knowledge...
+                      </span>
+
+                      <span className="ml-auto hidden sm:inline-flex rounded-md bg-white border border-slate-200 px-2 py-1 text-[10px] text-slate-400">
+                        Search
+                      </span>
+
+                    </div>
+
+
+                    {/* Search suggestions */}
+                    <div className="flex flex-wrap gap-2 mt-4">
+
+                      <Suggestion text="Patient Registration" />
+                      <Suggestion text="Triage & Vitals" />
+                      <Suggestion text="Clinical Workflows" />
+                      <Suggestion text="Troubleshooting" />
+
+                    </div>
+
+                  </div>
+
+
+                  {/* Product capability strip */}
+                  <div className="border-t border-slate-100 bg-slate-50/80 px-5 sm:px-7 py-4">
+
+                    <div className="grid grid-cols-3 divide-x divide-slate-200">
+
+                      <PreviewMetric
+                        label="Knowledge"
+                        value="Guides"
+                      />
+
+                      <PreviewMetric
+                        label="Workflows"
+                        value="HMIS"
+                      />
+
+                      <PreviewMetric
+                        label="Assistant"
+                        value="AI"
+                      />
+
+                    </div>
+
+                  </div>
+
                 </div>
 
               </div>
@@ -112,79 +236,9 @@ export default function Landing({
             </div>
 
 
-            {/* RIGHT HERO CARD */}
-            <div className="relative">
-
-              <div className="absolute -inset-5 bg-violet-300/10 blur-3xl rounded-full" />
-
-              <div className="relative bg-white rounded-3xl border border-slate-200 shadow-2xl p-7 sm:p-8">
-
-                <div className="flex items-center justify-between">
-
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-violet-600 font-bold">
-                      Taifa Care
-                    </p>
-
-                    <p className="text-sm text-slate-400 mt-1">
-                      Knowledge Centre
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                    <span className="w-2 h-2 rounded-full bg-violet-500" />
-                    Ready
-                  </div>
-
-                </div>
-
-
-                <div className="mt-10">
-
-                  <p className="text-sm font-semibold text-violet-600 mb-3">
-                    One trusted place
-                  </p>
-
-                  <h3 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 leading-tight">
-                    Everything connected.
-                    <span className="block text-violet-600">
-                      One trusted place.
-                    </span>
-                  </h3>
-
-                </div>
-
-
-                <div className="grid grid-cols-3 gap-3 mt-8">
-
-                  <HeroCapability
-                    title="Knowledge"
-                    text="Trusted guides"
-                  />
-
-                  <HeroCapability
-                    title="Workflows"
-                    text="Practical tools"
-                  />
-
-                  <HeroCapability
-                    title="AI"
-                    text="Smart assistance"
-                  />
-
-                </div>
-
-
-                <button
-                  onClick={onOpenAssistant}
-                  className="w-full mt-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-4 py-3.5 text-sm font-semibold transition flex items-center justify-center gap-2"
-                >
-                  <span className="text-violet-400">✦</span>
-                  Ask the Taifa Care Assistant
-                </button>
-
-              </div>
-
+            {/* Small bottom caption */}
+            <div className="mt-5 text-center text-xs text-indigo-100/60">
+              Search, learn and work with confidence.
             </div>
 
           </div>
@@ -194,53 +248,45 @@ export default function Landing({
       </section>
 
 
-      {/* FEATURES */}
+      {/* =====================================================
+          CORE CAPABILITIES
+      ====================================================== */}
       <section className="bg-white border-b border-slate-200">
 
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-14">
 
-          <div className="text-center mb-10">
+          <div className="max-w-2xl">
 
-            <p className="text-xs uppercase tracking-widest text-violet-600 font-bold">
-              What you can do
+            <p className="text-[10px] uppercase tracking-[0.16em] text-violet-600 font-semibold">
+              Core capabilities
             </p>
 
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
-              Knowledge, workflows and AI in one place
+            <h2 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+              One centre. Three ways to work.
             </h2>
 
           </div>
 
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid md:grid-cols-3 gap-4 mt-8">
 
-            <Feature
-              icon="📚"
+            <Capability
+              number="01"
               title="Knowledge Base"
-              text="Find trusted guides, procedures and reference material."
-              onClick={onLogin}
+              text="Search guides, procedures and reference material."
             />
 
-            <Feature
-              icon="🏥"
+            <Capability
+              number="02"
               title="HMIS Workflows"
-              text="Access practical guidance for everyday healthcare operations."
-              onClick={onLogin}
+              text="Find practical guidance for everyday operations."
             />
 
-            <Feature
-              icon="🤖"
+            <Capability
+              number="03"
               title="AI Assistance"
-              text="Ask questions and explore knowledge instantly."
+              text="Ask questions and discover relevant knowledge."
               onClick={onOpenAssistant}
-              action="Try Assistant →"
-            />
-
-            <Feature
-              icon="🔐"
-              title="Secure Access"
-              text="Role-based access gives teams the right tools."
-              onClick={onLogin}
             />
 
           </div>
@@ -250,46 +296,31 @@ export default function Landing({
       </section>
 
 
-      {/* HOW IT WORKS */}
+      {/* =====================================================
+          CTA
+      ====================================================== */}
       <section className="bg-slate-50">
 
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8 py-14">
 
-          <div className="text-center">
+          <div className="rounded-3xl bg-violet-800 px-7 py-10 sm:px-10 text-center shadow-xl shadow-violet-900/10">
 
-            <p className="text-xs uppercase tracking-widest text-violet-600 font-bold">
-              Explore Taifa Care
-            </p>
-
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
-              Start where you need it
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">
+              Ready to use Taifa Care?
             </h2>
 
-          </div>
+            <p className="mt-3 text-sm text-violet-100 max-w-lg mx-auto">
+              Create an account for your role-specific workspace and tools.
+            </p>
 
-
-          <div className="grid md:grid-cols-3 gap-5 mt-10">
-
-            <Step
-              number="01"
-              title="Ask the Assistant"
-              text="Get immediate answers from the Taifa Care knowledge base."
-              onClick={onOpenAssistant}
-            />
-
-            <Step
-              number="02"
-              title="Explore Knowledge"
-              text="Browse guides, procedures and practical workflows."
-              onClick={onLogin}
-            />
-
-            <Step
-              number="03"
-              title="Sign in when needed"
-              text="Create an account when you need personalized access and tools."
+            <button
+              type="button"
               onClick={onRegister}
-            />
+              className="mt-6 inline-flex items-center justify-center rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-violet-800 hover:bg-violet-50 transition"
+            >
+              Create an account
+              <span className="ml-2">→</span>
+            </button>
 
           </div>
 
@@ -298,54 +329,27 @@ export default function Landing({
       </section>
 
 
-      {/* CTA */}
-      <section className="bg-violet-900">
-
-        <div className="max-w-5xl mx-auto px-5 sm:px-8 py-14 text-center">
-
-          <div className="inline-flex w-12 h-12 rounded-xl bg-violet-500/20 border border-violet-400/20 items-center justify-center text-violet-300 text-xl mb-5">
-            ✦
-          </div>
-
-          <h2 className="text-2xl sm:text-3xl font-bold text-white">
-            Ready to go further with Taifa Care?
-          </h2>
-
-          <p className="mt-3 text-violet-100 max-w-xl mx-auto text-sm">
-            Sign in to access the full knowledge centre, workflows and role-based tools.
-          </p>
-
-          <button
-            onClick={onRegister}
-            className="mt-7 px-7 py-3.5 bg-white text-violet-800 rounded-xl font-bold hover:bg-violet-50 transition"
-          >
-            Create Your Account →
-          </button>
-
-        </div>
-
-      </section>
-
-
-      {/* FOOTER */}
+      {/* =====================================================
+          FOOTER
+      ====================================================== */}
       <footer className="bg-slate-950 text-slate-500">
 
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-7 flex flex-col sm:flex-row justify-between gap-3 text-xs">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
 
           <div className="flex items-center gap-2">
 
-            <div className="w-7 h-7 bg-violet-500 rounded-lg flex items-center justify-center text-xs font-bold text-slate-950">
+            <div className="w-7 h-7 rounded-lg bg-violet-500 flex items-center justify-center text-[10px] font-bold text-slate-950">
               TC
             </div>
 
             <span>
-              © {new Date().getFullYear()} Taifa Care · Knowledge Centre
+              © {new Date().getFullYear()} Taifa Care
             </span>
 
           </div>
 
           <span>
-            Healthcare knowledge &amp; assistance
+            Healthcare Knowledge Centre
           </span>
 
         </div>
@@ -357,89 +361,79 @@ export default function Landing({
 }
 
 
-function HeroCapability({ title, text }) {
+function Suggestion({ text }) {
   return (
-    <div className="rounded-xl bg-slate-50 border border-slate-200 px-3 py-3">
-      <div className="flex items-center gap-2">
-        <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
-        <span className="text-xs font-semibold text-slate-700">
-          {title}
-        </span>
-      </div>
+    <span className="inline-flex items-center rounded-lg bg-white border border-slate-200 px-3 py-2 text-[11px] font-medium text-slate-500">
+      {text}
+    </span>
+  )
+}
 
-      <p className="text-[10px] text-slate-400 mt-1">
-        {text}
+
+function PreviewMetric({
+  label,
+  value,
+}) {
+  return (
+    <div className="text-center px-3">
+      <p className="text-[10px] uppercase tracking-wide text-slate-400 font-semibold">
+        {label}
+      </p>
+
+      <p className="text-sm font-semibold text-slate-700 mt-1">
+        {value}
       </p>
     </div>
   )
 }
 
 
-function Feature({
-  icon,
-  title,
-  text,
-  onClick,
-  action = "Explore →",
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="group bg-white border border-slate-200 rounded-xl p-5 text-left hover:border-violet-300 hover:shadow-md transition-all"
-    >
-
-      <div className="w-10 h-10 rounded-lg bg-violet-50 text-violet-700 flex items-center justify-center text-lg mb-4 group-hover:bg-violet-600 group-hover:text-white transition">
-        {icon}
-      </div>
-
-      <h3 className="font-semibold text-slate-800">
-        {title}
-      </h3>
-
-      <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-        {text}
-      </p>
-
-      <div className="mt-4 text-xs font-semibold text-violet-600">
-        {action}
-      </div>
-
-    </button>
-  )
-}
-
-
-function Step({
+function Capability({
   number,
   title,
   text,
   onClick,
 }) {
+  const clickable = Boolean(onClick)
+
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="group bg-white border border-slate-200 rounded-xl p-6 text-left hover:border-violet-300 hover:shadow-md transition-all"
+      disabled={!clickable}
+      className={`text-left rounded-2xl border border-slate-200 bg-white p-6 transition ${
+        clickable
+          ? "hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md cursor-pointer"
+          : "cursor-default"
+      }`}
     >
 
       <div className="flex items-center justify-between">
 
-        <span className="text-xs font-bold tracking-widest text-violet-600">
+        <span className="text-[10px] uppercase tracking-[0.16em] font-semibold text-violet-600">
           {number}
         </span>
 
-        <span className="text-slate-300 group-hover:text-violet-500 transition">
-          →
+        <span className="w-8 h-8 rounded-lg bg-violet-50 text-violet-700 flex items-center justify-center text-sm">
+          {number === "03" ? "✦" : "▤"}
         </span>
 
       </div>
 
-      <h3 className="text-base font-bold text-slate-800 mt-6">
+
+      <h3 className="mt-6 text-base font-semibold text-slate-800">
         {title}
       </h3>
 
-      <p className="text-sm text-slate-500 leading-relaxed mt-2">
+      <p className="mt-2 text-sm leading-6 text-slate-500">
         {text}
       </p>
+
+      {clickable && (
+        <span className="inline-flex mt-4 text-sm font-medium text-violet-700">
+          Ask Assistant →
+        </span>
+      )}
 
     </button>
   )

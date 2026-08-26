@@ -15,11 +15,11 @@ export default function ErrorPage({
           <span className="text-2xl text-violet-600">!</span>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">
+        <h1 className="text-2xl font-bold text-slate-800 mb-2">
           {title}
         </h1>
 
-        <p className="text-gray-500 mb-7">
+        <p className="text-slate-500 mb-7">
           {message}
         </p>
 
@@ -27,7 +27,7 @@ export default function ErrorPage({
           {onBack && (
             <button
               onClick={onBack}
-              className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition"
+              className="px-4 py-2 rounded-lg border border-gray-200 text-slate-700 hover:bg-gray-50 transition"
             >
               Go Back
             </button>

@@ -315,7 +315,7 @@ export default function Products({ onSelectProduct }) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-              {products.map((product, index) => {
+              {products.map(product => {
 
                 const isPrimary =
                   product.name?.toLowerCase() === "taifa care"
