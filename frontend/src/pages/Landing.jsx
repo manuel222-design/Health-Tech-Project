@@ -106,55 +106,40 @@ export default function Landing({
 
 
           {}
-          <div className="relative mx-auto max-w-5xl px-2 sm:px-6 lg:px-10">
+          <div className="relative mx-auto max-w-6xl px-0 sm:px-4">
 
-            {}
-            <div className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 xl:-translate-x-6 items-center gap-2.5 rounded-xl border border-white/15 bg-white/8 backdrop-blur-md px-3 py-2.5 shadow-lg">
-              <span className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-violet-200">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-                  <path d="M5 4h14v16H5z" />
-                  <path d="M8 8h8" />
-                  <path d="M8 12h6" />
-                  <path d="M8 16h4" />
-                </svg>
-              </span>
+            <div className="grid items-center gap-5 lg:grid-cols-[190px_minmax(0,1fr)_190px]">
 
-              <div>
-                <p className="text-[10px] uppercase tracking-wide text-indigo-100/60">
-                  Knowledge
-                </p>
+              <div className="hidden lg:block">
+                <div className="rounded-2xl border border-white/15 bg-white/8 backdrop-blur-md px-4 py-4 shadow-lg">
+                  <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-violet-200 mb-3">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                      <path d="M5 4h14v16H5z" />
+                      <path d="M8 8h8" />
+                      <path d="M8 12h6" />
+                      <path d="M8 16h4" />
+                    </svg>
+                  </div>
 
-                <p className="text-xs font-medium text-white">
-                  Clinical Guidance
-                </p>
+                  <p className="text-[9px] uppercase tracking-[0.14em] text-indigo-100/60">
+                    Knowledge
+                  </p>
+
+                  <p className="mt-1 text-xs font-medium text-white">
+                    Clinical Guidance
+                  </p>
+
+                  <p className="mt-1 text-[10px] leading-4 text-indigo-100/55">
+                    Trusted HMIS procedures
+                  </p>
+                </div>
               </div>
-            </div>
 
+              <div className="relative z-20 min-w-0">
 
-            {}
-            <div className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 xl:translate-x-6 items-center gap-2.5 rounded-xl border border-white/15 bg-white/8 backdrop-blur-md px-3 py-2.5 shadow-lg">
-              <span className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-violet-200">
-                ✦
-              </span>
+                <div className="absolute -inset-4 rounded-[2rem] bg-white/7 blur-3xl pointer-events-none" />
 
-              <div>
-                <p className="text-[10px] uppercase tracking-wide text-indigo-100/60">
-                  Assistance
-                </p>
-
-                <p className="text-xs font-medium text-white">
-                  Guided Answers
-                </p>
-              </div>
-            </div>
-
-
-            {}
-            <div className="relative z-20 mx-auto max-w-3xl">
-
-              <div className="absolute -inset-4 rounded-[2rem] bg-white/8 blur-3xl pointer-events-none" />
-
-              <div className="relative rounded-[1.75rem] border border-white/20 bg-white/10 backdrop-blur-xl p-2 shadow-2xl">
+                <div className="relative rounded-[1.75rem] border border-white/20 bg-white/10 backdrop-blur-xl p-2 shadow-2xl">
 
                 <div className="rounded-[1.35rem] bg-white overflow-hidden">
 
@@ -242,12 +227,30 @@ export default function Landing({
 
                 </div>
 
+                </div>
               </div>
 
+              <div className="hidden lg:block">
+                <div className="rounded-2xl border border-white/15 bg-white/8 backdrop-blur-md px-4 py-4 shadow-lg">
+                  <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-violet-200 mb-3">
+                    <span className="text-sm">✦</span>
+                  </div>
+
+                  <p className="text-[9px] uppercase tracking-[0.14em] text-indigo-100/60">
+                    Assistance
+                  </p>
+
+                  <p className="mt-1 text-xs font-medium text-white">
+                    Guided Answers
+                  </p>
+
+                  <p className="mt-1 text-[10px] leading-4 text-indigo-100/55">
+                    AI-powered knowledge help
+                  </p>
+                </div>
+              </div>
             </div>
 
-
-            {}
             <div className="mt-5 text-center text-xs text-indigo-100/60">
               Search, learn and work with confidence.
             </div>
