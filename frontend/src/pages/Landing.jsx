@@ -106,12 +106,17 @@ export default function Landing({
 
 
           {}
-          <div className="relative max-w-5xl mx-auto mt-12 sm:mt-14 pb-10">
+          <div className="relative mx-auto max-w-5xl px-2 sm:px-6 lg:px-10">
 
             {}
-            <div className="hidden md:flex absolute left-0 top-14 translate-x-0 items-center gap-2 rounded-xl border border-white/15 bg-white/10 backdrop-blur-md px-3.5 py-2.5 shadow-lg">
-              <span className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-sm">
-                ▤
+            <div className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 xl:-translate-x-6 items-center gap-2.5 rounded-xl border border-white/15 bg-white/8 backdrop-blur-md px-3 py-2.5 shadow-lg">
+              <span className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-violet-200">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                  <path d="M5 4h14v16H5z" />
+                  <path d="M8 8h8" />
+                  <path d="M8 12h6" />
+                  <path d="M8 16h4" />
+                </svg>
               </span>
 
               <div>
@@ -120,15 +125,15 @@ export default function Landing({
                 </p>
 
                 <p className="text-xs font-medium text-white">
-                  Clinical Guides
+                  Clinical Guidance
                 </p>
               </div>
             </div>
 
 
             {}
-            <div className="hidden md:flex absolute right-0 top-20 items-center gap-2 rounded-xl border border-white/15 bg-white/10 backdrop-blur-md px-3.5 py-2.5 shadow-lg">
-              <span className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-sm text-violet-200">
+            <div className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 xl:translate-x-6 items-center gap-2.5 rounded-xl border border-white/15 bg-white/8 backdrop-blur-md px-3 py-2.5 shadow-lg">
+              <span className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-violet-200">
                 ✦
               </span>
 
@@ -145,9 +150,9 @@ export default function Landing({
 
 
             {}
-            <div className="relative mx-auto max-w-3xl">
+            <div className="relative z-20 mx-auto max-w-3xl">
 
-              <div className="absolute -inset-5 rounded-[2rem] bg-white/10 blur-3xl" />
+              <div className="absolute -inset-4 rounded-[2rem] bg-white/8 blur-3xl pointer-events-none" />
 
               <div className="relative rounded-[1.75rem] border border-white/20 bg-white/10 backdrop-blur-xl p-2 shadow-2xl">
 
